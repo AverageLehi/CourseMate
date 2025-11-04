@@ -1,31 +1,3 @@
-"""
-================================================================================
-COURSEMATE - SIMPLE & COMPLETE VERSION
-================================================================================
-
-WHAT YOU GET:
-✓ Dashboard with courses overview and task list
-✓ Freeform text editor for quick notes
-✓ 3 Technical templates (Polya, 5W1H, Concept Map)
-✓ 3 Non-technical templates (Cornell, Frayer, Main Idea)
-✓ JSON data storage (auto-saves everything)
-✓ Simple, beginner-friendly code
-✓ Organized with classes (but easy to understand!)
-
-FILE STRUCTURE (All in ONE file for simplicity):
-- CourseMateApp class → Main app
-- Simple methods → Each does ONE thing
-- JSON storage → Saves/loads automatically
-
-HOW TO RUN:
-1. Save this file as: coursemate.py
-2. Run: python coursemate.py
-3. That's it! Your data saves automatically in coursemate_data.json
-
-LET'S BUILD IT STEP BY STEP...
-================================================================================
-"""
-
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import json
@@ -61,16 +33,16 @@ class CourseMateApp:
         # DATA: Store everything here
         self.courses = {}  # Format: {"Course Name": {"notes": [], "tasks": []}}
         self.tasks = []    # Active tasks list
-        self.completed_tasks = []  # Completed tasks (new!)
+        self.completed_tasks = []  # Completed tasksa
         
         # LOAD DATA: Get saved data from file
-        self.data_file = Path("coursemate_data.json")
+        self.data_file = Path("Coursemate_data.json")
         self._load_data()
         
         # CREATE UI: Build the interface
         self._setup_styles()
         self._create_layout()
-        self._create_sidebar()
+        self._create_widgets()
         
         # START: Show dashboard first
         self.show_dashboard()
@@ -118,7 +90,7 @@ class CourseMateApp:
                 "completed_tasks": self.completed_tasks
             }
             with open(self.data_file, 'w') as f:
-                json.dump(data, f, indent=2)  # Write to file
+                json.dump(data, f, indent=2)  # Write  to file
             print("💾 Data saved automatically")
         except Exception as e:
             print(f"❌ Error saving: {e}")
@@ -141,48 +113,55 @@ class CourseMateApp:
         # Buttons
         style.configure('Sidebar.TButton', background='#34495e', foreground='white',
                        borderwidth=0, font=('Helvetica', 10))
-        style.map('Sidebar.TButton', background=[('active', '#546a7e')])
+        style.map('Sidebar.TButton', background=[('active', "#7d7e54")])
     
     def _create_layout(self):
-        """Create main layout: sidebar on left, content on right"""
+        """Create main layout: header on top, sidebar on left, content on right"""
+        self.header_frame = ttk.Frame(self.root, height=65, style='Sidebar.TFrame')
+        self.header_frame.pack(fill='x', side='top')
+        self.header_frame.pack_propagate(False)
         # Sidebar (navigation)
-        self.sidebar = ttk.Frame(self.root, width=220, style='Sidebar.TFrame')
-        self.sidebar.pack(fill='y', side='left')
-        self.sidebar.pack_propagate(False)
+        self.sidebar_frame = ttk.Frame(self.root, width=220, style='Sidebar.TFrame')
+        self.sidebar_frame.pack(fill='y', side='left')
+        self.sidebar_frame.pack_propagate(False)
         
         # Main content area (where views appear)
         self.main_content = ttk.Frame(self.root, style='TFrame')
         self.main_content.pack(fill='both', expand=True, side='right')
+
+    def _create_widgets(self):
+        """Create widgets"""
+        #header container frame
+        self.header_container = ttk.Frame(self.header_frame, style='Sidebar.TFrame')
+        self.header_container.pack(pady='8',padx='20', side='left',  fill='both', expand='True')
     
-    def _create_sidebar(self):
-        """Create navigation sidebar"""
-        # Title
-        tk.Label(self.sidebar, text="CourseMate",
-                font=('Helvetica', 16, 'bold'),
-                bg='#2c3e50', fg='white').pack(pady=20)
-        
-        tk.Label(self.sidebar, text="Simple & Complete",
+        # Title on header containter 
+        tk.Label(self.header_container, text="CourseMate",
+                font=('Helvetica', 19, 'bold'),
+                bg='#2c3e50', fg='white').pack(anchor='w')
+        #Tagline on header container
+        tk.Label(self.header_container, text="Stay Organized • Think Smarter • Learn Deeper • Solve Problems Better",
                 font=('Helvetica', 9, 'italic'),
-                bg='#2c3e50', fg='#95a5a6').pack()
+                bg='#2c3e50', fg='#95a5a6').pack(anchor='w')
         
-        # Navigation section
-        tk.Label(self.sidebar, text="NAVIGATION",
+        # Navigation section on sidebar
+        tk.Label(self.sidebar_frame, text="NAVIGATION",
                 font=('Helvetica', 9, 'bold'),
                 bg='#2c3e50', fg='#95a5a6').pack(pady=(30, 10), padx=20, anchor='w')
         
-        # Main navigation buttons
+        # Main navigation buttons on sidebar
         main_nav = [
             ("📊 Dashboard", self.show_dashboard),
-            ("📝 Freeform Notes", self.show_freeform),
+            ("📝 Freeform Notes", self.show_freeform)
         ]
         
         for text, command in main_nav:
-            btn = ttk.Button(self.sidebar, text=text, style='Sidebar.TButton',
+            btn = ttk.Button(self.sidebar_frame, text=text, style='Sidebar.TButton',
                            command=command)
             btn.pack(fill='x', pady=3, padx=15)
         
         # Non-Technical Templates Section
-        tk.Label(self.sidebar, text="NON-TECHNICAL TEMPLATES",
+        tk.Label(self.sidebar_frame, text="NON-TECHNICAL TEMPLATES",
                 font=('Helvetica', 8, 'bold'),
                 bg='#2c3e50', fg='#95a5a6').pack(pady=(15, 5), padx=20, anchor='w')
         
@@ -193,12 +172,12 @@ class CourseMateApp:
         ]
         
         for text, template_key in non_tech_templates:
-            btn = ttk.Button(self.sidebar, text=text, style='Sidebar.TButton',
+            btn = ttk.Button(self.sidebar_frame, text=text, style='Sidebar.TButton',
                            command=lambda k=template_key: self.open_template(k))
             btn.pack(fill='x', pady=2, padx=15)
         
         # Technical Templates Section
-        tk.Label(self.sidebar, text="TECHNICAL TEMPLATES",
+        tk.Label(self.sidebar_frame, text="TECHNICAL TEMPLATES",
                 font=('Helvetica', 8, 'bold'),
                 bg='#2c3e50', fg='#95a5a6').pack(pady=(15, 5), padx=20, anchor='w')
         
@@ -209,24 +188,24 @@ class CourseMateApp:
         ]
         
         for text, template_key in tech_templates:
-            btn = ttk.Button(self.sidebar, text=text, style='Sidebar.TButton',
+            btn = ttk.Button(self.sidebar_frame, text=text, style='Sidebar.TButton',
                            command=lambda k=template_key: self.open_template(k))
             btn.pack(fill='x', pady=2, padx=15)
         
         # Quick Actions section
-        tk.Label(self.sidebar, text="QUICK ACTIONS",
+        tk.Label(self.sidebar_frame, text="QUICK ACTIONS",
                 font=('Helvetica', 9, 'bold'),
                 bg='#2c3e50', fg='#95a5a6').pack(pady=(20, 10), padx=20, anchor='w')
         
-        tk.Button(self.sidebar, text="+ Add Course",
+        tk.Button(self.sidebar_frame, text="+ Add Course",
                  command=self.add_course,
                  bg='#27ae60', fg='white',
                  relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
         
-        tk.Button(self.sidebar, text="+ Add Task",
-                 command=self.add_task,
-                 bg='#3498db', fg='white',
-                 relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
+        # tk.Button(self.sidebar_frame, text="+ Add Task",
+        #          command=self.add_task,
+        #          bg='#3498db', fg='white',
+        #          relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
     
     # ------------------------------------------------------------------------
     # PART 4: COURSE MANAGEMENT
@@ -600,7 +579,7 @@ class CourseMateApp:
         # Title
         tk.Label(self.main_content, text="📊 Dashboard",
                 font=('Helvetica', 24, 'bold'),
-                bg='#f5f5f5').pack(pady=20, anchor='w', padx=30)
+                bg='#f5f5f5').pack(pady=10, anchor='w', padx=30)
         
         # Container for two columns
         container = ttk.Frame(self.main_content)
@@ -612,7 +591,7 @@ class CourseMateApp:
         
         tk.Label(courses_frame, text="📚 My Courses",
                 font=('Helvetica', 14, 'bold'),
-                bg='white').pack(anchor='w', pady=(0, 10))
+                bg='white').pack(anchor='w', pady=(0, 10        ))
         
         if not self.courses:
             tk.Label(courses_frame, text="No courses yet.\nClick '+ Add Course' to start!",
@@ -757,7 +736,7 @@ class CourseMateApp:
         self._clear_content()
         
         # Title
-        tk.Label(self.main_content, text="📝 Freeform Notes",
+        tk.Label(self.main_content, text="📝 Freeforms Notes",
                 font=('Helvetica', 24, 'bold'),
                 bg='#f5f5f5').pack(pady=20, anchor='w', padx=30)
         
@@ -817,7 +796,8 @@ class CourseMateApp:
         
         tk.Button(card, text="💾 Save Note",
                  command=save_note,
-                 bg='#27ae60', fg='white',
+                #  bg='#27ae60', 
+                 fg='white',
                  font=('Helvetica', 11, 'bold'),
                  relief='flat', padx=20, pady=10).pack(pady=10)
     
@@ -904,19 +884,20 @@ class CourseMateApp:
         
         # Template definitions
         TEMPLATES = {
-            "Polya": ["Step 1: Understand the Problem", "Step 2: Devise a Plan",
-                     "Step 3: Carry out the Plan", "Step 4: Look Back/Review"],
-            "5W1H": ["What is the problem?", "Why is it important?",
-                    "When did it happen?", "Where is it applied?",
-                    "Who is involved?", "How does it work?"],
-            "ConceptMap": ["Central Concept", "Related Concept 1",
-                          "Related Concept 2", "Connection/Relationship"],
             "Cornell": ["Keywords/Cues (Left Column)", "Notes (Right Column)",
                        "Summary (Bottom)"],
             "Frayer": ["Concept/Term", "Definition", "Characteristics",
                       "Examples", "Non-Examples"],
             "MainIdea": ["Main Topic", "Core Idea/Thesis",
                         "Supporting Detail 1", "Supporting Detail 2", "Supporting Detail 3"],
+            "Polya": ["Step 1: Understand the Problem", "Step 2: Devise a Plan",
+                     "Step 3: Carry out the Plan", "Step 4: Look Back/Review"],
+            "5W1H": ["What is the problem?", "Why is it important?",
+                    "When did it happen?", "Where is it applied?",
+                    "Who is involved?", "How does it work?"],
+            "ConceptMap": ["Central Concept", "Related Concept 1",
+                          "Related Concept 2", "Connection/Relationship"]
+            
         }
         
         # Template display names
@@ -1033,16 +1014,16 @@ class CourseMateApp:
 # ============================================================================
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("COURSEMATE - SIMPLE & COMPLETE")
-    print("=" * 60)
-    print("\n✓ Dashboard with courses and tasks")
-    print("✓ Freeform notes editor")
-    print("✓ 3 Technical templates")
-    print("✓ 3 Study templates")
-    print("✓ Auto-save to JSON")
-    print("\nData saves to: coursemate_data.json")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("COURSEMATE - SIMPLE & COMPLETE")
+    # print("=" * 60)
+    # print("\n✓ Dashboard with courses and tasks")
+    # print("✓ Freeform notes editor")
+    # print("✓ 3 Technical templates")
+    # print("✓ 3 Study templates")
+    # print("✓ Auto-save to JSON")
+    # print("\nData saves to: coursemate_data.json")
+    # print("=" * 60)
     
     root = tk.Tk()
     app = CourseMateApp(root)
