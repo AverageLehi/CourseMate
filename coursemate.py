@@ -1139,17 +1139,17 @@ class CourseMateApp:
             self.show_dashboard()
        
         btn_frame = ttk.Frame(self.main_content)
-        btn_frame.pack(fill='x', padx=30, pady=10)
+        btn_frame.place(relx=1.0, y=20, anchor='ne')
        
         tk.Button(btn_frame, text="💾 Save Template",
                  command=save_template,
                  bg='#27ae60', fg='white',
                  font=('Helvetica', 11, 'bold'),
-                 relief='flat', padx=20, pady=10).pack(side='left')
+                 relief='flat', padx=20, pady=10).pack(side='right', padx=10)
        
         tk.Button(btn_frame, text="← Back to Dashboard",
                  command=self.show_dashboard,
-                 relief='flat', padx=15, pady=10).pack(side='left', padx=10)
+                 relief='flat', padx=15, pady=10).pack(side='right', padx=5)
 
 
 
