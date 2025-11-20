@@ -962,10 +962,10 @@ class CourseMateApp:
         field_widgets = {}
 
 
-
+        # --- NON-TECHNICAL TEMPLATES ---
 
         if template_key == "Cornell":
-        # --- Tagline Above Cornell Notes ---
+        # --- Tagline ---
             tagline_label = tk.Label(
                 form_frame,
                 text="🧠 Think clearly, write wisely.",
@@ -975,7 +975,6 @@ class CourseMateApp:
             )
             tagline_label.pack(anchor='center', pady=(0, 10))
    
-        # --- Custom Cornell Notes Layout ---
         if template_key == "Cornell":
             # --- Title / Topic and Date (Top Section) ---
             top_section = ttk.Frame(form_frame, style='Card.TFrame', padding=12)
@@ -1030,7 +1029,7 @@ class CourseMateApp:
 
         # --- FRAYER MODEL TEMPLATE ---
         elif template_key == "Frayer":
-           # --- Tagline Above Cornell Notes ---
+           # --- Tagline ---
             tagline_label = tk.Label(
                 form_frame,
                 text="📘 Defining concepts, expanding understanding.",
@@ -1095,8 +1094,113 @@ class CourseMateApp:
             importance_text.pack(fill='both', expand=True)
             field_widgets["Importance"] = importance_text
 
+        # --- TECHNICAL TEMPLATES ---
 
-       
+        elif template_key == "Polya":
+
+            # --- Tagline ---
+            tagline_label = tk.Label(
+                form_frame,
+                text="⚙️ Problem-solving methodology",
+                font=('Helvetica', 11, 'italic'),
+                fg='#7f8c8d',
+                bg='#f5f5f5'
+            )
+            tagline_label.pack(anchor='center', pady=(0, 10))
+
+            # --- Main 2x2 Grid ---
+            grid_frame = ttk.Frame(form_frame)
+            grid_frame.pack(fill='both', expand=True, pady=10, padx=120)
+
+            # --- TOP ROW (Step 1 & Step 2) ---
+            top_row = ttk.Frame(grid_frame)
+            top_row.pack(fill='both', expand=True)
+
+            # Step 1
+            step1_card = ttk.Frame(top_row, style='Card.TFrame', padding=12)
+            step1_card.pack(side='left', fill='both', expand=True, padx=(0, 5))
+
+            tk.Label(
+                step1_card,
+                text="1. Understanding the problem",
+                font=('Helvetica', 11, 'bold'),
+                bg='white'
+            ).pack(anchor='w', pady=(0, 8))
+
+            step1_text = tk.Text(
+                step1_card,
+                height=10,
+                wrap='word',
+                font=('Helvetica', 10)
+            )
+            step1_text.pack(fill='both', expand=True)
+            field_widgets["Step 1"] = step1_text
+
+            # Step 2
+            step2_card = ttk.Frame(top_row, style='Card.TFrame', padding=12)
+            step2_card.pack(side='left', fill='both', expand=True, padx=(5, 0))
+
+            tk.Label(
+                step2_card,
+                text="2. Devise a plan",
+                font=('Helvetica', 11, 'bold'),
+                bg='white'
+            ).pack(anchor='w', pady=(0, 8))
+
+            step2_text = tk.Text(
+                step2_card,
+                height=10,
+                wrap='word',
+                font=('Helvetica', 10)
+            )
+            step2_text.pack(fill='both', expand=True)
+            field_widgets["Step 2"] = step2_text
+
+            # --- BOTTOM ROW (Step 3 & Step 4) ---
+            bottom_row = ttk.Frame(grid_frame)
+            bottom_row.pack(fill='both', expand=True, pady=(10, 0))
+
+            # Step 3
+            step3_card = ttk.Frame(bottom_row, style='Card.TFrame', padding=12)
+            step3_card.pack(side='left', fill='both', expand=True, padx=(0, 5))
+
+            tk.Label(
+                step3_card,
+                text="3. Carry out the plan",
+                font=('Helvetica', 11, 'bold'),
+                bg='white'
+            ).pack(anchor='w', pady=(0, 8))
+
+            step3_text = tk.Text(
+                step3_card,
+                height=10,
+                wrap='word',
+                font=('Helvetica', 10)
+            )
+            step3_text.pack(fill='both', expand=True)
+            field_widgets["Step 3"] = step3_text
+
+            # Step 4
+            step4_card = ttk.Frame(bottom_row, style='Card.TFrame', padding=12)
+            step4_card.pack(side='left', fill='both', expand=True, padx=(5, 0))
+
+            tk.Label(
+                step4_card,
+                text="4. Look back",
+                font=('Helvetica', 11, 'bold'),
+                bg='white'
+            ).pack(anchor='w', pady=(0, 8))
+
+            step4_text = tk.Text(
+                step4_card,
+                height=10,
+                wrap='word',
+                font=('Helvetica', 10)
+            )
+            step4_text.pack(fill='both', expand=True)
+            field_widgets["Step 4"] = step4_text
+
+    
         # Save button
         def save_template():
             course = course_var.get()
@@ -1180,7 +1284,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CourseMateApp(root)
     root.mainloop()
-
 
 
 
