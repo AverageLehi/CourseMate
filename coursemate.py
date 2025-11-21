@@ -1036,7 +1036,7 @@ class CourseMateApp:
                 return
            
             if not title:
-                title = f"Note - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                title = f"Note - {datetime.now().strftime("%Y-%m-%d %H:%M")}"
            
             # Save note
             note = {
@@ -1509,6 +1509,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CourseMateApp(root)
     root.mainloop()
+
 
 
 
