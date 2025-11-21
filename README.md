@@ -10,13 +10,13 @@
 
 ## 💡 Project Overview
 
-**CourseMate** is a lightweight, student-centered application designed to help learners organize their academic materials and apply proven learning strategies. By integrating flexible, evidence-based study templates with a simple course management system, CourseMate transforms a basic digital notebook into a powerful thinking tool. It is built to be a practical and adaptable companion for students across both technical and non-technical disciplines.
+**CourseMate** is a lightweight, student-centered application designed to help learners organize their academic materials and apply proven learning strategies. By integrating flexible, evidence-based [...]
 
 ---
 
 ## ✨ Features
 
-* **Course Management:** Keep your educational materials neatly organized by creating dedicated folders for each course or module. Add tasks, assignments, and readings, and track their completion status to stay on top of your workload.
+* **Course Management:** Keep your educational materials neatly organized by creating dedicated folders for each course or module. Add tasks, assignments, and readings, and track their completion stat[...]
 * **Note-taking Module:** Write, edit, and organize notes under each course. The application supports various templates to guide your note-taking process.
 * **Templates for Non-Technical Courses:**
     * **Cornell Notes:** A powerful method for active review and retention.
@@ -27,6 +27,7 @@
     * **Concept Mapping:** Visually connect ideas to build a deeper understanding of any topic.
     * **5W1H Strategy:** Instantly get a complete overview of a topic by answering six essential questions.
 * **Lightweight Data Storage:** The system uses simple CSV and text files for structured records and notes, making the application highly portable and easy to back up.
+* **Update — Data Storage Format:** Moving forward, CourseMate will use JSON files for data saving and file storage instead of CSV. The original CSV/text description on the previous line is retained for context and backward-compatibility notes.
 
 ---
 
@@ -44,7 +45,7 @@ Our core objectives for CourseMate are to:
 
 ## 🛠️ How It Works
 
-CourseMate addresses the common student struggle of staying organized while applying effective study techniques. It combines a simple file management system with integrated learning templates, guiding students to think smarter, learn deeper, and solve problems better. The application’s design is centered on user-friendliness and portability, ensuring that students can focus on learning without the hassle of complex software.
+CourseMate addresses the common student struggle of staying organized while applying effective study techniques. It combines a simple file management system with integrated learning templates, guiding[...]
 
 ---
 
