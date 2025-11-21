@@ -1,4 +1,0 @@
-1. Know what style='Sidebar.TFrame' means vs 'Card.TFrame'
-2. What are the parameters or padx(' ', '')
-3. How to use padding in ttk.Frame()
-4. What does pack_propagate means
