@@ -1,4 +1,0 @@
-1. add bar on the top of the main window / Completed
-2. Landing page 
-    - User's profile [name]
-    - What is CourseMate and How to use CourseMate
