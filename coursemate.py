@@ -5,25 +5,6 @@ from datetime import datetime
 from pathlib import Path
 import customtkinter as ctk
 
-# Global color palette
-COLORS = {
-    'primary_dark': "#0F335C",
-    'primary': '#1A3D64',
-    'accent': '#1D546C',
-    'background': '#F4F4F4',
-    'sidebar_button': '#1A3D64',
-    'sidebar_hover': '#1D546C',
-    'sidebar_text': '#F4F4F4',
-    'card_bg': '#FFFFFF',
-    'success': '#27ae60',
-    'info': '#3498db',
-    'warning': '#ffe082',
-    'muted': '#95a5a6',
-    'header_text': '#F4F4F4',
-    'main_text': '#0C2B4E',
-    'secondary_text': "#627488",
-}
-
 # ============================================================================
 # MAIN APPLICATION CLASS
 # ============================================================================
@@ -44,59 +25,59 @@ class CourseMateApp:
     # You can add more palettes here; keys must match usages below.
     THEMES = {
         'CourseMate Theme': {
-            'primary_dark': '#253241',
-            'primary': '#334a66',
-            'accent': '#4a90e2',
-            'background': '#f4f7fb',
-            'sidebar_button': '#334a66',
-            'sidebar_hover': '#405977',
-            'sidebar_text': '#F4F4F4',
-            'card_bg': '#e1e7ed',
-            'success': '#27ae60',
-            'info': '#3498db',
-            'warning': '#ffe082',
-            'muted': '#9aa6b1',
-            'header_text': '#F4F4F4',
-            'main_text': '#0b2740',
-            'secondary_text': '#8193a1', 
-            'danger': '#e74c3c'
+            'primary_dark':     '#253241',
+            'primary':          '#334a66',
+            'accent':           '#4a90e2',
+            'background':       '#f4f7fb',
+            'sidebar_button':   '#334a66',
+            'sidebar_hover':    '#405977',
+            'sidebar_text':     '#F4F4F4',
+            'card_bg':          '#e1e7ed',
+            'success':          '#27ae60',
+            'info':             '#3498db',
+            'warning':          '#ffe082',
+            'muted':            '#9aa6b1',
+            'header_text':      '#F4F4F4',
+            'main_text':        '#0b2740',
+            'secondary_text':   '#8193a1', 
+            'danger':           '#e74c3c'
         },
 
         'Slate Gray': {
-            'primary_dark': '#2b3438',
-            'primary': '#3b4a4f',
-            'accent': '#2aa198',
-            'background': '#f7f7f7',
-            'sidebar_button': '#3b4a4f',
-            'sidebar_hover': '#4a5a5f',
-            'sidebar_text': '#F4F4F4',
-            'card_bg': '#e1e7ed',
-            'success': '#27ae60',
-            'info': '#3498db',
-            'warning': '#ffe082',
-            'muted': '#99a1a4',
-            'header_text': '#F4F4F4',
-            'main_text': '#132028',
-            'secondary_text': '#97a0a3', 
-            'danger': '#e74c3c'
+            'primary_dark':     '#2b3438',
+            'primary':          '#3b4a4f',
+            'accent':           '#2aa198',
+            'background':       '#f7f7f7',
+            'sidebar_button':   '#3b4a4f',
+            'sidebar_hover':    '#4a5a5f',
+            'sidebar_text':     '#F4F4F4',
+            'card_bg':          '#e1e7ed',
+            'success':          '#27ae60',
+            'info':             '#3498db',
+            'warning':          '#ffe082',
+            'muted':            '#99a1a4',
+            'header_text':      '#F4F4F4',
+            'main_text':        '#132028',
+            'secondary_text':   '#97a0a3', 
+            'danger':           '#e74c3c'
         },
         'Warm Charcoal': {
-            'primary_dark': '#2e3336',
-            'primary': '#3b4044',
-            'accent': '#22a155',
-            'background': '#f6f6f6',
-            'sidebar_button': '#3b4044',
-            'sidebar_hover': '#495052',
-            'sidebar_text': '#F4F4F4',
-            'card_bg': '#e1e7ed',
-            'success': '#27ae60',
-            'info': '#3498db',
-            'warning': '#ffe082',
-            'muted': '#a0a6a8',
-            'header_text': '#F4F4F4',
-            'main_text': '#0b2427',
-            'secondary_text': '#8f9698', 
-            'danger': '#e74c3c'
+            'primary_dark':     '#2e3336',
+            'primary':          '#3b4044',
+            'accent':           '#22a155',
+            'background':       '#f6f6f6',
+            'sidebar_button':   '#3b4044',
+            'sidebar_hover':    '#495052',
+            'sidebar_text':     "#FFFFFF",
+            'card_bg':          '#e1e7ed',
+            'success':          '#27ae60',
+            'info':             '#3498db',
+            'warning':          '#ffe082',
+            'muted':            '#a0a6a8',
+            'header_text':      '#F4F4F4',
+            'main_text':        '#0b2427',
+            'secondary_text':   '#8f9698', 
+            'danger':           '#e74c3c'
         },
         'Soft Pink': {
             'primary_dark':   '#CC6F95',
@@ -105,7 +86,7 @@ class CourseMateApp:
             'background':     '#F8F8F8',
             'sidebar_button': '#FF9BBE',
             'sidebar_hover':  '#E887AB',
-            'sidebar_text':   '#FFFFFF',
+            'sidebar_text':   "#FCE8F1",
             'card_bg':        '#FFFFFF',
             'success':        '#7ACDA0',
             'info':           '#A0D4FF',
@@ -113,7 +94,7 @@ class CourseMateApp:
             'muted':          "#FFBBD3",
             'header_text':    '#FFFFFF',
             'main_text':      '#1A1A1A',
-            'secondary_text': "#F0C9D6",
+            'secondary_text': "#FFF4F8",
             'danger':         '#E57373',
         },
         'Baby Blue': {
@@ -340,7 +321,7 @@ class CourseMateApp:
         # Navigation section on sidebar
         tk.Label(self.sidebar_frame, text="NAVIGATION",
             font=('Helvetica', 9, 'bold'),
-            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(10), padx=20, anchor='w')
+            bg=self.colors['primary_dark'], fg=self.colors['sidebar_text']).pack(pady=(0,3), padx=20, anchor='w')
 
         main_nav = [
             ("Dashboard", self.show_dashboard),
@@ -360,15 +341,15 @@ class CourseMateApp:
                 corner_radius=20,
                 border_width=0,
                 width=self.sidebar_button_width,
-                height=36,
-                font=("Helvetica", 14)
+                height=30,
+                font=("Helvetica", 14, "bold")
             )
             btn.pack(pady=2, padx=5)
        
         # Non-Technical Templates Section
         tk.Label(self.sidebar_frame, text="NON-TECHNICAL TEMPLATES",
             font=('Helvetica', 9, 'bold'),
-            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(10), padx=20, anchor='w')
+            bg=self.colors['primary_dark'], fg=self.colors['sidebar_text']).pack(pady=3, padx=20, anchor='w')
        
         non_tech_templates = [
             ("Cornell Notes", "Cornell"),
@@ -388,15 +369,15 @@ class CourseMateApp:
                 corner_radius=20,
                 border_width=0,
                 width=self.sidebar_button_width,
-                height=36,
-                font=("Helvetica", 14)
+                height=30,
+                font=("Helvetica", 14, "bold")
             )
             btn.pack(pady=2, padx=5)
        
         # Technical Templates Section
         tk.Label(self.sidebar_frame, text="TECHNICAL TEMPLATES",
             font=('Helvetica', 9, 'bold'),
-            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(10), padx=20, anchor='w')
+            bg=self.colors['primary_dark'], fg=self.colors['sidebar_text']).pack(pady=3, padx=20, anchor='w')
 
         tech_templates = [
             ("Polya's 4 Steps", "Polya"),
@@ -415,15 +396,15 @@ class CourseMateApp:
                     corner_radius=20,
                     border_width=0,
                     width=self.sidebar_button_width,
-                    height=36,
-                    font=("Helvetica", 14)
+                    height=30,
+                    font=("Helvetica", 14, "bold")
             )
             btn.pack(pady=2, padx=5)
 
         # Quick Actions section (placed after template lists)
         tk.Label(self.sidebar_frame, text="QUICK ACTIONS",
             font=('Helvetica', 9, 'bold'),
-            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(20, 10), padx=20, anchor='w')
+            bg=self.colors['primary_dark'], fg=self.colors['sidebar_text']).pack(pady=3, padx=20, anchor='w')
 
         # Theme selector button
         tk.Button(self.sidebar_frame, text="🎨 Themes",
@@ -864,7 +845,7 @@ class CourseMateApp:
         # Title
         tk.Label(self.main_content, text="Dashboard",
             font=('Helvetica', 24, 'bold'),
-            bg=self.colors['background']).pack(pady=10, anchor='w', padx=30)
+            bg=self.colors['background']).pack(pady=5, anchor='w', padx=30)
        
         # Container for two columns
         # Container for two columns (dashboard)
@@ -927,10 +908,10 @@ class CourseMateApp:
         )
         tasks_frame.pack(side='right', fill='both', expand=True, padx=(10, 0), pady=10)
 
-        # Title
-        ctk.CTkLabel(tasks_frame, text="✅ To-Do List",
-                     font=("Helvetica", 14, "bold"),
-                     text_color=self.colors['main_text']).pack(anchor='w', pady=(0, 10), padx=(8,0))
+        # To-Do List
+        ctk.CTkLabel(tasks_frame, text="To-Do List",
+                 font=("Helvetica", 24, "bold"),
+                 text_color=self.colors['main_text']).pack(anchor='w', pady=(10, 10), padx=(10))
 
         # Input row: Entry + Add button
         input_row = ctk.CTkFrame(tasks_frame, fg_color=self.colors.get('card_bg'), corner_radius=0, border_width=0)
