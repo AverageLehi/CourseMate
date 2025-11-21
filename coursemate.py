@@ -3,46 +3,146 @@ from tkinter import ttk, messagebox, simpledialog
 import json
 from datetime import datetime
 from pathlib import Path
+import customtkinter as ctk
 
-
-
-
-
-
-
+# Global color palette
+COLORS = {
+    'primary_dark': "#0F335C",
+    'primary': '#1A3D64',
+    'accent': '#1D546C',
+    'background': '#F4F4F4',
+    'sidebar_button': '#1A3D64',
+    'sidebar_hover': '#1D546C',
+    'sidebar_text': '#F4F4F4',
+    'card_bg': '#FFFFFF',
+    'success': '#27ae60',
+    'info': '#3498db',
+    'warning': '#ffe082',
+    'muted': '#95a5a6',
+    'header_text': '#F4F4F4',
+    'main_text': '#0C2B4E',
+    'secondary_text': "#627488",
+}
 
 # ============================================================================
 # MAIN APPLICATION CLASS
 # ============================================================================
 
-
-
-
 class CourseMateApp:
     """
-    The main CourseMate application.
-   
-    SIMPLE STRUCTURE:
-    1. __init__ → Set up everything when app starts
-    2. Data methods → Load/save JSON
-    3. UI methods → Create the interface
-    4. Action methods → What happens when buttons clicked
+    Main CourseMate application class.
+    
+    Structure:
+    1. __init__ - Initializes the app and sets up everything when it starts.
+    2. Data methods - Load and save data using JSON files.
+    3. UI methods - Build the user interface (windows, buttons, etc.).
+    4. Action methods - Define what happens when you click buttons or interact with the app.
     """
    
+    # ------------------------------------------------------------------------
+    # Theme definitions (class attribute): multiple named palettes
+    # You can add more palettes here; keys must match usages below.
+    THEMES = {
+        'Muted Navy': {
+            'primary_dark': '#24323a',
+            'primary': '#34495e',
+            'accent': '#2d9cdb',
+            'background': '#f5f5f5',
+            'sidebar_button': '#34495e',
+            'sidebar_hover': '#3d5562',
+            'sidebar_text': '#F4F4F4',
+            'card_bg': '#e1e7ed',
+            'success': '#27ae60',
+            'info': '#3498db',
+            'warning': '#ffe082',
+            'muted': '#95a5a6',
+            'header_text': '#F4F4F4',
+            'main_text': '#0C2B4E',
+            'secondary_text': '#627488', 
+            'danger': '#e74c3c'
+        },
+        'Slate Gray': {
+            'primary_dark': '#2b3438',
+            'primary': '#3b4a4f',
+            'accent': '#2aa198',
+            'background': '#f7f7f7',
+            'sidebar_button': '#3b4a4f',
+            'sidebar_hover': '#4a5a5f',
+            'sidebar_text': '#F4F4F4',
+            'card_bg': '#e1e7ed',
+            'success': '#27ae60',
+            'info': '#3498db',
+            'warning': '#ffe082',
+            'muted': '#99a1a4',
+            'header_text': '#F4F4F4',
+            'main_text': '#132028',
+            'secondary_text': '#97a0a3', 
+            'danger': '#e74c3c'
+        },
+        'Warm Charcoal': {
+            'primary_dark': '#2e3336',
+            'primary': '#3b4044',
+            'accent': '#22a155',
+            'background': '#f6f6f6',
+            'sidebar_button': '#3b4044',
+            'sidebar_hover': '#495052',
+            'sidebar_text': '#F4F4F4',
+            'card_bg': '#e1e7ed',
+            'success': '#27ae60',
+            'info': '#3498db',
+            'warning': '#ffe082',
+            'muted': '#a0a6a8',
+            'header_text': '#F4F4F4',
+            'main_text': '#0b2427',
+            'secondary_text': '#8f9698', 
+            'danger': '#e74c3c'
+        },
+        'Soft Indigo': {
+            'primary_dark': '#253241',
+            'primary': '#334a66',
+            'accent': '#4a90e2',
+            'background': '#f4f7fb',
+            'sidebar_button': '#334a66',
+            'sidebar_hover': '#405977',
+            'sidebar_text': '#F4F4F4',
+            'card_bg': '#e1e7ed',
+            'success': '#27ae60',
+            'info': '#3498db',
+            'warning': '#ffe082',
+            'muted': '#9aa6b1',
+            'header_text': '#F4F4F4',
+            'main_text': '#0b2740',
+            'secondary_text': '#8193a1', 
+            'danger': '#e74c3c'
+        }
+    }
+
+    # Default class-level COLORS (initially use one theme)
+    COLORS = THEMES['Muted Navy']
+
     # ------------------------------------------------------------------------
     # PART 1: INITIALIZATION (Runs when app starts)
     # ------------------------------------------------------------------------
    
     def __init__(self, root):
-        """Set up the app when it starts"""
+        """
+        Set up the app when it starts.
+        This method creates the main window, loads data, and builds the interface.
+        """
         self.root = root
-        self.root.title("CourseMate - think smarter, learn deeper, and solve problems better. ")
+        self.root.title("CourseMate - Smart Note-Taking & Study Aid For Students")
         self.root.geometry("1100x700")
+        self.root.minsize(1000, 800)
+        # Theme state (instance-level). Start with the class default.
+        self.theme_name = 'Muted Navy'
+        self.colors = CourseMateApp.COLORS.copy()
+        # Width used by sidebar buttons and the header stats card so they align
+        self.sidebar_button_width = 180
        
         # DATA: Store everything here
         self.courses = {}  # Format: {"Course Name": {"notes": [], "tasks": []}}
         self.tasks = []    # Active tasks list
-        self.completed_tasks = []  # Completed tasksa
+        self.completed_tasks = []  # Completed tasks
        
         # LOAD DATA: Get saved data from file
         self.data_file = Path("Coursemate_data.json")
@@ -64,13 +164,8 @@ class CourseMateApp:
    
     def _load_data(self):
         """
-        Load data from JSON file.
-       
-        JSON is just a text file that stores data like:
-        {
-          "courses": {"Math": {"notes": [], "tasks": []}},
-          "tasks": ["Do homework", "Study"]
-        }
+        Load data from a JSON file.
+        This reads saved courses and tasks from disk so you don't lose your progress.
         """
         try:
             if self.data_file.exists():
@@ -89,8 +184,8 @@ class CourseMateApp:
    
     def _save_data(self):
         """
-        Save data to JSON file.
-        Called automatically after any change!
+        Save data to a JSON file.
+        This is called automatically whenever you make changes, so your work is always saved.
         """
         try:
             data = {
@@ -110,23 +205,34 @@ class CourseMateApp:
     # ------------------------------------------------------------------------
    
     def _setup_styles(self):
-        """Set up colors and styling"""
+        """
+        Set up colors and styling for the app.
+        This method defines how the app looks (colors, fonts, button styles).
+        """
         style = ttk.Style()
         style.theme_use('clam')
        
         # Colors
-        style.configure('TFrame', background='#f5f5f5')
-        style.configure('Sidebar.TFrame', background='#2c3e50')
-        style.configure('Card.TFrame', background='white', relief='solid', borderwidth=1)
-       
+        style.configure('TFrame', background=self.colors['background'])
+        style.configure('Sidebar.TFrame', background=self.colors['primary_dark'])
+        style.configure('Card.TFrame', background=self.colors['card_bg'], relief='solid', borderwidth=1)
+
         # Buttons
-        style.configure('Sidebar.TButton', background='#34495e', foreground='white',
-                       borderwidth=0, font=('Helvetica', 10))
-        style.map('Sidebar.TButton', background=[('active', "#7d7e54")])
+        style.configure('Sidebar.TButton', background=self.colors['sidebar_button'], foreground=self.colors['sidebar_text'],
+               borderwidth=0, font=('Helvetica', 10))
+        style.map('Sidebar.TButton', background=[('active', self.colors['sidebar_hover'])])
+
+        # Custom Primary Button (matches main window color)
+        style.configure('Primary.TButton', background=self.colors['primary_dark'], foreground=self.colors['sidebar_text'],
+               borderwidth=0, font=('Helvetica', 10), padding=5)
+        style.map('Primary.TButton', background=[('active', self.colors['primary'])])
    
     def _create_layout(self):
-        """Create main layout: header on top, sidebar on left, content on right"""
-        self.header_frame = ttk.Frame(self.root, height=65, style='Sidebar.TFrame')
+        """
+        Create the main layout of the app.
+        Adds the header at the top, sidebar on the left, and main content area on the right.
+        """
+        self.header_frame = ttk.Frame(self.root, height=110, style='Sidebar.TFrame')
         self.header_frame.pack(fill='x', side='top')
         self.header_frame.pack_propagate(False)
         # Sidebar (navigation)
@@ -138,44 +244,112 @@ class CourseMateApp:
         self.main_content = ttk.Frame(self.root, style='TFrame')
         self.main_content.pack(fill='both', expand=True, side='right')
 
-
-
-
     def _create_widgets(self):
-        """Create widgets"""
-        #header container frame
+        """
+        Create all widgets (buttons, labels, frames) for the app.
+        This method builds the sidebar, header, navigation, and other UI elements.
+        """
+
+        # Header container frame
         self.header_container = ttk.Frame(self.header_frame, style='Sidebar.TFrame')
-        self.header_container.pack(pady='8',padx='20', side='left',  fill='both', expand='True')
-   
-        # Title on header containter
-        tk.Label(self.header_container, text="CourseMate",
-                font=('Helvetica', 19, 'bold'),
-                bg='#2c3e50', fg='white').pack(anchor='w')
-        #Tagline on header container
-        tk.Label(self.header_container, text="Stay Organized • Think Smarter • Learn Deeper • Solve Problems Better",
-                font=('Helvetica', 9, 'italic'),
-                bg='#2c3e50', fg='#95a5a6').pack(anchor='w')
+        self.header_container.pack(fill='both', expand=True)
+
+        # Title and slogan (centered, stacked)
+        title_frame = ttk.Frame(self.header_container, style='Sidebar.TFrame')
+        title_frame.pack(fill='x', expand=True)
+        tk.Label(title_frame, text="CourseMate",
+            font=('Helvetica', 20, 'bold'),
+            bg=self.colors['primary_dark'], fg=self.colors['header_text']).pack(pady=(1,0), anchor='center')
+        tk.Label(title_frame, text="Stay Organized • Think Smarter • Learn Deeper • Solve Problems Better",
+            font=('Helvetica', 10,),
+            bg=self.colors['primary_dark'], fg=self.colors['secondary_text']).pack(pady=(0,1), anchor='center')
+
+        # NOTE: header keeps title and slogan only. Stats are shown in the sidebar.
+        # Ensure stats are shown on startup (sidebar widgets created below)
+        # (the actual labels are created in the sidebar area)
+        
        
+        # Header overlay: small stats + theme name placed over the title so the
+        # centered title/slogan remain unchanged. Use a rounded CTkFrame.
+        # To avoid the window's default (white) background showing through the
+        # rounded corners, create a square "holder" with the same card color
+        # behind the rounded frame. The holder provides a consistent background
+        # so rounded corners blend seamlessly.
+        overlay_color = self.colors.get('card_bg')
+
+        # Holder behind the rounded overlay (square, no border)
+        overlay_holder = ctk.CTkFrame(self.header_container,
+                          fg_color=self.colors['primary_dark'],
+                          corner_radius=0,
+                          border_width=0,
+                          width=self.sidebar_button_width,
+                          height=90)
+        # absolute placement so it doesn't affect packing of the centered title
+        overlay_holder.place(x=20, y=10)
+
+        # The actual rounded overlay sits inside the holder. Because the holder
+        # uses the same `card_bg`, any transparent rounded corners will reveal
+        # the same color instead of the white window background.
+        header_overlay = ctk.CTkFrame(overlay_holder,
+                          fg_color=overlay_color,
+                          corner_radius=15,
+                          border_width=2.5,
+                          border_color=self.colors.get('muted'))
+        header_overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+        # left column: numeric stats (stacked vertically)
+        stats_col = tk.Frame(header_overlay, bg=overlay_color)
+        stats_col.pack(side='left', anchor='n', padx=8, pady=6)
+
+        # Use darker text on the light overlay so it remains readable
+        stat_fg = self.colors.get('primary_dark', '#222222')
+
+        self.stat_courses = tk.Label(stats_col, text="", font=('Helvetica', 8, 'bold'), bg=overlay_color, fg=stat_fg)
+        self.stat_courses.pack(anchor='w')
+        self.stat_active_tasks = tk.Label(stats_col, text="", font=('Helvetica', 8, 'bold'), bg=overlay_color, fg=stat_fg)
+        self.stat_active_tasks.pack(anchor='w')
+        self.stat_completed = tk.Label(stats_col, text="", font=('Helvetica', 8, 'bold'), bg=overlay_color, fg=stat_fg)
+        self.stat_completed.pack(anchor='w')
+
+        # Theme shown as a quick stat (same format as other stats)
+        self.stat_theme = tk.Label(stats_col, text=f"Theme: {self.theme_name}", font=('Helvetica', 8, 'bold'), bg=overlay_color, fg=stat_fg)
+        self.stat_theme.pack(anchor='w')
+
+        # Ensure stats are shown on startup (populates text and swatch)
+        self._update_stats()
+
         # Navigation section on sidebar
         tk.Label(self.sidebar_frame, text="NAVIGATION",
-                font=('Helvetica', 9, 'bold'),
-                bg='#2c3e50', fg='#95a5a6').pack(pady=(30, 10), padx=20, anchor='w')
-       
-        # Main navigation buttons on sidebar
+            font=('Helvetica', 9, 'bold'),
+            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(10), padx=20, anchor='w')
+
         main_nav = [
-            ("📊 Dashboard", self.show_dashboard),
-            ("📝 Freeform Notes", self.show_freeform)
+            ("Dashboard", self.show_dashboard),
+            ("Freeform Notes", self.show_freeform),
+            ("Task History", self.show_task_history) 
         ]
-       
+
         for text, command in main_nav:
-            btn = ttk.Button(self.sidebar_frame, text=text, style='Sidebar.TButton',
-                           command=command)
-            btn.pack(fill='x', pady=3, padx=15)
+            btn = ctk.CTkButton(
+                self.sidebar_frame,
+                text=text,
+                command=command,
+                fg_color=self.colors['sidebar_button'],
+                bg_color=self.colors['primary_dark'],
+                hover_color=self.colors['sidebar_hover'],
+                text_color=self.colors['sidebar_text'],
+                corner_radius=20,
+                border_width=0,
+                width=self.sidebar_button_width,
+                height=36,
+                font=("Helvetica", 14)
+            )
+            btn.pack(pady=2, padx=5)
        
         # Non-Technical Templates Section
         tk.Label(self.sidebar_frame, text="NON-TECHNICAL TEMPLATES",
-                font=('Helvetica', 8, 'bold'),
-                bg='#2c3e50', fg='#95a5a6').pack(pady=(15, 5), padx=20, anchor='w')
+            font=('Helvetica', 9, 'bold'),
+            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(10), padx=20, anchor='w')
        
         non_tech_templates = [
             ("Cornell Notes", "Cornell"),
@@ -184,47 +358,94 @@ class CourseMateApp:
         ]
        
         for text, template_key in non_tech_templates:
-            btn = ttk.Button(self.sidebar_frame, text=text, style='Sidebar.TButton',
-                           command=lambda k=template_key: self.open_template(k))
-            btn.pack(fill='x', pady=2, padx=15)
+            btn = ctk.CTkButton(
+                self.sidebar_frame,
+                text=text,
+                command=lambda k=template_key: self.open_template(k),
+                fg_color=self.colors['sidebar_button'],
+                bg_color=self.colors['primary_dark'],
+                hover_color=self.colors['sidebar_hover'],
+                text_color=self.colors['sidebar_text'],
+                corner_radius=20,
+                border_width=0,
+                width=self.sidebar_button_width,
+                height=36,
+                font=("Helvetica", 14)
+            )
+            btn.pack(pady=2, padx=5)
        
         # Technical Templates Section
         tk.Label(self.sidebar_frame, text="TECHNICAL TEMPLATES",
-                font=('Helvetica', 8, 'bold'),
-                bg='#2c3e50', fg='#95a5a6').pack(pady=(15, 5), padx=20, anchor='w')
-       
+            font=('Helvetica', 9, 'bold'),
+            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(10), padx=20, anchor='w')
+
         tech_templates = [
             ("Polya's 4 Steps", "Polya"),
             ("5W1H Analysis", "5W1H"),
             ("Concept Map", "ConceptMap"),
         ]
-       
         for text, template_key in tech_templates:
-            btn = ttk.Button(self.sidebar_frame, text=text, style='Sidebar.TButton',
-                           command=lambda k=template_key: self.open_template(k))
-            btn.pack(fill='x', pady=2, padx=15)
-       
-        # Quick Actions section
+            btn = ctk.CTkButton(
+                    self.sidebar_frame,
+                    text=text,
+                    command=lambda k=template_key: self.open_template(k),
+                    fg_color=self.colors['sidebar_button'],
+                    bg_color=self.colors['primary_dark'],
+                    hover_color=self.colors['sidebar_hover'],
+                    text_color=self.colors['sidebar_text'],
+                    corner_radius=20,
+                    border_width=0,
+                    width=self.sidebar_button_width,
+                    height=36,
+                    font=("Helvetica", 14)
+            )
+            btn.pack(pady=2, padx=5)
+
+        # Quick Actions section (placed after template lists)
         tk.Label(self.sidebar_frame, text="QUICK ACTIONS",
-                font=('Helvetica', 9, 'bold'),
-                bg='#2c3e50', fg='#95a5a6').pack(pady=(20, 10), padx=20, anchor='w')
-       
+            font=('Helvetica', 9, 'bold'),
+            bg=self.colors['primary_dark'], fg=self.colors['muted']).pack(pady=(20, 10), padx=20, anchor='w')
+
+        # Theme selector button
+        tk.Button(self.sidebar_frame, text="🎨 Themes",
+            command=self.show_theme_selector,
+            bg=self.colors['primary'], fg=self.colors['sidebar_text'],
+            relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
+
         tk.Button(self.sidebar_frame, text="+ Add Course",
-                 command=self.add_course,
-                 bg='#27ae60', fg='white',
-                 relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
-       
-        # tk.Button(self.sidebar_frame, text="+ Add Task",
-        #          command=self.add_task,
-        #          bg='#3498db', fg='white',
-        #          relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
+            command=self.add_course,
+            bg=self.colors['success'], fg=self.colors['sidebar_text'],
+            relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
+
+        tk.Button(self.sidebar_frame, text="+ Add To-Do",
+            command=self.quick_add_task,
+            bg=self.colors['info'], fg=self.colors['sidebar_text'],
+            relief='flat', font=('Helvetica', 9, 'bold')).pack(fill='x', padx=15, pady=3)
+   
+    def _update_stats(self):
+        """
+        Update the quick stats display in the header.
+        Shows the number of courses, active tasks, and completed tasks.
+        """
+        self.stat_courses.config(text=f"Courses: {len(self.courses)}")
+        self.stat_active_tasks.config(text=f"Active Tasks: {len(self.tasks)}")
+        self.stat_completed.config(text=f"Completed Tasks: {len(self.completed_tasks)}")
+        # Update theme display (if present)
+        if hasattr(self, 'stat_theme'):
+            try:
+                self.stat_theme.config(text=f"Theme: {self.theme_name}")
+            except Exception:
+                pass
    
     # ------------------------------------------------------------------------
     # PART 4: COURSE MANAGEMENT
     # ------------------------------------------------------------------------
    
     def add_course(self):
-        """Add a new course"""
+        """
+        Add a new course to your list.
+        Prompts the user for a course name and saves it if valid.
+        """
         name = simpledialog.askstring("Add Course", "Enter course name:")
        
         if name and name.strip():
@@ -236,13 +457,17 @@ class CourseMateApp:
             # Create new course
             self.courses[name] = {"notes": [], "tasks": []}
             self._save_data()
+            self._update_stats()
             messagebox.showinfo("Success", f"Course '{name}' added!")
             self.show_dashboard()  # Refresh view
         elif name is not None:  # User clicked OK but empty
             messagebox.showwarning("Error", "Course name cannot be empty!")
    
     def delete_course(self, name):
-        """Delete a course"""
+        """
+        Delete a course and all its notes and tasks.
+        Asks for confirmation before deleting.
+        """
         if messagebox.askyesno("Delete", f"Delete '{name}' and all its notes?"):
             del self.courses[name]
             self._save_data()
@@ -251,8 +476,8 @@ class CourseMateApp:
    
     def view_course(self, course_name):
         """
-        VIEW COURSE DETAILS
-        Shows all notes for a specific course with scrollbar
+        View details for a specific course.
+        Shows all notes and tasks for the selected course, with scrolling if needed.
         """
         self._clear_content()
        
@@ -263,44 +488,43 @@ class CourseMateApp:
         header_frame.pack(fill='x', padx=30, pady=20)
        
         tk.Label(header_frame, text=f"📚 {course_name}",
-                font=('Helvetica', 24, 'bold'),
-                bg='#f5f5f5').pack(side='left')
+            font=('Helvetica', 24, 'bold'),
+            bg=self.colors['background']).pack(side='left')
        
         tk.Button(header_frame, text="← Back to Dashboard",
-                 command=self.show_dashboard,
-                 bg='#95a5a6', fg='white',
-                 relief='flat', font=('Helvetica', 9)).pack(side='right')
+             command=self.show_dashboard,
+             bg=self.colors['muted'], fg=self.colors['header_text'],
+             relief='flat', font=('Helvetica', 9)).pack(side='right')
        
         # Stats
         stats_frame = ttk.Frame(self.main_content, style='Card.TFrame', padding=15)
         stats_frame.pack(fill='x', padx=30, pady=(0, 20))
        
         tk.Label(stats_frame, text=f"📝 Total Notes: {len(course['notes'])}",
-                font=('Helvetica', 12), bg='white').pack(side='left', padx=10)
+            font=('Helvetica', 12), bg=self.colors['card_bg']).pack(side='left', padx=10)
         tk.Label(stats_frame, text=f"📋 Total Tasks: {len(course['tasks'])}",
-                font=('Helvetica', 12), bg='white').pack(side='left', padx=10)
+            font=('Helvetica', 12), bg=self.colors['card_bg']).pack(side='left', padx=10)
        
         # Notes section title
         tk.Label(self.main_content, text="Notes",
-                font=('Helvetica', 16, 'bold'),
-                bg='#f5f5f5').pack(anchor='w', padx=30, pady=(10, 10))
+            font=('Helvetica', 16, 'bold'),
+            bg=self.colors['background']).pack(anchor='w', padx=30, pady=(10, 10))
        
         if not course['notes']:
             empty_card = ttk.Frame(self.main_content, style='Card.TFrame', padding=30)
             empty_card.pack(fill='x', padx=30, pady=10)
-           
             tk.Label(empty_card, text="📝 No notes yet for this course",
-                    font=('Helvetica', 12), bg='white',
-                    fg='#95a5a6').pack()
+                    font=('Helvetica', 12), bg=self.colors['card_bg'],
+                    fg=self.colors['muted']).pack()
             tk.Label(empty_card, text="Use 'Freeform Notes' or templates to add notes!",
-                    font=('Helvetica', 10), bg='white',
-                    fg='#95a5a6').pack(pady=5)
+                    font=('Helvetica', 10), bg=self.colors['card_bg'],
+                    fg=self.colors['muted']).pack(pady=5)
         else:
             # Create scrollable area for notes
             notes_container = ttk.Frame(self.main_content)
             notes_container.pack(fill='both', expand=True, padx=30, pady=(0, 20))
            
-            canvas = tk.Canvas(notes_container, bg='#f5f5f5', highlightthickness=0)
+            canvas = tk.Canvas(notes_container, bg=self.colors['background'], highlightthickness=0)
             scrollbar = ttk.Scrollbar(notes_container, orient='vertical', command=canvas.yview)
             scrollable_frame = ttk.Frame(canvas)
            
@@ -323,7 +547,10 @@ class CourseMateApp:
                 self._display_note_card_in_frame(scrollable_frame, course_name, i, note)
    
     def _display_note_card_in_frame(self, parent_frame, course_name, note_index, note):
-        """Helper: Display a single note card in a specific frame"""
+        """
+        Display a single note card in a given frame.
+        Used to show each note in the course details view.
+        """
         card = ttk.Frame(parent_frame, style='Card.TFrame', padding=15)
         card.pack(fill='x', pady=8, padx=5)
        
@@ -332,57 +559,60 @@ class CourseMateApp:
         header.pack(fill='x', pady=(0, 10))
        
         tk.Label(header, text=note.get('title', 'Untitled Note'),
-                font=('Helvetica', 13, 'bold'),
-                bg='white').pack(side='left')
+            font=('Helvetica', 13, 'bold'),
+            bg=self.colors['card_bg']).pack(side='left')
        
         tk.Label(header, text=note.get('created', ''),
-                font=('Helvetica', 9), fg='#95a5a6',
-                bg='white').pack(side='left', padx=10)
+            font=('Helvetica', 9), fg=self.colors['muted'],
+            bg=self.colors['card_bg']).pack(side='left', padx=10)
        
         # Delete button
         tk.Button(header, text="🗑️ Delete",
-                 command=lambda: self.delete_note(course_name, note_index),
-                 fg='#e74c3c', relief='flat',
-                 font=('Helvetica', 9)).pack(side='right')
+             command=lambda: self.delete_note(course_name, note_index),
+             fg=self.colors['danger'], relief='flat',
+             font=('Helvetica', 9)).pack(side='right')
        
         # Note content
         if 'template' in note:
             # Template note - show structured data
-            tk.Label(card, text=f"Template: {note['template']}",
+                tk.Label(card, text=f"Template: {note['template']}",
                     font=('Helvetica', 10, 'italic'),
-                    fg='#3498db', bg='white').pack(anchor='w', pady=5)
+                    fg=self.colors['info'], bg=self.colors['card_bg']).pack(anchor='w', pady=5)
            
-            for field, value in note.get('data', {}).items():
-                if value:  # Only show fields with content
-                    field_frame = ttk.Frame(card)
-                    field_frame.pack(fill='x', pady=5)
-                   
-                    tk.Label(field_frame, text=f"{field}:",
-                            font=('Helvetica', 10, 'bold'),
-                            bg='white').pack(anchor='w')
-                   
-                    tk.Label(field_frame, text=value,
-                            font=('Helvetica', 10),
-                            bg='white', wraplength=700,
-                            justify='left').pack(anchor='w', padx=20)
+        for field, value in note.get('data', {}).items():
+            if value:  # Only show fields with content
+                field_frame = ttk.Frame(card)
+                field_frame.pack(fill='x', pady=5)
+                
+                tk.Label(field_frame, text=f"{field}:",
+                    font=('Helvetica', 10, 'bold'),
+                    bg=self.colors['card_bg']).pack(anchor='w')
+            
+                tk.Label(field_frame, text=value,
+                    font=('Helvetica', 10),
+                    bg=self.colors['card_bg'], wraplength=700,
+                    justify='left').pack(anchor='w', padx=20)
         else:
             # Freeform note - show content
             content = note.get('content', '')
             preview = content[:200] + "..." if len(content) > 200 else content
            
             tk.Label(card, text=preview,
-                    font=('Helvetica', 10),
-                    bg='white', wraplength=700,
-                    justify='left').pack(anchor='w', pady=5)
+                font=('Helvetica', 10),
+                bg=self.colors['card_bg'], wraplength=700,
+                justify='left').pack(anchor='w', pady=5)
            
             if len(content) > 200:
                 tk.Button(card, text="Read full note →",
                          command=lambda: self.view_full_note(note),
-                         fg='#3498db', relief='flat',
+                         fg=self.colors['info'], relief='flat',
                          font=('Helvetica', 9)).pack(anchor='w', pady=5)
    
     def delete_note(self, course_name, note_index):
-        """Delete a specific note"""
+        """
+        Delete a specific note from a course.
+        Asks for confirmation before deleting.
+        """
         note_title = self.courses[course_name]['notes'][note_index].get('title', 'this note')
        
         if messagebox.askyesno("Delete Note", f"Delete '{note_title}'?"):
@@ -391,7 +621,10 @@ class CourseMateApp:
             self.view_course(course_name)  # Refresh the view
    
     def view_full_note(self, note):
-        """View full note content in a popup window"""
+        """
+        Show the full content of a note in a popup window.
+        Useful for reading long notes.
+        """
         popup = tk.Toplevel(self.root)
         popup.title(note.get('title', 'Note'))
         popup.geometry("700x500")
@@ -418,53 +651,52 @@ class CourseMateApp:
        
         # Close button
         tk.Button(popup, text="Close",
-                 command=popup.destroy,
-                 bg='#95a5a6', fg='white',
-                 font=('Helvetica', 10),
-                 relief='flat', padx=20, pady=8).pack(pady=10)
+             command=popup.destroy,
+             bg=self.colors['muted'], fg=self.colors['header_text'],
+             font=('Helvetica', 10),
+             relief='flat', padx=20, pady=8).pack(pady=10)
    
     def show_task_history(self):
         """
-        TASK HISTORY VIEW
-        Shows completed tasks with restore/delete options
+        Show the history of completed tasks.
+        Lets you restore or permanently delete completed tasks.
         """
         self._clear_content()
        
         # Title
         tk.Label(self.main_content, text="✅ Task History",
-                font=('Helvetica', 24, 'bold'),
-                bg='#f5f5f5').pack(pady=20, anchor='w', padx=30)
+            font=('Helvetica', 24, 'bold'),
+            bg=self.colors['background']).pack(pady=20, anchor='w', padx=30)
        
         tk.Label(self.main_content, text="View and manage your completed tasks",
-                font=('Helvetica', 11), fg='#7f8c8d',
-                bg='#f5f5f5').pack(anchor='w', padx=30, pady=(0, 20))
+            font=('Helvetica', 11), fg=self.colors['secondary_text'],
+            bg=self.colors['background']).pack(anchor='w', padx=30, pady=(0, 20))
        
         # Stats
         stats_frame = ttk.Frame(self.main_content, style='Card.TFrame', padding=15)
         stats_frame.pack(fill='x', padx=30, pady=(0, 20))
        
         tk.Label(stats_frame, text=f"📋 Active Tasks: {len(self.tasks)}",
-                font=('Helvetica', 12), bg='white').pack(side='left', padx=10)
+            font=('Helvetica', 12), bg=self.colors['card_bg']).pack(side='left', padx=10)
         tk.Label(stats_frame, text=f"✓ Completed Tasks: {len(self.completed_tasks)}",
-                font=('Helvetica', 12), bg='white').pack(side='left', padx=10)
+            font=('Helvetica', 12), bg=self.colors['card_bg']).pack(side='left', padx=10)
        
         # Completed tasks list
         if not self.completed_tasks:
             empty_card = ttk.Frame(self.main_content, style='Card.TFrame', padding=30)
             empty_card.pack(fill='x', padx=30, pady=10)
-           
             tk.Label(empty_card, text="✅ No completed tasks yet",
-                    font=('Helvetica', 12), bg='white',
-                    fg='#95a5a6').pack()
+                font=('Helvetica', 12), bg=self.colors['card_bg'],
+                fg=self.colors['muted']).pack()
             tk.Label(empty_card, text="Complete tasks from the Dashboard to see them here!",
-                    font=('Helvetica', 10), bg='white',
-                    fg='#95a5a6').pack(pady=5)
+                font=('Helvetica', 10), bg=self.colors['card_bg'],
+                fg=self.colors['muted']).pack(pady=5)
         else:
             # Create scrollable area for completed tasks
             tasks_container = ttk.Frame(self.main_content)
             tasks_container.pack(fill='both', expand=True, padx=30, pady=(0, 20))
            
-            canvas = tk.Canvas(tasks_container, bg='#f5f5f5', highlightthickness=0)
+            canvas = tk.Canvas(tasks_container, bg=self.colors['background'], highlightthickness=0)
             scrollbar = ttk.Scrollbar(tasks_container, orient='vertical', command=canvas.yview)
             scrollable_frame = ttk.Frame(canvas)
            
@@ -492,92 +724,114 @@ class CourseMateApp:
                 info_frame.pack(fill='x')
                
                 tk.Label(info_frame, text="✓",
-                        font=('Helvetica', 14, 'bold'),
-                        fg='#27ae60', bg='white').pack(side='left', padx=(0, 10))
+                    font=('Helvetica', 14, 'bold'),
+                    fg=self.colors['success'], bg=self.colors['card_bg']).pack(side='left', padx=(0, 10))
                
                 task_text_frame = ttk.Frame(info_frame)
                 task_text_frame.pack(side='left', fill='x', expand=True)
                
                 tk.Label(task_text_frame, text=task_data['task'],
-                        font=('Helvetica', 11),
-                        bg='white').pack(anchor='w')
+                    font=('Helvetica', 11),
+                    bg=self.colors['card_bg']).pack(anchor='w')
                
                 tk.Label(task_text_frame, text=f"Completed: {task_data['completed_date']}",
-                        font=('Helvetica', 9), fg='#95a5a6',
-                        bg='white').pack(anchor='w')
+                    font=('Helvetica', 9), fg=self.colors['muted'],
+                    bg=self.colors['card_bg']).pack(anchor='w')
                
                 # Action buttons
                 btn_frame = ttk.Frame(info_frame)
                 btn_frame.pack(side='right')
                
                 tk.Button(btn_frame, text="↶ Restore",
-                         command=lambda idx=i: self._restore_and_refresh(idx),
-                         bg='#3498db', fg='white',
+                         command=lambda idx=i: self._restore_task_and_refresh(idx),
+                         bg=self.colors['info'], fg=self.colors['header_text'],
                          relief='flat', font=('Helvetica', 9)).pack(side='left', padx=5)
                
                 tk.Button(btn_frame, text="🗑️ Delete",
-                         command=lambda idx=i: self._delete_completed_and_refresh(idx),
-                         fg='#e74c3c',
+                         command=lambda idx=i: self._delete_completed_task(idx),
+                         fg=self.colors['danger'],
                          relief='flat', font=('Helvetica', 9)).pack(side='left', padx=5)
        
         # Back button
         tk.Button(self.main_content, text="← Back to Dashboard",
-                 command=self.show_dashboard,
-                 bg='#95a5a6', fg='white',
-                 relief='flat', font=('Helvetica', 10),
-                 padx=15, pady=8).pack(pady=20)
+             command=self.show_dashboard,
+             bg=self.colors['muted'], fg=self.colors['header_text'],
+             relief='flat', font=('Helvetica', 10),
+             padx=15, pady=8).pack(pady=20)
    
     def _restore_task_and_refresh(self, index):
-        """Restore task from dashboard and refresh"""
+        """
+        Restore a completed task from history and refresh the view.
+        """
         self.restore_task(index)
-        self.show_dashboard()
+        self.show_task_history()
    
-    def _delete_completed_from_dashboard(self, index):
-        """Delete completed task from dashboard"""
+    def _delete_completed_task(self, index):
+        """
+        Permanently delete a completed task from history.
+        """
         if messagebox.askyesno("Delete", "Permanently delete this completed task?"):
             self.permanently_delete_task(index)
-            self.show_dashboard()
+            self.show_task_history()
    
     # ------------------------------------------------------------------------
     # PART 5: TASK MANAGEMENT
     # ------------------------------------------------------------------------
    
-    def add_task(self):
-        """Add a general task"""
-        task = simpledialog.askstring("Add Task", "Enter task:")
+    def quick_add_task(self):
+        """
+        Quickly add a new task from the sidebar using a dialog box.
+        """
+        task = simpledialog.askstring("Add To-Do", "Enter task:")
        
         if task and task.strip():
             self.tasks.append(task.strip())
             self._save_data()
+            self._update_stats()
+            messagebox.showinfo("Success", "To-Do added!")
             self.show_dashboard()
+        elif task is not None:
+            messagebox.showwarning("Error", "Task cannot be empty!")
    
     def delete_task(self, index):
-        """Mark task as complete and move to history"""
+        """
+        Mark a task as complete and move it to the history.
+        """
         task = self.tasks.pop(index)
         self.completed_tasks.append({
             "task": task,
             "completed_date": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         })
         self._save_data()
+        self._update_stats()
         self.show_dashboard()
    
     def restore_task(self, index):
-        """Restore a completed task back to active tasks"""
+        """
+        Restore a completed task back to the active tasks list.
+        """
         task_data = self.completed_tasks.pop(index)
         self.tasks.append(task_data["task"])
         self._save_data()
+        self._update_stats()
    
     def permanently_delete_task(self, index):
-        """Permanently delete a completed task"""
+        """
+        Permanently delete a completed task from the history.
+        """
         self.completed_tasks.pop(index)
         self._save_data()
+        self._update_stats()
    
     # ------------------------------------------------------------------------
     # PART 6: VIEWS (Different screens)
     # ------------------------------------------------------------------------
    
     def _clear_content(self):
-        """Helper: Clear the main content area"""
+        """
+        Clear the main content area before showing a new view.
+        Removes all widgets from the main content frame.
+        """
         for widget in self.main_content.winfo_children():
             widget.destroy()
    
@@ -589,156 +843,128 @@ class CourseMateApp:
         self._clear_content()
        
         # Title
-        tk.Label(self.main_content, text="📊 Dashboard",
-                font=('Helvetica', 24, 'bold'),
-                bg='#f5f5f5').pack(pady=10, anchor='w', padx=30)
+        tk.Label(self.main_content, text="Dashboard",
+            font=('Helvetica', 24, 'bold'),
+            bg=self.colors['background']).pack(pady=10, anchor='w', padx=30)
        
         # Container for two columns
-        container = ttk.Frame(self.main_content)
-        container.pack(fill='both', expand=True, padx=30, pady=10)
-       
-        # LEFT: Courses list
-        courses_frame = ttk.Frame(container, style='Card.TFrame', padding=15)
-        courses_frame.pack(side='left', fill='both', expand=True, padx=(0, 10))
-       
-        tk.Label(courses_frame, text="📚 My Courses",
-                font=('Helvetica', 14, 'bold'),
-                bg='white').pack(anchor='w', pady=(0, 10        ))
-       
+        # Container for two columns (dashboard)
+        dashboard_container = ctk.CTkFrame(
+            self.main_content,
+            fg_color=self.colors['background'],
+            corner_radius=15,
+            border_width=0
+        )
+        dashboard_container.pack(fill="both", expand=True, padx=30, pady=10)
+
+        # LEFT: Courses list (course management frame)
+        courses_frame = ctk.CTkFrame(
+            dashboard_container,
+            fg_color=self.colors.get('card_bg'),
+            corner_radius=15,
+            border_width=2.5,
+            border_color=self.colors.get('muted')
+        )
+        courses_frame.pack(side="left", fill="both", expand=True, padx=(0, 10), pady=10)
+
+        ctk.CTkLabel(courses_frame, text="My Courses",
+            font=("Helvetica", 24, "bold"),
+            text_color=self.colors['main_text']).pack(anchor="w", pady=(10, 10), padx=(10))
+
         if not self.courses:
-            tk.Label(courses_frame, text="No courses yet.\nClick '+ Add Course' to start!",
-                    font=('Helvetica', 10), fg='#95a5a6',
-                    bg='white', justify='left').pack(pady=20)
+            ctk.CTkLabel(courses_frame, text="No courses yet.\nClick '+ Add Course' to start!",
+                font=("Helvetica", 12),
+                text_color="#95a5a6",
+                justify="left").pack(pady=20)
         else:
             for name, data in self.courses.items():
-                course_row = ttk.Frame(courses_frame)
-                course_row.pack(fill='x', pady=5)
-               
+                course_row = ctk.CTkFrame(courses_frame, fg_color=self.colors['background'], corner_radius=10, border_width=0, width=350)
+                course_row.pack(fill="x", pady=5, padx=15)
                 # Make course name clickable
-                course_btn = tk.Button(course_row, text=f"📚 {name}",
-                                      font=('Helvetica', 11, 'bold'),
-                                      bg='white', fg='#2c3e50',
-                                      relief='flat', anchor='w',
-                                      command=lambda n=name: self.view_course(n))
-                course_btn.pack(side='left', fill='x', expand=True)
-               
-                tk.Label(course_row, text=f"({len(data['notes'])} notes)",
-                        font=('Helvetica', 9), fg='#7f8c8d',
-                        bg='white').pack(side='left', padx=5)
-               
-                tk.Button(course_row, text="🗑️",
-                         command=lambda n=name: self.delete_course(n),
-                         relief='flat', bg='white',
-                         font=('Helvetica', 8)).pack(side='right')
+                course_btn = ctk.CTkButton(course_row, text=f"📚 {name}",
+                                font=("Helvetica", 16, "bold"),
+                                fg_color=self.colors['sidebar_button'], bg_color=self.colors['background'],
+                                hover_color=self.colors['sidebar_hover'], text_color=self.colors['sidebar_text'],
+                                corner_radius=15, border_width=0,
+                                width=220, height=40,
+                                command=lambda n=name: self.view_course(n),
+                                anchor="w")
+                course_btn.pack(side="left", padx=(0, 10))
+                ctk.CTkLabel(course_row, text=f"({len(data['notes'])} notes)",
+                    font=("Helvetica", 13), text_color="#7f8c8d", anchor="w").pack(side="left", padx=10)
+                ctk.CTkButton(course_row, text="🗑️ Delete Course",
+                    command=lambda n=name: self.delete_course(n),
+                    fg_color=self.colors.get('danger', '#e74c3c'), text_color="white",
+                    bg_color=self.colors.get('card_bg'),
+                    font=("Helvetica", 14, "bold"), width=60, height=40).pack(side="right", padx=(10,0))
        
-        # RIGHT: Tasks list (Active + Completed)
-        tasks_frame = ttk.Frame(container, style='Card.TFrame', padding=15)
-        tasks_frame.pack(side='right', fill='both', expand=True, padx=(10, 0))
-       
-        # Active Tasks Section
-        active_header = ttk.Frame(tasks_frame)
-        active_header.pack(fill='x', pady=(0, 10))
-       
-        tk.Label(active_header, text="✅ Quick Tasks",
-                font=('Helvetica', 14, 'bold'),
-                bg='white').pack(side='left')
-       
-        tk.Button(active_header, text="+ Add",
-                 command=self.add_task,
-                 bg='#3498db', fg='white',
-                 relief='flat', font=('Helvetica', 8, 'bold')).pack(side='right')
-       
+        # RIGHT: Tasks list (Active + Completed) - use CTk to match My Courses styling
+        tasks_frame = ctk.CTkFrame(
+            dashboard_container,
+            fg_color=self.colors.get('card_bg'),
+            corner_radius=15,
+            border_width=2.5,
+            border_color=self.colors.get('muted')
+        )
+        tasks_frame.pack(side='right', fill='both', expand=True, padx=(10, 0), pady=10)
+
+        # Title
+        ctk.CTkLabel(tasks_frame, text="✅ To-Do List",
+                     font=("Helvetica", 14, "bold"),
+                     text_color=self.colors['main_text']).pack(anchor='w', pady=(0, 10), padx=(8,0))
+
+        # Input row: Entry + Add button
+        input_row = ctk.CTkFrame(tasks_frame, fg_color=self.colors.get('card_bg'), corner_radius=0, border_width=0)
+        input_row.pack(fill='x', pady=(0, 10), padx=(6,6))
+
+        task_entry = ctk.CTkEntry(input_row, font=('Helvetica', 10))
+        task_entry.pack(side='left', fill='x', expand=True, padx=(0, 8))
+
+        def add_task_with_validation():
+            """Add task with error handling"""
+            task = task_entry.get().strip()
+            if not task:
+                messagebox.showwarning("Error", "Task cannot be empty!")
+                return
+            if task.isdigit():
+                messagebox.showwarning("Error", "Numbers only are not allowed!")
+                return
+            self.tasks.append(task)
+            self._save_data()
+            task_entry.delete(0, tk.END)
+            self.show_dashboard()
+
+        ctk.CTkButton(input_row, text="+ Add",
+                      command=add_task_with_validation,
+                      fg_color=self.colors['primary_dark'],
+                      text_color=self.colors['sidebar_text'],
+                      corner_radius=8).pack(side='right')
+
+        # Task list card (separate container with minimum height)
+        tasks_list_card = ctk.CTkFrame(tasks_frame,
+                                       fg_color=self.colors.get('card_bg'),
+                                       corner_radius=10,
+                                       border_width=0)
+        tasks_list_card.pack(fill='both', expand=True, pady=(0, 0), padx=6)
+
         # Active tasks list
         if not self.tasks:
-            tk.Label(tasks_frame, text="No active tasks",
-                    font=('Helvetica', 10), fg='#95a5a6',
-                    bg='white').pack(pady=10)
+            ctk.CTkLabel(tasks_list_card, text="No active tasks",
+                         font=('Helvetica', 10), text_color=self.colors['muted']).pack(pady=20)
         else:
             for i, task in enumerate(self.tasks):
-                task_row = ttk.Frame(tasks_frame)
-                task_row.pack(fill='x', pady=5)
-               
-                tk.Label(task_row, text=f"☐ {task}",
-                        font=('Helvetica', 11), bg='white').pack(side='left')
-               
-                tk.Button(task_row, text="✓",
-                         command=lambda idx=i: self.delete_task(idx),
-                         relief='flat', bg='white', fg='#27ae60',
-                         font=('Helvetica', 10, 'bold')).pack(side='right')
-       
-        # Separator
-        ttk.Separator(tasks_frame, orient='horizontal').pack(fill='x', pady=15)
-       
-        # Completed Tasks Section
-        completed_header = ttk.Frame(tasks_frame)
-        completed_header.pack(fill='x', pady=(0, 10))
-       
-        tk.Label(completed_header, text="✓ Completed Tasks",
-                font=('Helvetica', 12, 'bold'),
-                fg='#27ae60', bg='white').pack(side='left')
-       
-        tk.Label(completed_header, text=f"({len(self.completed_tasks)})",
-                font=('Helvetica', 10), fg='#95a5a6',
-                bg='white').pack(side='left', padx=5)
-       
-        # Completed tasks list (scrollable if many)
-        if not self.completed_tasks:
-            tk.Label(tasks_frame, text="No completed tasks yet",
-                    font=('Helvetica', 9), fg='#95a5a6',
-                    bg='white', justify='left').pack(pady=10)
-        else:
-            # Create scrollable area for completed tasks
-            completed_container = ttk.Frame(tasks_frame)
-            completed_container.pack(fill='both', expand=True)
-           
-            # Limit height for scrollbar
-            canvas_height = min(200, len(self.completed_tasks) * 40)
-           
-            canvas = tk.Canvas(completed_container, bg='white',
-                             height=canvas_height, highlightthickness=0)
-            scrollbar = ttk.Scrollbar(completed_container, orient='vertical',
-                                     command=canvas.yview)
-            scrollable_completed = ttk.Frame(canvas)
-           
-            scrollable_completed.bind('<Configure>',
-                                     lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
-           
-            canvas.create_window((0, 0), window=scrollable_completed, anchor='nw')
-            canvas.configure(yscrollcommand=scrollbar.set)
-           
-            canvas.pack(side='left', fill='both', expand=True)
-            if len(self.completed_tasks) > 5:
-                scrollbar.pack(side='right', fill='y')
-           
-            # Display completed tasks
-            for i, task_data in enumerate(reversed(self.completed_tasks[-10:])):  # Show last 10, newest first
-                task_row = ttk.Frame(scrollable_completed)
-                task_row.pack(fill='x', pady=3)
-               
-                # Task text
-                task_text_frame = ttk.Frame(task_row)
-                task_text_frame.pack(side='left', fill='x', expand=True)
-               
-                tk.Label(task_text_frame, text=f"✓ {task_data['task']}",
-                        font=('Helvetica', 9), fg='#7f8c8d',
-                        bg='white').pack(anchor='w')
-               
-                # Action buttons
-                btn_container = ttk.Frame(task_row)
-                btn_container.pack(side='right')
-               
-                # Calculate actual index in the original list
-                actual_index = len(self.completed_tasks) - 1 - i
-               
-                tk.Button(btn_container, text="↶",
-                         command=lambda idx=actual_index: self._restore_task_and_refresh(idx),
-                         relief='flat', bg='white', fg='#3498db',
-                         font=('Helvetica', 9), cursor='hand2').pack(side='left', padx=2)
-               
-                tk.Button(btn_container, text="🗑️",
-                         command=lambda idx=actual_index: self._delete_completed_from_dashboard(idx),
-                         relief='flat', bg='white', fg='#e74c3c',
-                         font=('Helvetica', 8), cursor='hand2').pack(side='left', padx=2)
+                task_row = ctk.CTkFrame(tasks_list_card, fg_color=self.colors.get('card_bg'), corner_radius=6, border_width=0)
+                task_row.pack(fill='x', pady=6, padx=6)
+
+                ctk.CTkLabel(task_row, text=f"☐ {task}",
+                             font=('Helvetica', 11), text_color=self.colors['main_text']).pack(side='left', fill='x', expand=True, padx=(8,0))
+
+                ctk.CTkButton(task_row, text="✓",
+                              width=36, height=28,
+                              command=lambda idx=i: self.delete_task(idx),
+                              fg_color=self.colors['success'],
+                              text_color='white',
+                              corner_radius=8).pack(side='right', padx=(6,6))
    
     def show_freeform(self):
         """
@@ -791,7 +1017,7 @@ class CourseMateApp:
                 return
            
             if not title:
-                title = f"Note - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                title = f"Note - {datetime.now().strftime("%Y-%m-%d %H:%M")}"
            
             # Save note
             note = {
@@ -812,77 +1038,57 @@ class CourseMateApp:
                  fg='white',
                  font=('Helvetica', 11, 'bold'),
                  relief='flat', padx=20, pady=10).pack(pady=10)
+
+    def show_theme_selector(self):
+        """
+        Open a small dialog that lists available themes.
+        Selecting a theme applies it immediately.
+        """
+        dlg = tk.Toplevel(self.root)
+        dlg.title("Select Theme")
+        dlg.geometry("320x220")
+        dlg.transient(self.root)
+        dlg.grab_set()
+
+        tk.Label(dlg, text="Choose a theme:", font=('Helvetica', 12, 'bold')).pack(pady=(10, 6))
+
+        for name, pal in CourseMateApp.THEMES.items():
+            # sample button shows the primary_dark color
+            btn = tk.Button(dlg, text=name,
+                            command=lambda n=name, d=dlg: self.apply_theme(n, d),
+                            bg=pal.get('primary_dark', '#333'), fg='white', relief='flat')
+            btn.pack(fill='x', padx=16, pady=6)
+
+    def apply_theme(self, name, dialog=None):
+        """Apply theme by name and rebuild UI styles/widgets."""
+        if name not in CourseMateApp.THEMES:
+            return
+        self.theme_name = name
+        self.colors = CourseMateApp.THEMES[name].copy()
+        # update class-level COLORS so other instances (if any) follow
+        CourseMateApp.COLORS = self.colors
+        # reapply styles and rebuild widgets to pick up new colors
+        self._setup_styles()
+        self._rebuild_ui()
+        if dialog:
+            try:
+                dialog.destroy()
+            except Exception:
+                pass
+
+    def _rebuild_ui(self):
+        """Clear header and sidebar content and re-create widgets."""
+        # Clear sidebar and header frames so widgets recreated cleanly
+        for w in list(self.header_frame.winfo_children()):
+            w.destroy()
+        for w in list(self.sidebar_frame.winfo_children()):
+            w.destroy()
+        # Recreate widgets and refresh current view
+        self._create_widgets()
+        # Refresh the main content to reflect current view
+        self.show_dashboard()
    
-    def show_technical(self):
-        """
-        TECHNICAL TEMPLATES VIEW
-        Shows: Polya, 5W1H, Concept Map
-        """
-        self._clear_content()
-       
-        tk.Label(self.main_content, text="💡 Technical Templates",
-                font=('Helvetica', 24, 'bold'),
-                bg='#f5f5f5').pack(pady=20, anchor='w', padx=30)
-       
-        tk.Label(self.main_content, text="Problem-solving frameworks for technical courses",
-                font=('Helvetica', 11), fg='#7f8c8d',
-                bg='#f5f5f5').pack(anchor='w', padx=30, pady=(0, 20))
-       
-        templates = [
-            ("Polya's 4 Steps", "Problem-solving methodology", "Polya"),
-            ("5W1H Analysis", "What, Why, When, Where, Who, How", "5W1H"),
-            ("Concept Mapping", "Visual relationship builder", "ConceptMap"),
-        ]
-       
-        for name, desc, key in templates:
-            card = ttk.Frame(self.main_content, style='Card.TFrame', padding=15)
-            card.pack(fill='x', pady=8, padx=30)
-           
-            tk.Label(card, text=name, font=('Helvetica', 13, 'bold'),
-                    bg='white').pack(anchor='w')
-            tk.Label(card, text=desc, font=('Helvetica', 10),
-                    fg='#7f8c8d', bg='white').pack(anchor='w', pady=5)
-           
-            tk.Button(card, text="Use Template →",
-                     command=lambda k=key: self.open_template(k),
-                     bg='#3498db', fg='white',
-                     relief='flat').pack(anchor='e')
-   
-    def show_nontechnical(self):
-        """
-        NON-TECHNICAL TEMPLATES VIEW
-        Shows: Cornell, Frayer, Main Idea
-        """
-        self._clear_content()
-       
-        tk.Label(self.main_content, text="📖 Study Templates",
-                font=('Helvetica', 24, 'bold'),
-                bg='#f5f5f5').pack(pady=20, anchor='w', padx=30)
-       
-        tk.Label(self.main_content, text="Structured note-taking methods for general education",
-                font=('Helvetica', 11), fg='#7f8c8d',
-                bg='#f5f5f5').pack(anchor='w', padx=30, pady=(0, 20))
-       
-        templates = [
-            ("Cornell Notes", "Two-column system with summary", "Cornell"),
-            ("Frayer Model", "Vocabulary and concept organizer", "Frayer"),
-            ("Main Idea & Details", "Topic breakdown structure", "MainIdea"),
-        ]
-       
-        for name, desc, key in templates:
-            card = ttk.Frame(self.main_content, style='Card.TFrame', padding=15)
-            card.pack(fill='x', padx=30, pady=8)
-           
-            tk.Label(card, text=name, font=('Helvetica', 13, 'bold'),
-                    bg='white').pack(anchor='w')
-            tk.Label(card, text=desc, font=('Helvetica', 10),
-                    fg='#7f8c8d', bg='white').pack(anchor='w', pady=5)
-           
-            tk.Button(card, text="Use Template →",
-                     command=lambda k=key: self.open_template(k),
-                     bg='#3498db', fg='white',
-                     relief='flat').pack(anchor='e')
-   
+    
     # ------------------------------------------------------------------------
     # PART 7: TEMPLATE SYSTEM
     # ------------------------------------------------------------------------

@@ -339,11 +339,28 @@ class CourseMateApp:
             tk.Label(card, text=f"Template: {note['template']}",
                     font=('Helvetica', 10, 'italic'),
                     fg='#3498db', bg='white').pack(anchor='w', pady=5)
-            
-            for field, value in note.get('data', {}).items():
-                if value:  # Only show fields with content
-                    field_frame = ttk.Frame(card)
-                    field_frame.pack(fill='x', pady=5)
+            tk.Label(
+                stats_frame,
+                text=f"📝 Total Notes: {len(course['notes'])}",
+                font=('Helvetica', 12),
+                bg=COLORS['card_bg']
+            ).pack(side='left', padx=10)
+            tk.Label(
+                stats_frame,
+                text=f"📋 Total Tasks: {len(course['tasks'])}",
+                font=('Helvetica', 12),
+                bg=COLORS['card_bg']
+            ).pack(side='left', padx=10)
+
+            # Notes section title
+            tk.Label(
+                self.main_content,
+                text="Notes",
+                font=('Helvetica', 16, 'bold'),
+                bg=COLORS['main_bg']
+            ).pack(anchor='w', padx=30, pady=(10, 10))
+
+            # If there are no notes, show a friendly message
                     
                     tk.Label(field_frame, text=f"{field}:",
                             font=('Helvetica', 10, 'bold'),
