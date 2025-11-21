@@ -43,24 +43,25 @@ class CourseMateApp:
     # Theme definitions (class attribute): multiple named palettes
     # You can add more palettes here; keys must match usages below.
     THEMES = {
-        'Muted Navy': {
-            'primary_dark': '#24323a',
-            'primary': '#34495e',
-            'accent': '#2d9cdb',
-            'background': '#f5f5f5',
-            'sidebar_button': '#34495e',
-            'sidebar_hover': '#3d5562',
+        'CourseMate Theme': {
+            'primary_dark': '#253241',
+            'primary': '#334a66',
+            'accent': '#4a90e2',
+            'background': '#f4f7fb',
+            'sidebar_button': '#334a66',
+            'sidebar_hover': '#405977',
             'sidebar_text': '#F4F4F4',
             'card_bg': '#e1e7ed',
             'success': '#27ae60',
             'info': '#3498db',
             'warning': '#ffe082',
-            'muted': '#95a5a6',
+            'muted': '#9aa6b1',
             'header_text': '#F4F4F4',
-            'main_text': '#0C2B4E',
-            'secondary_text': '#627488', 
+            'main_text': '#0b2740',
+            'secondary_text': '#8193a1', 
             'danger': '#e74c3c'
         },
+
         'Slate Gray': {
             'primary_dark': '#2b3438',
             'primary': '#3b4a4f',
@@ -97,28 +98,46 @@ class CourseMateApp:
             'secondary_text': '#8f9698', 
             'danger': '#e74c3c'
         },
-        'Soft Indigo': {
-            'primary_dark': '#253241',
-            'primary': '#334a66',
-            'accent': '#4a90e2',
-            'background': '#f4f7fb',
-            'sidebar_button': '#334a66',
-            'sidebar_hover': '#405977',
-            'sidebar_text': '#F4F4F4',
-            'card_bg': '#e1e7ed',
-            'success': '#27ae60',
-            'info': '#3498db',
-            'warning': '#ffe082',
-            'muted': '#9aa6b1',
-            'header_text': '#F4F4F4',
-            'main_text': '#0b2740',
-            'secondary_text': '#8193a1', 
-            'danger': '#e74c3c'
-        }
+        'Soft Pink': {
+            'primary_dark':   '#CC6F95',
+            'primary':        '#FF9BBE',
+            'accent':         '#FFB4CD',
+            'background':     '#F8F8F8',
+            'sidebar_button': '#FF9BBE',
+            'sidebar_hover':  '#E887AB',
+            'sidebar_text':   '#FFFFFF',
+            'card_bg':        '#FFFFFF',
+            'success':        '#7ACDA0',
+            'info':           '#A0D4FF',
+            'warning':        '#FFD28B',
+            'muted':          "#FFBBD3",
+            'header_text':    '#FFFFFF',
+            'main_text':      '#1A1A1A',
+            'secondary_text': "#F0C9D6",
+            'danger':         '#E57373',
+        },
+        'Baby Blue': {
+            'primary_dark':   '#6FAFE0',
+            'primary':        '#90C9FF',
+            'accent':         '#A8D7FF',
+            'background':     '#F8F8F8',
+            'sidebar_button': '#90C9FF',
+            'sidebar_hover':  '#7AB7EE',
+            'sidebar_text':   '#FFFFFF',
+            'card_bg':        '#FFFFFF',
+            'success':        '#7ACDA0',
+            'info':           '#90C9FF',
+            'warning':        '#FFD28B',
+            'muted':          "#C0DEFA",
+            'header_text':    '#FFFFFF',
+            'main_text':      '#1A1A1A',
+            'secondary_text': '#555555',
+            'danger':         '#E57373',
+        },
     }
 
     # Default class-level COLORS (initially use one theme)
-    COLORS = THEMES['Muted Navy']
+    COLORS = THEMES['CourseMate Theme']
 
     # ------------------------------------------------------------------------
     # PART 1: INITIALIZATION (Runs when app starts)
@@ -134,7 +153,7 @@ class CourseMateApp:
         self.root.geometry("1100x700")
         self.root.minsize(1000, 800)
         # Theme state (instance-level). Start with the class default.
-        self.theme_name = 'Muted Navy'
+        self.theme_name = 'CourseMate Theme'
         self.colors = CourseMateApp.COLORS.copy()
         # Width used by sidebar buttons and the header stats card so they align
         self.sidebar_button_width = 180
@@ -1017,7 +1036,7 @@ class CourseMateApp:
                 return
            
             if not title:
-                title = f"Note - {datetime.now().strftime("%Y-%m-%d %H:%M")}"
+                title = f"Note - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
            
             # Save note
             note = {
