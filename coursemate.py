@@ -1065,7 +1065,7 @@ class CourseMateApp:
         """
         dlg = tk.Toplevel(self.root)
         dlg.title("Select Theme")
-        dlg.geometry("320x220")
+        dlg.geometry("320x250")
         dlg.transient(self.root)
         dlg.grab_set()
 
