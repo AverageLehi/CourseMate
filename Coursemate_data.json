@@ -1,0 +1,17 @@
+{
+  "courses": {
+    "The world wide commotion": {
+      "notes": [],
+      "tasks": []
+    }
+  },
+  "tasks": [
+    "Bring soup"
+  ],
+  "completed_tasks": [
+    {
+      "task": "Bring adobo",
+      "completed_date": "2025-11-22 01:18:54"
+    }
+  ]
+}
