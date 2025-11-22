@@ -1,17 +1,13 @@
 {
-  "courses": {
-    "The world wide commotion": {
-      "notes": [],
-      "tasks": []
-    }
-  },
-  "tasks": [
-    "Bring soup"
-  ],
-  "completed_tasks": [
-    {
-      "task": "Bring adobo",
-      "completed_date": "2025-11-22 01:18:54"
-    }
-  ]
+  "courses": {},
+  "tasks": [],
+  "completed_tasks": [],
+  "unassigned_notes": [],
+  "settings": {
+    "theme": "CourseMate Theme",
+    "font_family": "Helvetica",
+    "font_size": "Normal",
+    "quotes": [],
+    "quote_timer": 30
+  }
 }
