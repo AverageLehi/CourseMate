@@ -1,5 +1,44 @@
 {
-  "courses": {},
+  "courses": {
+    "Mathematics In The Modern World": {
+      "notes": [
+        {
+          "title": "Title",
+          "content": "",
+          "created": "2025-11-23 16:42",
+          "notebook": null
+        }
+      ],
+      "tasks": [],
+      "code": "MAT 152",
+      "instructor": "David"
+    },
+    "test note": {
+      "notes": [
+        {
+          "title": "Song",
+          "content": "Title: The day dawn is breaking\n\nQuestion/Keyword\nHymn\n\nNotes\nVerse one \nVerse two\n\nSummary\nverse three",
+          "created": "2025-11-23 18:22",
+          "notebook": "Mathematics In The Modern World"
+        }
+      ],
+      "tasks": [],
+      "code": "",
+      "instructor": ""
+    },
+    "asdf": {
+      "notes": [],
+      "tasks": [],
+      "code": "",
+      "instructor": ""
+    },
+    "asdff": {
+      "notes": [],
+      "tasks": [],
+      "code": "",
+      "instructor": ""
+    }
+  },
   "tasks": [],
   "completed_tasks": [],
   "unassigned_notes": [],
