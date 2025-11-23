@@ -1,11 +1,5 @@
 {
   "courses": {
-    "asdf": {
-      "notes": [],
-      "tasks": [],
-      "code": "",
-      "instructor": ""
-    },
     "Introduction to IT": {
       "notes": [],
       "tasks": [],
@@ -25,7 +19,7 @@
   ],
   "settings": {
     "theme": "CourseMate Theme",
-    "font_family": "OpenDyslexic",
+    "font_family": "Open Sans",
     "font_size": "Normal",
     "quotes": [
       "Everyday is a new day for a wise man.",
@@ -38,7 +32,7 @@
     ],
     "quote_timer": 5,
     "custom_templates": {
-      "Lehi Weekly Planning": "Week:  \n\n Goals: \n-\n- \nPlans: \n-\n-"
+      "Lehi Weekly Planning": "Week:  \n\nGoals: \n-\n- \nPlans: \n-\n-"
     }
   }
 }
