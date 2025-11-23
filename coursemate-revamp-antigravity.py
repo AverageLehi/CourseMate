@@ -121,7 +121,7 @@ THEMES = {
 
 DEFAULT_SETTINGS = {
     "theme": "CourseMate Theme",
-    "font_family": "Helvetica",
+    "font_family": "Open Sans",
     "font_size": "Normal", # Normal, Large
     "quotes": [],
     "quote_timer": 30 # seconds
@@ -278,7 +278,7 @@ class CourseMateRevampApp(ctk.CTk):
         self.colors = THEMES.get(self.current_theme, THEMES['CourseMate Theme'])
         
         # Font State
-        self.font_family = self.data_manager.get_settings().get("font_family", "Helvetica")
+        self.font_family = self.data_manager.get_settings().get("font_family", "Open Sans")
         self.font_size_mode = self.data_manager.get_settings().get("font_size", "Normal")
         self.base_font_size = 14 if self.font_size_mode == "Normal" else 18
         
@@ -392,11 +392,11 @@ class CourseMateRevampApp(ctk.CTk):
         self.header_stats_frame.place(x=8, y=8)
 
         self.header_lbl_notebooks_count = ctk.CTkLabel(self.header_stats_frame, text="Notebooks: 0",
-                                   font=self.get_font(-2, "bold"), text_color=self.colors['header_text'])
+                                   font=self.get_font(-1, "bold"), text_color=self.colors['header_text'])
         self.header_lbl_notebooks_count.pack(anchor="w", padx=(5, 0))
 
         self.header_lbl_notes_count = ctk.CTkLabel(self.header_stats_frame, text="Total Notes: 0",
-                               font=self.get_font(-2, "bold"), text_color=self.colors['header_text'])
+                               font=self.get_font(-1, "bold"), text_color=self.colors['header_text'])
         self.header_lbl_notes_count.pack(anchor="w", padx=(5, 0))
 
         # Sidebar
@@ -498,12 +498,24 @@ class CourseMateRevampApp(ctk.CTk):
                 # Update header stats labels (if present)
                 if hasattr(self, 'header_lbl_notebooks_count'):
                     try:
-                        self.header_lbl_notebooks_count.configure(text_color=self.colors.get('header_text'))
+                        self.header_lbl_notebooks_count.configure(text_color=self.colors.get('header_text'), font=self.get_font(-2, "bold"))
                     except Exception:
                         pass
                 if hasattr(self, 'header_lbl_notes_count'):
                     try:
-                        self.header_lbl_notes_count.configure(text_color=self.colors.get('header_text'))
+                        self.header_lbl_notes_count.configure(text_color=self.colors.get('header_text'), font=self.get_font(-2, "bold"))
+                    except Exception:
+                        pass
+                        
+                # Update header title and slogan fonts
+                if hasattr(self, 'header_title_label') and self.header_title_label:
+                    try:
+                        self.header_title_label.configure(font=self.get_font(8, "bold"))
+                    except Exception:
+                        pass
+                if hasattr(self, 'header_slogan_label') and self.header_slogan_label:
+                    try:
+                        self.header_slogan_label.configure(font=self.get_font(0, "bold"))
                     except Exception:
                         pass
         except Exception:
@@ -751,648 +763,6 @@ class HomeView:
         templates = ["Select..."] + list(self.TEMPLATES.keys())
         self.template_dropdown = ctk.CTkOptionMenu(controls, variable=self.template_var, values=templates,
                        command=self.insert_template,
-                       fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
-                       text_color=self.colors.get('dropdown_text', 'white'), width=150)
-        self.template_dropdown.pack(side="left")
-        
-        # Save Button
-        ctk.CTkButton(controls, text="Save Note", command=self.save_note,
-                      fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=100).pack(side="right")
-                      
-        # Clear Button
-        ctk.CTkButton(controls, text="Clear", command=self.clear_write_area,
-                      fg_color=self.colors['danger'], hover_color='#c0392b', text_color="white", width=80).pack(side="right", padx=(0, 10))
-        
-        # Title Entry
-        self.title_entry = ctk.CTkEntry(self.write_frame, placeholder_text="Note Title (Required)", 
-                font=self.app.get_font(0, "bold"), height=40,
-                fg_color=self.colors['background'], text_color=self.colors['main_text'], border_width=0)
-        self.title_entry.pack(fill="x", padx=20, pady=(0, 10))
-
-        # Text Area
-        self.text_area = ctk.CTkTextbox(self.write_frame, font=self.app.get_font(0), 
-                fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                wrap="word", corner_radius=10)
-        self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-    def update_notebook_dropdown(self):
-        # Add bullets to notebook names and truncate
-        self.notebook_map = {} # Map display name -> full name
-        notebook_list = []
-        
-        for name in self.data_manager.get_notebooks().keys():
-            display_name = f"• {self.master.master.truncate_text(name)}"
-            notebook_list.append(display_name)
-            self.notebook_map[display_name] = name
-            
-        notebooks = ["+ Create new notebook...", "• Unassigned Notes"] + notebook_list
-        
-        if hasattr(self, 'notebook_dropdown'):
-            self.notebook_dropdown.configure(values=notebooks)
-            
-            current_val = self.notebook_var.get()
-            # Ensure current selection is valid format
-            if current_val not in notebooks:
-                # Try to find it with bullet/truncated
-                # This is tricky if we don't know the full name of current selection easily
-                # But usually we set it explicitly.
-                # Let's just default to Unassigned if invalid
-                self.notebook_var.set("• Unassigned Notes")
-        else:
-            self.notebook_dropdown = ctk.CTkOptionMenu(self.controls_frame, variable=self.notebook_var, values=notebooks,
-                                                       command=self.handle_notebook_selection,
-                                                       fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
-                                                       text_color=self.colors.get('dropdown_text', 'white'), width=180)
-            self.notebook_dropdown.pack(side="left", padx=(0, 20))
-
-    def _setup_notes_ui(self):
-        # Header
-        ctk.CTkLabel(self.notes_frame, text="Unassigned Notes", font=self.app.get_font(2, "bold"), 
-                 text_color=self.colors['main_text']).pack(pady=(20, 10), padx=20, anchor="w")
-        
-        # Search Bar
-        search_frame = ctk.CTkFrame(self.notes_frame, fg_color="transparent")
-        search_frame.pack(fill="x", padx=20, pady=(0, 10))
-        
-        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Search notes...", 
-                                         fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30)
-        self.search_entry.pack(side="left", fill="x", expand=True)
-        self.search_entry.bind("<KeyRelease>", self.filter_notes)
-        
-        # Filter Emoji
-        ctk.CTkLabel(search_frame, text="🔍", font=self.app.get_font(0), text_color=self.colors['secondary_text']).pack(side="right", padx=(5, 0))
-        
-        # Scrollable List
-        self.notes_list = ctk.CTkScrollableFrame(self.notes_frame, fg_color="transparent")
-        self.notes_list.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        self.refresh_notes_list()
-        
-    def filter_notes(self, event=None):
-        self.refresh_notes_list()
-
-    def insert_template(self, template_name):
-        if template_name in self.TEMPLATES:
-            content = self.TEMPLATES[template_name]
-            current_text = self.text_area.get("1.0", "end-1c")
-            
-            if len(current_text.strip()) > 0:
-                self.text_area.insert("end", "\n\n" + content)
-            else:
-                self.text_area.insert("1.0", content)
-            
-            # Reset dropdown
-            self.template_var.set("Select...")
-
-    def handle_notebook_selection(self, selection):
-        if selection == "+ Create new notebook...":
-            # Open dialog
-            CreateNotebookDialog(self.master, self.data_manager, self.colors, self.on_notebook_created)
-            # Reset dropdown temporarily until created or cancelled
-            self.notebook_var.set("• Unassigned Notes")
-
-    def on_notebook_created(self, new_notebook_name):
-        self.update_notebook_dropdown()
-        # Find the display name for this new notebook
-        display_name = f"• {self.master.master.truncate_text(new_notebook_name)}"
-        self.notebook_var.set(display_name)
-        # Also refresh sidebar
-        if isinstance(self.master.master, CourseMateRevampApp):
-             self.master.master.sidebar.refresh_notebooks_list()
-             self.master.master.sidebar.refresh_stats()
-
-    def clear_write_area(self):
-        if not self.text_area.get("1.0", "end-1c").strip() and not self.title_entry.get().strip():
-            return # Already empty
-            
-        if messagebox.askyesno("Clear Note", "Are you sure you want to clear the current note?"):
-            self.title_entry.delete(0, "end")
-            self.text_area.delete("1.0", "end")
-            self.notebook_var.set("• Unassigned Notes")
-            self.template_var.set("Select...")
-
-    def save_note(self):
-        title = self.title_entry.get().strip()
-        content = self.text_area.get("1.0", "end-1c").strip()
-        assigned_notebook = self.notebook_var.get()
-        
-        if not title:
-            messagebox.showwarning("Missing Title", "A title is required to save the note.")
-            return
-        
-        # Content can be empty if title is present? User said "No title, no saving". Didn't explicitly say content is required, but usually it is.
-        # Let's allow empty content if title is there, or maybe just warn.
-        # "The first three words of the text. If none, then leave it blank." implies content can be empty.
-        
-        # Resolve full notebook name
-        if assigned_notebook in self.notebook_map:
-            clean_notebook_name = self.notebook_map[assigned_notebook]
-        else:
-            clean_notebook_name = assigned_notebook.replace("• ", "") # Fallback
-            
-        # Check for duplicate title
-        if self.data_manager.note_exists(clean_notebook_name, title):
-            messagebox.showwarning("Duplicate Title", f"A note with the title '{title}' already exists in '{assigned_notebook}'.")
-            return
-        
-        note = {
-            "title": title,
-            "content": content,
-            "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "notebook": clean_notebook_name if assigned_notebook != "• Unassigned Notes" else None
-        }
-        
-        if assigned_notebook != "• Unassigned Notes" and assigned_notebook != "+ Create new notebook...":
-            self.data_manager.add_note_to_notebook(clean_notebook_name, note)
-            messagebox.showinfo("Saved", f"Note saved to '{clean_notebook_name}'")
-        else:
-            self.data_manager.add_unassigned_note(note)
-            self.refresh_notes_list()
-            
-        # Clear inputs
-        self.title_entry.delete(0, "end")
-        self.text_area.delete("1.0", "end")
-        self.notebook_var.set("• Unassigned Notes")
-        
-        # Refresh sidebar stats
-        if isinstance(self.master.master, CourseMateRevampApp):
-             self.master.master.sidebar.refresh_stats()
-
-    def refresh_notes_list(self):
-        for widget in self.notes_list.winfo_children():
-            widget.destroy()
-            
-        notes = self.data_manager.get_unassigned_notes()
-        search_term = self.search_entry.get().lower().strip() if hasattr(self, 'search_entry') else ""
-        
-        if not notes:
-            ctk.CTkLabel(self.notes_list, text="No unassigned notes", font=self.app.get_font(-1, "italic"), 
-                         text_color=self.colors['secondary_text']).pack(pady=20)
-            return
-
-        # Filter and Sort (Newest first)
-        filtered_notes = []
-        for note in reversed(notes):
-            if search_term:
-                if search_term in note.get('title', '').lower() or search_term in note.get('content', '').lower():
-                    filtered_notes.append(note)
-            else:
-                filtered_notes.append(note)
-                
-        if not filtered_notes and search_term:
-             ctk.CTkLabel(self.notes_list, text="No matches found", font=self.app.get_font(0, "italic"), 
-                         text_color=self.colors['secondary_text']).pack(pady=20)
-             return
-
-        for note in filtered_notes:
-            self._create_note_card(note)
-
-    def _create_note_card(self, note):
-        card = ctk.CTkFrame(self.notes_list, fg_color=self.colors['background'], corner_radius=8)
-        card.pack(fill="x", pady=5)
-        
-        # Click event to open note
-        card.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
-        
-        title = note.get('title', 'Untitled')
-        
-        # Date formatting: "Nov 23"
-        try:
-            created_dt = datetime.strptime(note.get('created', ''), "%Y-%m-%d %H:%M")
-            date_str = created_dt.strftime("%b %d")
-        except:
-            date_str = note.get('created', '').split(' ')[0]
-            
-        # Preview: First 3 words
-        content_words = note.get('content', '').split()
-        preview_text = " ".join(content_words[:3]) if content_words else ""
-        
-        # Row 1: Title
-        lbl_title = ctk.CTkLabel(card, text=title, font=self.app.get_font(-1, "bold"), text_color=self.colors['main_text'], anchor="w")
-        lbl_title.pack(fill="x", padx=10, pady=(5, 0))
-        lbl_title.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
-        
-        # Row 2: Date | Preview
-        meta_text = f"{date_str} | {preview_text}"
-        lbl_meta = ctk.CTkLabel(card, text=meta_text, font=self.app.get_font(-3), text_color=self.colors['secondary_text'], anchor="w")
-        lbl_meta.pack(fill="x", padx=10, pady=(0, 5))
-        lbl_meta.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
-
-    def open_note_window(self, note):
-        # Open note in new window
-        NoteWindow(self.master, note, self.colors, self.data_manager, self.refresh_notes_list)
-
-class NoteWindow(ctk.CTkToplevel):
-    def __init__(self, master, note, colors, data_manager, callback):
-        super().__init__(master)
-        self.title(note.get('title', 'Note'))
-        self.geometry("600x600")
-        
-        self.colors = colors
-        self.note = note
-        self.data_manager = data_manager
-        self.callback = callback
-        
-        # Make modal and stay on top
-        self.transient(master)
-        self.grab_set()
-        self.focus_force()
-        
-        # Use master's font helper if available
-        get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Helvetica", 14+s, w)
-        
-        # Title
-        # Title
-        self.title_label = ctk.CTkLabel(self, text=note.get('title', 'Untitled'), font=get_font(6, "bold"), text_color=colors['main_text'])
-        self.title_label.pack(pady=20, padx=20, anchor="w")
-        
-        # Content
-        self.text_area = ctk.CTkTextbox(self, font=get_font(-2), fg_color=colors['background'], text_color=colors['main_text'], wrap="word")
-        self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-        self.text_area.insert("1.0", note.get('content', ''))
-        
-        # Actions Frame
-        actions_frame = ctk.CTkFrame(self, fg_color="transparent")
-        actions_frame.pack(fill="x", padx=20, pady=20)
-        
-        # Save Button
-        ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white").pack(side="left", padx=(0, 10))
-        
-        # Delete Button
-        ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white").pack(side="right")
-        
-        # Rename Button
-        ctk.CTkButton(actions_frame, text="Rename Title", command=self.rename_note, fg_color=colors['info'], text_color="white").pack(side="right", padx=(0, 10))
-        
-        # Move to Notebook
-        move_frame = ctk.CTkFrame(self, fg_color="transparent")
-        move_frame.pack(fill="x", padx=20, pady=(0, 20))
-        
-        ctk.CTkLabel(move_frame, text="Move to:", font=get_font(-2), text_color=colors['main_text']).pack(side="left", padx=(0, 5))
-        
-        self.notebook_var = ctk.StringVar(value="Select Notebook...")
-        
-        self.notebook_map = {}
-        notebook_list = []
-        for name in self.data_manager.get_notebooks().keys():
-            display_name = master.master.truncate_text(name)
-            notebook_list.append(display_name)
-            self.notebook_map[display_name] = name
-            
-        # Include an option to move the note to Unassigned Notes
-        notebooks = ["• Unassigned Notes"] + notebook_list
-        if not notebook_list:
-            # If there are no notebooks, allow the user to select 'No Notebooks'
-            notebooks = ["• Unassigned Notes", "No Notebooks"]
-        # Map the unassigned display to a sentinel value (None)
-        self.notebook_map["• Unassigned Notes"] = None
-            
-        self.notebook_dropdown = ctk.CTkOptionMenu(move_frame, variable=self.notebook_var, values=notebooks,
-                       fg_color=colors.get('dropdown_bg', colors['main_text']), button_color=colors.get('primary'),
-                       text_color=colors.get('dropdown_text', 'white'))
-        self.notebook_dropdown.pack(side="left", padx=(0, 10))
-
-        # Move Button
-        ctk.CTkButton(move_frame, text="Move", command=self.move_note, width=60,
-                      fg_color=colors['info'], text_color="white").pack(side="left")
-
-    def rename_note(self):
-        # Use a CustomTkinter modal dialog instead of tkinter.simpledialog
-        dlg = ctk.CTkToplevel(self)
-        dlg.title("Rename Note")
-        dlg.geometry("420x160")
-        dlg.transient(self)
-        dlg.grab_set()
-
-        dlg.configure(fg_color=self.colors.get('background', '#fff'))
-
-        ctk.CTkLabel(dlg, text="Enter new title:", font=self.master.get_font(0, "bold"), text_color=self.colors['main_text']).pack(pady=(18, 6), padx=20, anchor='w')
-
-        entry = ctk.CTkEntry(dlg, width=360, placeholder_text="New title", fg_color=self.colors['card_bg'], text_color=self.colors['main_text'])
-        entry.insert(0, self.note.get('title', ''))
-        entry.pack(padx=20, pady=(0, 12))
-
-        result = {'value': None}
-
-        buttons = ctk.CTkFrame(dlg, fg_color="transparent")
-        buttons.pack(fill='x', padx=20, pady=(0, 12))
-
-        def on_ok():
-            val = entry.get().strip()
-            if val:
-                result['value'] = val
-                dlg.destroy()
-            else:
-                messagebox.showwarning("Required", "Title cannot be empty.")
-
-        def on_cancel():
-            dlg.destroy()
-
-        ctk.CTkButton(buttons, text="OK", width=80, command=on_ok, fg_color=self.colors['info']).pack(side='right', padx=(6,0))
-        ctk.CTkButton(buttons, text="Cancel", width=80, command=on_cancel, fg_color=self.colors['danger']).pack(side='right')
-
-        entry.focus()
-        dlg.wait_window()
-
-        new_title = result['value']
-        if new_title and new_title.strip():
-            self.note['title'] = new_title.strip()
-            # Update window title
-            try:
-                self.title(self.note['title'])
-            except Exception:
-                pass
-
-            # Update stored title label if present
-            if hasattr(self, 'title_label'):
-                self.title_label.configure(text=self.note['title'])
-
-            self.data_manager.save_data()
-            if self.callback:
-                self.callback()
-
-
-    def save_changes(self):
-        new_content = self.text_area.get("1.0", "end-1c")
-        self.note['content'] = new_content
-        self.data_manager.save_data()
-        messagebox.showinfo("Saved", "Note changes saved.")
-        if self.callback:
-            self.callback()
-
-    def delete_note(self):
-        if messagebox.askyesno("Delete Note", "Are you sure you want to delete this note? This cannot be undone."):
-            # Try to remove from unassigned first
-            unassigned = self.data_manager.get_unassigned_notes()
-            if self.note in unassigned:
-                unassigned.remove(self.note)
-                self.data_manager.save_data()
-                self.destroy()
-                if self.callback:
-                    self.callback()
-                # Refresh sidebar stats
-                if isinstance(self.master.master, CourseMateRevampApp):
-                     self.master.master.sidebar.refresh_stats()
-                return
-
-            # If not in unassigned, check all notebooks
-            for notebook_name, notebook_data in self.data_manager.get_notebooks().items():
-                if self.note in notebook_data.get("notes", []):
-                    notebook_data["notes"].remove(self.note)
-                    self.data_manager.save_data()
-                    self.destroy()
-                    if self.callback:
-                        self.callback()
-                    # Refresh sidebar stats
-                    if isinstance(self.master.master, CourseMateRevampApp):
-                         self.master.master.sidebar.refresh_stats()
-                    return
-            
-            messagebox.showerror("Error", "Could not find note to delete.")
-
-    def move_note(self):
-        # Move note to selected notebook (from the dropdown created in __init__)
-        target_display = self.notebook_var.get()
-        if not target_display or target_display in ("Select Notebook...", "No Notebooks"):
-            messagebox.showwarning("No Target", "Please select a target notebook to move this note.")
-            return
-
-        # Resolve the mapping; notebook_map maps display names to actual notebook
-        # names, and maps '• Unassigned Notes' to None.
-        target_notebook = self.notebook_map.get(target_display, target_display)
-
-        # Confirm action text for unassigned target
-        confirm_target = "Unassigned Notes" if target_notebook is None else target_notebook
-        if messagebox.askyesno("Move Note", f"Move this note to '{confirm_target}'?"):
-            # If target is Unassigned (None), remove from any notebook and add to unassigned
-            if target_notebook is None:
-                # If already unassigned, nothing to do
-                unassigned = self.data_manager.get_unassigned_notes()
-                if self.note in unassigned:
-                    messagebox.showinfo("No-op", "Note is already in Unassigned Notes.")
-                    return
-
-                # Remove from assigned notebook if present
-                removed = False
-                for notebook_name, notebook_data in self.data_manager.get_notebooks().items():
-                    if self.note in notebook_data.get("notes", []):
-                        notebook_data["notes"].remove(self.note)
-                        removed = True
-                        break
-
-                # Add to unassigned and save
-                self.data_manager.add_unassigned_note(self.note)
-                # If we removed from a notebook we already modified data in-memory; save
-                if not removed:
-                    # If it wasn't found in notebooks, ensure data is saved
-                    self.data_manager.save_data()
-
-                self.destroy()
-                if self.callback:
-                    self.callback()
-
-                # Refresh sidebar and main view
-                if isinstance(self.master.master, CourseMateRevampApp):
-                    try:
-                        self.master.master.sidebar.refresh_stats()
-                        self.master.master.sidebar.refresh_notebooks_list()
-                    except Exception:
-                        pass
-                return
-
-            # Otherwise, move to a named notebook
-            # Remove from unassigned if present
-            unassigned = self.data_manager.get_unassigned_notes()
-            if self.note in unassigned:
-                unassigned.remove(self.note)
-                self.data_manager.add_note_to_notebook(target_notebook, self.note)
-                self.data_manager.save_data()
-                self.destroy()
-                if self.callback:
-                    self.callback()
-                if isinstance(self.master.master, CourseMateRevampApp):
-                    try:
-                        self.master.master.sidebar.refresh_stats()
-                        self.master.master.sidebar.refresh_notebooks_list()
-                    except Exception:
-                        pass
-                return
-
-            # If not in unassigned, search notebooks to find and move
-            for notebook_name, notebook_data in self.data_manager.get_notebooks().items():
-                if self.note in notebook_data.get("notes", []):
-                    notebook_data["notes"].remove(self.note)
-                    self.data_manager.add_note_to_notebook(target_notebook, self.note)
-                    self.data_manager.save_data()
-                    self.destroy()
-                    if self.callback:
-                        self.callback()
-                    if isinstance(self.master.master, CourseMateRevampApp):
-                        try:
-                            self.master.master.sidebar.refresh_stats()
-                            self.master.master.sidebar.refresh_notebooks_list()
-                        except Exception:
-                            pass
-                    return
-
-            messagebox.showerror("Error", "Could not move note.")
-
-class CreateNotebookDialog(ctk.CTkToplevel):
-    def __init__(self, master, data_manager, colors, callback):
-        super().__init__(master)
-        self.title("Create New Notebook")
-        self.geometry("400x350")
-        self.data_manager = data_manager
-        self.colors = colors
-        self.callback = callback
-        
-        self.configure(fg_color=colors['background'])
-        
-        # Make modal and stay on top
-        self.transient(master)
-        self.grab_set()
-        self.focus_force()
-        
-        # Use master's font helper
-        get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Helvetica", 14+s, w)
-        
-        ctk.CTkLabel(self, text="New Notebook", font=get_font(4, "bold"), text_color=colors['main_text']).pack(pady=20)
-        
-        self.name_entry = ctk.CTkEntry(self, placeholder_text="Notebook Name (Required)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'])
-        self.name_entry.pack(pady=10)
-        # self.name_entry.focus() # Moved to after() call at end of init
-        
-        self.code_entry = ctk.CTkEntry(self, placeholder_text="Course Code (Optional)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'])
-        self.code_entry.pack(pady=10)
-        
-        self.instructor_entry = ctk.CTkEntry(self, placeholder_text="Instructor (Optional)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'])
-        self.instructor_entry.pack(pady=10)
-        
-        ctk.CTkButton(self, text="Create Notebook", command=self.create, fg_color=colors['success'], text_color="white").pack(pady=20)
-        
-        # Bind Enter key to all inputs and window
-        self.bind("<Return>", lambda e: self.create())
-        self.name_entry.bind("<Return>", lambda e: self.create())
-        self.code_entry.bind("<Return>", lambda e: self.create())
-        self.instructor_entry.bind("<Return>", lambda e: self.create())
-        
-        # Ensure focus lands on name entry after window is ready
-        self.after(100, self.name_entry.focus)
-        
-    def create(self):
-        name = self.name_entry.get().strip()
-        code = self.code_entry.get().strip()
-        instructor = self.instructor_entry.get().strip()
-        
-        if not name:
-            messagebox.showwarning("Required", "Notebook name is required.")
-            return
-            
-        if len(name) > 25:
-            messagebox.showwarning("Name Too Long", "Notebook name must be 25 characters or less.")
-            return
-            
-        if self.data_manager.add_notebook(name, code, instructor):
-            self.callback(name)
-            self.destroy()
-        else:
-            messagebox.showerror("Error", "Notebook already exists!")
-
-class NotebooksView:
-    def __init__(self, master, data_manager, colors, initial_notebook=None):
-        self.master = master
-        self.data_manager = data_manager
-        self.colors = colors
-        
-        self.container = ctk.CTkFrame(master, fg_color="transparent")
-        self.container.pack(fill="both", expand=True, padx=20, pady=20)
-        
-        if initial_notebook and initial_notebook in self.data_manager.get_notebooks():
-            self.show_notebook(initial_notebook)
-        else:
-            self.show_all_notebooks()
-
-    def show_all_notebooks(self):
-        # Clear container
-        for widget in self.container.winfo_children():
-            widget.destroy()
-            
-        # Header
-        header = ctk.CTkFrame(self.container, fg_color="transparent")
-        header.pack(fill="x", pady=(0, 20))
-        ctk.CTkLabel(header, text="Your Notebooks", font=self.master.get_font(6, "bold"), text_color=self.colors['main_text']).pack(side="left")
-        ctk.CTkButton(header, text="+ Create Notebook", command=self.add_notebook, fg_color=self.colors['success'], text_color="white").pack(side="right")
-        
-        # Grid Container
-        self.grid_frame = ctk.CTkScrollableFrame(self.container, fg_color="transparent")
-        self.grid_frame.pack(fill="both", expand=True)
-        
-        # Grid Layout Logic
-        notebooks = self.data_manager.get_notebooks()
-        if not notebooks:
-             ctk.CTkLabel(self.grid_frame, text="No notebooks yet. Create one to get started!", font=self.master.get_font(0), text_color=self.colors['secondary_text']).pack(pady=50)
-             return
-
-        # Configure grid columns
-        columns = 3
-        for i in range(columns):
-            self.grid_frame.grid_columnconfigure(i, weight=1)
-
-        for i, (name, data) in enumerate(notebooks.items()):
-            row = i // columns
-            col = i % columns
-            self._create_notebook_card(name, data, row, col)
-
-    def _create_notebook_card(self, name, data, row, col):
-        # Card Frame
-        card = ctk.CTkFrame(self.grid_frame, fg_color=self.colors['card_bg'], corner_radius=15)
-        card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
-        
-        # Make card clickable
-        for widget in [card]: # We'll bind children too if needed, but frame binding usually works if children don't block
-             widget.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
-             widget.bind("<Enter>", lambda e, c=card: c.configure(fg_color=self.colors.get('card_hover', self.colors['sidebar_hover'])))
-             widget.bind("<Leave>", lambda e, c=card: c.configure(fg_color=self.colors['card_bg']))
-
-        # Content
-        # Title
-        display_name = self.master.truncate_text(name, 20)
-        lbl_title = ctk.CTkLabel(card, text=display_name, font=self.master.get_font(2, "bold"), text_color=self.colors['main_text'])
-        lbl_title.pack(padx=15, pady=(15, 5), anchor="w")
-        lbl_title.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
-        
-        # Meta (Code | Instructor)
-        meta = []
-        if data.get("code"): meta.append(data["code"])
-        if data.get("instructor"): meta.append(data["instructor"])
-        meta_text = " • ".join(meta) if meta else "No details"
-        
-        lbl_meta = ctk.CTkLabel(card, text=meta_text, font=self.master.get_font(-2), text_color=self.colors['secondary_text'])
-        lbl_meta.pack(padx=15, pady=(0, 10), anchor="w")
-        lbl_meta.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
-        
-        # Stats (Note Count)
-        note_count = len(data.get("notes", []))
-        lbl_count = ctk.CTkLabel(card, text=f"{note_count} Notes", font=self.master.get_font(-2, "bold"), text_color=self.colors['accent'])
-        lbl_count.pack(padx=15, pady=(0, 15), anchor="w")
-        lbl_count.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
-
-        # Actions Row
-        actions_frame = ctk.CTkFrame(card, fg_color="transparent")
-        actions_frame.pack(fill="x", padx=10, pady=(0, 10))
-        
-        ctk.CTkButton(actions_frame, text="Rename", width=60, height=25, 
-                  command=lambda n=name: self.rename_notebook(n),
-                  fg_color=self.colors['info'], font=self.master.get_font(-3)).pack(side="left", padx=(0, 5), expand=True, fill="x")
-                      
-        ctk.CTkButton(actions_frame, text="Delete", width=60, height=25, 
-                  command=lambda n=name: self.delete_notebook(n),
-                  fg_color=self.colors['danger'], font=self.master.get_font(-3)).pack(side="right", padx=(5, 0), expand=True, fill="x")
-
-    def show_notebook(self, name):
-        self.selected_notebook = name
-        
-        # Clear container
         for widget in self.container.winfo_children():
             widget.destroy()
             
@@ -1402,16 +772,16 @@ class NotebooksView:
         
         # Back Button
         ctk.CTkButton(header, text="← Back", width=60, command=self.show_all_notebooks, 
-                      fg_color="transparent", text_color=self.colors['main_text'], hover_color=self.colors['sidebar_hover']).pack(side="left", padx=(0, 10))
+                      fg_color="transparent", text_color=self.colors['main_text'], hover_color=self.colors['sidebar_hover'], font=self.master.get_font(0)).pack(side="left", padx=(0, 10))
         
         # Title
         ctk.CTkLabel(header, text=name, font=self.master.get_font(6, "bold"), text_color=self.colors['main_text']).pack(side="left")
         
         # Actions
         ctk.CTkButton(header, text="Delete", width=80, command=self.delete_notebook,
-                      fg_color=self.colors['danger'], text_color="white").pack(side="right", padx=5)
+                      fg_color=self.colors['danger'], text_color="white", font=self.master.get_font(0)).pack(side="right", padx=5)
         ctk.CTkButton(header, text="Rename", width=80, command=self.rename_notebook,
-                      fg_color=self.colors['info'], text_color="white").pack(side="right", padx=5)
+                      fg_color=self.colors['info'], text_color="white", font=self.master.get_font(0)).pack(side="right", padx=5)
         
         # Notes List
         self.notes_area = ctk.CTkScrollableFrame(self.container, fg_color="transparent")
@@ -1557,99 +927,6 @@ class SettingsView:
         self._setup_templates_section()
 
     def _setup_appearance_section(self):
-        frame = ctk.CTkFrame(self.container, fg_color=self.colors['card_bg'], corner_radius=10)
-        frame.pack(fill="x", pady=10)
-        
-        ctk.CTkLabel(frame, text="Appearance", font=self.master.master.get_font(2, "bold"), text_color=self.colors['main_text']).pack(anchor="w", padx=20, pady=15)
-        
-        # Theme
-        row1 = ctk.CTkFrame(frame, fg_color="transparent")
-        row1.pack(fill="x", padx=20, pady=5)
-        ctk.CTkLabel(row1, text="Theme Color:", font=self.master.master.get_font(0), text_color=self.colors['main_text']).pack(side="left")
-        
-        self.theme_var = ctk.StringVar(value=self.settings.get("theme", "CourseMate Theme"))
-        themes = list(THEMES.keys())
-        # OptionMenu now previews theme on selection; use Apply to save
-        ctk.CTkOptionMenu(row1, variable=self.theme_var, values=themes, command=self.preview_theme,
-              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
-        ctk.CTkButton(row1, text="Apply", width=80, command=lambda: self.change_theme(self.theme_var.get()),
-                  fg_color=self.colors['info']).pack(side="right", padx=(8,8))
-        
-        # Font Family
-        row2 = ctk.CTkFrame(frame, fg_color="transparent")
-        row2.pack(fill="x", padx=20, pady=5)
-        ctk.CTkLabel(row2, text="Font Style:", font=self.master.master.get_font(0), text_color=self.colors['main_text']).pack(side="left")
-        
-        self.font_var = ctk.StringVar(value=self.settings.get("font_family", "Helvetica"))
-        fonts = ["Helvetica", "Times New Roman", "Courier New", "Alice", "Open Sans", "Roboto Mono"]
-        ctk.CTkOptionMenu(row2, variable=self.font_var, values=fonts, command=lambda v: self.update_setting("font_family", v),
-              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
-
-        # Font Size
-        row3 = ctk.CTkFrame(frame, fg_color="transparent")
-        row3.pack(fill="x", padx=20, pady=(5, 20))
-        ctk.CTkLabel(row3, text="Font Size:", font=self.master.master.get_font(0), text_color=self.colors['main_text']).pack(side="left")
-        
-        self.size_var = ctk.StringVar(value=self.settings.get("font_size", "Normal"))
-        sizes = ["Normal", "Large"]
-        ctk.CTkOptionMenu(row3, variable=self.size_var, values=sizes, command=lambda v: self.update_setting("font_size", v),
-              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
-
-        # Live Theme Preview
-        preview_container = ctk.CTkFrame(frame, fg_color="transparent")
-        preview_container.pack(fill="x", padx=20, pady=(8, 12))
-
-        self.preview_header = ctk.CTkFrame(preview_container, fg_color=self.colors['primary_dark'], corner_radius=6)
-        self.preview_header.pack(fill="x")
-        self.preview_header_label = ctk.CTkLabel(self.preview_header, text="Header Preview", font=self.master.master.get_font(-1, "bold"), text_color=self.colors['header_text'])
-        self.preview_header_label.pack(expand=True)
-
-        sample_row = ctk.CTkFrame(preview_container, fg_color="transparent")
-        sample_row.pack(fill="x", pady=(8,0))
-
-        self.preview_sidebar = ctk.CTkFrame(sample_row, fg_color=self.colors['primary'], width=120, height=80, corner_radius=6)
-        self.preview_sidebar.pack(side="left", padx=(0,8))
-        self.preview_sidebar_label = ctk.CTkLabel(self.preview_sidebar, text="Sidebar", font=self.master.master.get_font(-2), text_color=self.colors['sidebar_text'])
-        self.preview_sidebar_label.pack(expand=True)
-
-        self.preview_main = ctk.CTkFrame(sample_row, fg_color=self.colors['background'], corner_radius=6)
-        self.preview_main.pack(fill="x", expand=True)
-        self.preview_main_label = ctk.CTkLabel(self.preview_main, text="Main Area", font=self.master.master.get_font(-2), text_color=self.colors['main_text'])
-        self.preview_main_label.pack(padx=8, pady=8, anchor="w")
-
-        # Add additional sample controls to the preview so users can see how
-        # dropdowns, entries and buttons will look in the selected theme.
-        sample_controls = ctk.CTkFrame(self.preview_main, fg_color="transparent")
-        sample_controls.pack(fill="x", padx=8, pady=(6, 10))
-
-        # Sample label
-        self.preview_sample_label = ctk.CTkLabel(sample_controls, text="Sample Label:", font=self.master.master.get_font(-3), text_color=self.colors['secondary_text'])
-        self.preview_sample_label.pack(side="left", padx=(0, 8))
-
-        # Sample dropdown
-        self.preview_sample_var = ctk.StringVar(value="Option 1")
-        self.preview_sample_dropdown = ctk.CTkOptionMenu(sample_controls, variable=self.preview_sample_var, values=["Option 1", "Option 2"], width=140,
-                     fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
-                     text_color=self.colors.get('dropdown_text', 'white'))
-        self.preview_sample_dropdown.pack(side="left", padx=(0, 8))
-
-        # Sample entry
-        self.preview_sample_entry = ctk.CTkEntry(sample_controls, placeholder_text="Type...", width=180,
-                             fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
-        self.preview_sample_entry.pack(side="left", padx=(0, 8))
-
-        # Sample action buttons
-        btns = ctk.CTkFrame(self.preview_main, fg_color="transparent")
-        btns.pack(fill="x", padx=8, pady=(0, 8))
-        self.preview_sample_primary = ctk.CTkButton(btns, text="Primary", width=100, fg_color=self.colors.get('accent'), text_color="white")
-        self.preview_sample_primary.pack(side="left", padx=(0, 8))
-        self.preview_sample_secondary = ctk.CTkButton(btns, text="Secondary", width=100, fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
-        self.preview_sample_secondary.pack(side="left")
-
-        # Initialize preview with current theme selection
-        try:
-            self.preview_theme(self.theme_var.get())
-        except Exception:
             pass
 
     def _setup_inspiration_section(self):
@@ -1668,7 +945,7 @@ class SettingsView:
         self.timer_entry.pack(side="left", padx=10)
         
         ctk.CTkButton(row1, text="Save Timer", width=80, command=self.save_timer,
-                      fg_color=self.colors['info']).pack(side="left")
+                      fg_color=self.colors['info'], font=self.master.master.get_font(0)).pack(side="left")
         
         # Add Quote
         row2 = ctk.CTkFrame(frame, fg_color="transparent")
@@ -1679,7 +956,7 @@ class SettingsView:
         self.quote_entry.pack(fill="x", pady=5)
         
         ctk.CTkButton(row2, text="Add Quote", command=self.add_quote,
-                  fg_color=self.colors['success']).pack(anchor="e", pady=5)
+                  fg_color=self.colors['success'], font=self.master.master.get_font(0)).pack(anchor="e", pady=5)
 
         # Quotes display area (shows all saved quotes, default + user-added)
         self.quotes_display_frame = ctk.CTkFrame(frame, fg_color="transparent")
@@ -1702,7 +979,7 @@ class SettingsView:
         
         # Add Template Button
         ctk.CTkButton(frame, text="+ Create New Template", command=self.create_template,
-                      fg_color=self.colors['primary'], height=35).pack(padx=20, pady=20, fill="x")
+                      fg_color=self.colors['primary'], height=35, font=self.master.master.get_font(0)).pack(padx=20, pady=20, fill="x")
 
     def update_setting(self, key, value):
         self.data_manager.update_setting(key, value)
@@ -1815,9 +1092,9 @@ class SettingsView:
             actions.pack(side="right", padx=8, pady=6)
 
             # Edit button
-            ctk.CTkButton(actions, text="Edit", width=70, height=28, fg_color=self.colors['info'], command=lambda i=idx: self.edit_quote(i)).pack(side="left", padx=(0,6))
+            ctk.CTkButton(actions, text="Edit", width=70, height=28, fg_color=self.colors['info'], command=lambda i=idx: self.edit_quote(i), font=self.master.master.get_font(-3)).pack(side="left", padx=(0,6))
             # Delete button
-            ctk.CTkButton(actions, text="Delete", width=70, height=28, fg_color=self.colors['danger'], command=lambda i=idx: self.delete_quote(i)).pack(side="left")
+            ctk.CTkButton(actions, text="Delete", width=70, height=28, fg_color=self.colors['danger'], command=lambda i=idx: self.delete_quote(i), font=self.master.master.get_font(-3)).pack(side="left")
 
     def edit_quote(self, index):
         """Edit an existing quote by index."""
