@@ -121,7 +121,7 @@ THEMES = {
 
 DEFAULT_SETTINGS = {
     "theme": "CourseMate Theme",
-    "font_family": "Helvetica",
+    "font_family": "Open Sans",
     "font_size": "Normal", # Normal, Large
     "quotes": [],
     "quote_timer": 30 # seconds
@@ -278,7 +278,7 @@ class CourseMate(ctk.CTk):
         self.colors = THEMES.get(self.current_theme, THEMES['CourseMate Theme'])
         
         # Font State
-        self.font_family = self.data_manager.get_settings().get("font_family", "Helvetica")
+        self.font_family = self.data_manager.get_settings().get("font_family", "Open Sans")
         self.font_size_mode = self.data_manager.get_settings().get("font_size", "Normal")
         self.base_font_size = 14 if self.font_size_mode == "Normal" else 18
         
@@ -455,7 +455,7 @@ class CourseMate(ctk.CTk):
             self.colors = THEMES[theme_name]
         
         # Update Font
-        self.font_family = settings.get("font_family", "Helvetica")
+        self.font_family = settings.get("font_family", "Open Sans")
         self.font_size_mode = settings.get("font_size", "Normal")
         self.base_font_size = 14 if self.font_size_mode == "Normal" else 18
         
@@ -696,13 +696,13 @@ class Sidebar(ctk.CTkFrame):
 
 
 # Small modal dialog used for creating/editing templates
-class TemplateDialog(tk.Toplevel):
+class TemplateDialog(ctk.CTkToplevel):
     def __init__(self, master, title_init="", structure_init="", on_save=None, is_edit=False):
         super().__init__(master)
         self.on_save = on_save
         self.is_edit = is_edit
         self.title("Template Editor")
-        self.geometry("480x340")
+        self.geometry("480x400")
         self.resizable(False, False)
         try:
             self.transient(master)
@@ -710,20 +710,20 @@ class TemplateDialog(tk.Toplevel):
         except Exception:
             pass
 
-        tk.Label(self, text="Template title:", font=("Arial", 11, "bold")).pack(anchor="w", padx=16, pady=(12, 4))
-        self.title_entry = tk.Entry(self, font=("Arial", 11))
+        ctk.CTkLabel(self, text="Template title:", font=("Open Sans", 12, "bold")).pack(anchor="w", padx=16, pady=(12, 4))
+        self.title_entry = ctk.CTkEntry(self, font=("Open Sans", 12))
         self.title_entry.pack(fill="x", padx=16, pady=(0, 8))
         self.title_entry.insert(0, title_init)
 
-        tk.Label(self, text="Template structure:", font=("Arial", 11, "bold")).pack(anchor="w", padx=16, pady=(0, 4))
-        self.structure_text = tk.Text(self, font=("Arial", 11), height=10)
+        ctk.CTkLabel(self, text="Template structure:", font=("Open Sans", 12, "bold")).pack(anchor="w", padx=16, pady=(0, 4))
+        self.structure_text = ctk.CTkTextbox(self, font=("Open Sans", 12), height=200)
         self.structure_text.pack(fill="both", expand=True, padx=16, pady=(0, 8))
         self.structure_text.insert("1.0", structure_init)
 
-        btn_frame = tk.Frame(self)
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
         btn_frame.pack(fill="x", padx=16, pady=(0, 12))
-        tk.Button(btn_frame, text="Save", width=10, command=self._on_save).pack(side="right", padx=(6,0))
-        tk.Button(btn_frame, text="Cancel", width=10, command=self.destroy).pack(side="right")
+        ctk.CTkButton(btn_frame, text="Cancel", command=self.destroy).pack(side="right", padx=(8, 0))
+        ctk.CTkButton(btn_frame, text="Save", command=self._on_save).pack(side="right", padx=(0, 8))
 
     def _on_save(self):
         title = self.title_entry.get().strip()
@@ -737,6 +737,42 @@ class TemplateDialog(tk.Toplevel):
             except Exception as e:
                 messagebox.showerror("Error", str(e))
                 return
+        self.destroy()
+
+
+# Small modal dialog for input (replaces simpledialog.askstring)
+class InputDialog(ctk.CTkToplevel):
+    def __init__(self, master, title, prompt, initialvalue=""):
+        super().__init__(master)
+        self.title(title)
+        self.geometry("400x150")
+        self.resizable(False, False)
+        try:
+            self.transient(master)
+            self.grab_set()
+        except Exception:
+            pass
+
+        self.result = None
+
+        ctk.CTkLabel(self, text=prompt, font=("Open Sans", 11)).pack(pady=(20, 10), padx=20, anchor="w")
+
+        self.entry = ctk.CTkEntry(self, width=360)
+        self.entry.pack(padx=20, pady=(0, 20))
+        self.entry.insert(0, initialvalue)
+        self.entry.focus()
+
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        btn_frame.pack(fill="x", padx=20, pady=(0, 20))
+
+        ctk.CTkButton(btn_frame, text="OK", width=80, command=self._on_ok).pack(side="right", padx=(6, 0))
+        ctk.CTkButton(btn_frame, text="Cancel", width=80, command=self.destroy).pack(side="right")
+
+        self.entry.bind("<Return>", lambda e: self._on_ok())
+        self.bind("<Escape>", lambda e: self.destroy())
+
+    def _on_ok(self):
+        self.result = self.entry.get().strip()
         self.destroy()
 
 
@@ -1069,7 +1105,7 @@ class NoteWindow(ctk.CTkToplevel):
         self.focus_force()
         
         # Use master's font helper if available
-        get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Helvetica", 14+s, w)
+        get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Open Sans", 14+s, w)
         
         # Title
         # Title
@@ -1128,43 +1164,9 @@ class NoteWindow(ctk.CTkToplevel):
 
     def rename_note(self):
         # Use a CustomTkinter modal dialog instead of tkinter.simpledialog
-        dlg = ctk.CTkToplevel(self)
-        dlg.title("Rename Note")
-        dlg.geometry("420x160")
-        dlg.transient(self)
-        dlg.grab_set()
-
-        dlg.configure(fg_color=self.colors.get('background', '#fff'))
-
-        ctk.CTkLabel(dlg, text="Enter new title:", font=self.master.get_font(0, "bold"), text_color=self.colors['main_text']).pack(pady=(18, 6), padx=20, anchor='w')
-
-        entry = ctk.CTkEntry(dlg, width=360, placeholder_text="New title", fg_color=self.colors['card_bg'], text_color=self.colors['main_text'])
-        entry.insert(0, self.note.get('title', ''))
-        entry.pack(padx=20, pady=(0, 12))
-
-        result = {'value': None}
-
-        buttons = ctk.CTkFrame(dlg, fg_color="transparent")
-        buttons.pack(fill='x', padx=20, pady=(0, 12))
-
-        def on_ok():
-            val = entry.get().strip()
-            if val:
-                result['value'] = val
-                dlg.destroy()
-            else:
-                messagebox.showwarning("Required", "Title cannot be empty.")
-
-        def on_cancel():
-            dlg.destroy()
-
-        ctk.CTkButton(buttons, text="OK", width=80, command=on_ok, fg_color=self.colors['info']).pack(side='right', padx=(6,0))
-        ctk.CTkButton(buttons, text="Cancel", width=80, command=on_cancel, fg_color=self.colors['danger']).pack(side='right')
-
-        entry.focus()
-        dlg.wait_window()
-
-        new_title = result['value']
+        dlg = InputDialog(self, "Rename Note", "Enter new title:", initialvalue=self.note.get('title', ''))
+        self.wait_window(dlg)
+        new_title = dlg.result
         if new_title and new_title.strip():
             self.note['title'] = new_title.strip()
             # Update window title
@@ -1324,7 +1326,7 @@ class CreateNotebookDialog(ctk.CTkToplevel):
         self.focus_force()
         
         # Use master's font helper
-        get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Helvetica", 14+s, w)
+        get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Open Sans", 14+s, w)
         
         ctk.CTkLabel(self, text="New Notebook", font=get_font(4, "bold"), text_color=colors['main_text']).pack(pady=20)
         
@@ -1533,7 +1535,9 @@ class NotebooksView:
         target = notebook_name or self.selected_notebook
         if not target: return
         
-        new_name = simpledialog.askstring("Rename", "Enter new name:", initialvalue=target)
+        dlg = InputDialog(self.master, "Rename", "Enter new name:", initialvalue=target)
+        self.master.wait_window(dlg)
+        new_name = dlg.result
         if new_name and new_name.strip() and new_name != target:
             if len(new_name.strip()) > 25:
                 messagebox.showwarning("Name Too Long", "Notebook name must be 25 characters or less.")
@@ -1663,8 +1667,8 @@ class SettingsView:
         row2.pack(fill="x", padx=20, pady=5)
         ctk.CTkLabel(row2, text="Font Style:", font=self.master.master.get_font(0), text_color=self.colors['main_text']).pack(side="left")
         
-        self.font_var = ctk.StringVar(value=self.settings.get("font_family", "Helvetica"))
-        fonts = ["Helvetica", "Times New Roman", "Courier New", "Alice", "Open Sans", "Roboto Mono"]
+        self.font_var = ctk.StringVar(value=self.settings.get("font_family", "Open Sans"))
+        fonts = [ "Alice", "Courier New", "OpenDyslexic", "Open Sans"]
         ctk.CTkOptionMenu(row2, variable=self.font_var, values=fonts, command=lambda v: self.update_setting("font_family", v),
               fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
 
@@ -1934,7 +1938,9 @@ class SettingsView:
         if index < 0 or index >= len(quotes):
             return
         current = quotes[index]
-        new_val = simpledialog.askstring("Edit Quote", "Modify quote:", initialvalue=current)
+        dlg = InputDialog(self.master, "Edit Quote", "Modify quote:", initialvalue=current)
+        self.master.wait_window(dlg)
+        new_val = dlg.result
         if new_val is None:
             return
         new_val = new_val.strip()

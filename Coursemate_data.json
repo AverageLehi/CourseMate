@@ -31,8 +31,6 @@
       "If you want to change the world, change education."
     ],
     "quote_timer": 5,
-    "custom_templates": {
-      "Lehi Weekly Planning": "Week:  \n\nGoals: \n-\n- \nPlans: \n-\n-"
-    }
+    "custom_templates": {}
   }
 }
