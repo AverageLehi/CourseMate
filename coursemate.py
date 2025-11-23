@@ -487,9 +487,17 @@ class CourseMate(ctk.CTk):
                             self.header_title_label.configure(text_color=self.colors.get('header_text'))
                         except Exception:
                             pass
+                        try:
+                            self.header_title_label.configure(font=self.get_font(8, "bold"))
+                        except Exception:
+                            pass
                     if hasattr(self, 'header_slogan_label') and self.header_slogan_label:
                         try:
                             self.header_slogan_label.configure(text_color=self.colors.get('secondary_text'))
+                        except Exception:
+                            pass
+                        try:
+                            self.header_slogan_label.configure(font=self.get_font(0, "bold"))
                         except Exception:
                             pass
                 except Exception:
@@ -499,16 +507,22 @@ class CourseMate(ctk.CTk):
                 if hasattr(self, 'header_lbl_notebooks_count'):
                     try:
                         self.header_lbl_notebooks_count.configure(text_color=self.colors.get('header_text'))
+                        self.header_lbl_notebooks_count.configure(font=self.get_font(-2, "bold"))
                     except Exception:
                         pass
                 if hasattr(self, 'header_lbl_notes_count'):
                     try:
                         self.header_lbl_notes_count.configure(text_color=self.colors.get('header_text'))
+                        self.header_lbl_notes_count.configure(font=self.get_font(-2, "bold"))
                     except Exception:
                         pass
         except Exception:
             pass
         
+        self._update_header_fonts()
+        self._update_header_stat_fonts()
+        self._update_header_inspiration_controls()
+
         # Refresh Current View
         # Re-instantiate the current view class
         if isinstance(self.current_view, HomeView):
@@ -529,6 +543,31 @@ class CourseMate(ctk.CTk):
         if len(text) > limit:
             return text[:limit-3] + "..."
         return text
+
+    def _update_header_fonts(self):
+        try:
+            if hasattr(self, 'header_title_label') and self.header_title_label:
+                self.header_title_label.configure(font=self.get_font(8, "bold"))
+            if hasattr(self, 'header_slogan_label') and self.header_slogan_label:
+                self.header_slogan_label.configure(font=self.get_font(0, "bold"))
+        except Exception:
+            pass
+
+    def _update_header_stat_fonts(self):
+        try:
+            if hasattr(self, 'header_lbl_notebooks_count') and self.header_lbl_notebooks_count:
+                self.header_lbl_notebooks_count.configure(font=self.get_font(-2, "bold"))
+            if hasattr(self, 'header_lbl_notes_count') and self.header_lbl_notes_count:
+                self.header_lbl_notes_count.configure(font=self.get_font(-2, "bold"))
+        except Exception:
+            pass
+
+    def _update_header_inspiration_controls(self):
+        try:
+            if hasattr(self, 'inspire_label') and self.inspire_label:
+                self.inspire_label.configure(font=self.get_font(2, "bold"))
+        except Exception:
+            pass
 
 
 # ============================================================================
