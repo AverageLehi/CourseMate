@@ -558,8 +558,8 @@ class Sidebar(ctk.CTkFrame):
         # Notebooks Quick Access (Scrollable)
         ctk.CTkLabel(self, text="NOTEBOOKS", font=master.get_font(-2, "bold"), text_color=colors['secondary_text'], anchor="w").pack(fill="x", padx=10, pady=(6, 3))
 
-        self.notebooks_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", height=150)
-        self.notebooks_frame.pack(fill="x", padx=8, pady=3)
+        self.notebooks_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", height=200)
+        self.notebooks_frame.pack(fill="both", expand=True, padx=8, pady=3)
 
         # Inspiration Section (collapsible)
         self.inspiration_visible = True
@@ -649,11 +649,42 @@ class Sidebar(ctk.CTkFrame):
         else:
             for name in notebooks:
                 display_name = self.master.truncate_text(name)
-                btn = ctk.CTkButton(self.notebooks_frame, text=f"📓 {display_name}", 
-                                    command=lambda n=name: self.open_notebook(n),
-                                    fg_color=self.colors.get('sidebar_button', self.colors['primary']), hover_color=self.colors['sidebar_hover'], 
-                                    anchor="w", height=30, font=self.master.get_font(0), text_color=self.colors.get('sidebar_text', 'white'))
-                btn.pack(fill="x", pady=2, padx=4)
+                item_bg = self.colors.get('sidebar_button', self.colors['primary'])
+                hover_bg = self.colors.get('sidebar_hover', item_bg)
+
+                row = ctk.CTkFrame(
+                    self.notebooks_frame,
+                    fg_color=item_bg,
+                    corner_radius=8
+                )
+                row.pack(fill="x", padx=4, pady=2)
+                row.configure(cursor="hand2")
+
+                label = ctk.CTkLabel(
+                    row,
+                    text=f"📓 {display_name}",
+                    font=self.master.get_font(0),
+                    text_color=self.colors.get('sidebar_text', 'white'),
+                    anchor="w"
+                )
+                label.pack(fill="x", padx=12, pady=6)
+                label.configure(cursor="hand2")
+
+                def _open_notebook(event=None, notebook=name):
+                    self.open_notebook(notebook)
+
+                def _on_enter(event=None, frame=row, color=hover_bg):
+                    frame.configure(fg_color=color)
+
+                def _on_leave(event=None, frame=row, color=item_bg):
+                    frame.configure(fg_color=color)
+
+                row.bind("<Button-1>", _open_notebook)
+                label.bind("<Button-1>", _open_notebook)
+                row.bind("<Enter>", _on_enter)
+                row.bind("<Leave>", _on_leave)
+                label.bind("<Enter>", _on_enter)
+                label.bind("<Leave>", _on_leave)
 
     def open_notebook(self, name):
         # Switch to Notebooks view and select the notebook
@@ -1122,7 +1153,7 @@ class NoteWindow(ctk.CTkToplevel):
         self.title_entry.pack(fill="x", padx=20, pady=(20, 10))
         
         # Content
-        self.text_area = ctk.CTkTextbox(self, font=get_font(-2), fg_color=colors['background'], text_color=colors['main_text'], wrap="word")
+        self.text_area = ctk.CTkTextbox(self, font=get_font(0), fg_color=colors['background'], text_color=colors['main_text'], wrap="word")
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
         self.text_area.insert("1.0", note.get('content', ''))
         
@@ -1530,7 +1561,7 @@ class NotebooksView:
         
         # Preview
         preview = note.get('content', '')[:100].replace('\n', ' ') + "..."
-        ctk.CTkLabel(card, text=preview, font=self.get_font(-2), text_color=self.colors['main_text'], anchor="w").pack(fill="x", padx=15, pady=(0, 10))
+        ctk.CTkLabel(card, text=preview, font=self.get_font(-1), text_color=self.colors['main_text'], anchor="w").pack(fill="x", padx=15, pady=(0, 10))
         
         # Open Button
         ctk.CTkButton(card, text="Open Note", command=lambda: self.open_note(note),
