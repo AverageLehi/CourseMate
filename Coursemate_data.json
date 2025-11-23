@@ -1,59 +1,20 @@
 {
-  "courses": {
-    "Mathematics In The Modern World": {
-      "notes": [
-        {
-          "title": "Title",
-          "content": "",
-          "created": "2025-11-23 16:42",
-          "notebook": null
-        }
-      ],
-      "tasks": [],
-      "code": "MAT 152",
-      "instructor": "David"
-    },
-    "test note": {
-      "notes": [
-        {
-          "title": "Song",
-          "content": "Title: The day dawn is breaking\n\nQuestion/Keyword\nHymn\n\nNotes\nVerse one \nVerse two\n\nSummary\nverse three",
-          "created": "2025-11-23 18:22",
-          "notebook": "Mathematics In The Modern World"
-        }
-      ],
-      "tasks": [],
-      "code": "",
-      "instructor": ""
-    },
-    "asdf": {
-      "notes": [],
-      "tasks": [],
-      "code": "",
-      "instructor": ""
-    },
-    "asdff": {
-      "notes": [],
-      "tasks": [],
-      "code": "",
-      "instructor": ""
-    }
-  },
+  "courses": {},
   "tasks": [],
   "completed_tasks": [],
-  "unassigned_notes": [
-    {
-      "title": "This is test 1",
-      "content": "substance",
-      "created": "2025-11-23 19:21",
-      "notebook": null
-    }
-  ],
+  "unassigned_notes": [],
   "settings": {
-    "theme": "CourseMate Theme",
-    "font_family": "Helvetica",
+    "theme": "Baby Blue",
+    "font_family": "Open Sans",
     "font_size": "Normal",
-    "quotes": [],
-    "quote_timer": 30
+    "quotes": [
+      "Everyday is a new day for a wise man.",
+      "The only way to do great work is to love what you do. \u2014 Steve Jobs",
+      "Tell me and I forget. Teach me and I remember. Involve me and I learn. \u2014 Benjamin Franklin",
+      "Practice doesn't make perfect. Practice makes permanent. \u2014 Unknown",
+      "Strive for progress, not perfection. \u2014 Unknown",
+      "We are what we repeatedly do. Excellence, then, is not an act, but a habit. \u2014 Aristotle"
+    ],
+    "quote_timer": 5
   }
 }
