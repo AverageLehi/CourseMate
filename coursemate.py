@@ -567,6 +567,8 @@ class Sidebar(ctk.CTkFrame):
         self.inspiration_header.pack(side="bottom", fill="x", padx=8, pady=(3, 10))
 
         # Make the inspiration header button match nav buttons and center it
+        self._insp_icon_open = "▼"
+        self._insp_icon_closed = "▶"
         self.inspire_label = ctk.CTkButton(
             self.inspiration_header,
             text="Inspiration",
@@ -579,6 +581,7 @@ class Sidebar(ctk.CTkFrame):
         )
         # Fill horizontally so the button stretches across the sidebar
         self.inspire_label.pack(padx=2, pady=3, fill="x")
+        self._update_inspiration_toggle_label()
 
         self.inspiration_frame = ctk.CTkFrame(self, fg_color=colors['card_bg'], corner_radius=10)
         try:
@@ -722,6 +725,12 @@ class Sidebar(ctk.CTkFrame):
             except Exception:
                 pass
             self.inspiration_visible = True
+        self._update_inspiration_toggle_label()
+
+    def _update_inspiration_toggle_label(self):
+        icon = self._insp_icon_open if getattr(self, 'inspiration_visible', True) else self._insp_icon_closed
+        # Pad so the icon appears visually on the right side of the button text
+        self.inspire_label.configure(text=f"Inspiration   {icon}")
 
 
 
