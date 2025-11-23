@@ -4,7 +4,7 @@
       "notes": [
         {
           "title": "Communication Models Overview",
-          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills",
+          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills\n\n",
           "created": "2025-11-24 10:00"
         },
         {
@@ -148,8 +148,8 @@
     }
   ],
   "settings": {
-    "theme": "CourseMate Theme",
-    "font_family": "Open Sans",
+    "theme": "Dark Theme",
+    "font_family": "Alice",
     "font_size": "Normal",
     "quotes": [
       "Everyday is a new day for a wise man.",

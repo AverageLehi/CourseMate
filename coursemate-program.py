@@ -62,7 +62,7 @@ THEMES = {
         'sidebar_button': '#253244', 
         'sidebar_hover':  '#2d4358', 
         'sidebar_text':   '#ffffff',
-        'card_bg':        '#1a2631',  
+        'card_bg':        '#11161a',  
         'success':        '#27ae60',  
         'info':           '#3498db',  
         'warning':        '#cf6679',
@@ -73,7 +73,7 @@ THEMES = {
         'dropdown_bg':    '#253244',  
         'dropdown_text':  '#ffffff',
         'danger':         '#e74c3c',
-        'card_hover':     '#273544'
+        'card_hover':     '#243442'
     },
     'Baby Pink': {
         'primary_dark':     '#f8bbd0',
@@ -1107,19 +1107,10 @@ class NoteWindow(ctk.CTkToplevel):
         # Use master's font helper if available
         get_font = master.master.get_font if hasattr(master.master, 'get_font') else lambda s=0, w="normal": ("Open Sans", 14+s, w)
         
-        # Editable title
-        initial_title = note.get('title', '').strip() or 'Untitled'
-        self.title_var = tk.StringVar(value=initial_title)
-        self.title_entry = ctk.CTkEntry(
-            self,
-            textvariable=self.title_var,
-            font=get_font(2, "bold"),
-            fg_color=colors.get('card_bg', colors['background']),
-            text_color=colors['main_text'],
-            border_width=1,
-            border_color=colors.get('card_border', colors.get('muted', '#68707a'))
-        )
-        self.title_entry.pack(fill="x", padx=20, pady=(20, 10))
+        # Title
+        # Title
+        self.title_label = ctk.CTkLabel(self, text=note.get('title', 'Untitled'), font=get_font(6, "bold"), text_color=colors['main_text'])
+        self.title_label.pack(pady=20, padx=20, anchor="w")
         
         # Content
         self.text_area = ctk.CTkTextbox(self, font=get_font(-2), fg_color=colors['background'], text_color=colors['main_text'], wrap="word")
@@ -1135,6 +1126,9 @@ class NoteWindow(ctk.CTkToplevel):
         
         # Delete Button
         ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white").pack(side="right")
+        
+        # Rename Button
+        ctk.CTkButton(actions_frame, text="Rename Title", command=self.rename_note, fg_color=colors['info'], text_color="white").pack(side="right", padx=(0, 10))
         
         # Move to Notebook
         move_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -1168,21 +1162,33 @@ class NoteWindow(ctk.CTkToplevel):
         ctk.CTkButton(move_frame, text="Move", command=self.move_note, width=60,
                       fg_color=colors['info'], text_color="white").pack(side="left")
 
+    def rename_note(self):
+        # Use a CustomTkinter modal dialog instead of tkinter.simpledialog
+        dlg = InputDialog(self, "Rename Note", "Enter new title:", initialvalue=self.note.get('title', ''))
+        self.wait_window(dlg)
+        new_title = dlg.result
+        if new_title and new_title.strip():
+            self.note['title'] = new_title.strip()
+            # Update window title
+            try:
+                self.title(self.note['title'])
+            except Exception:
+                pass
+
+            # Update stored title label if present
+            if hasattr(self, 'title_label'):
+                self.title_label.configure(text=self.note['title'])
+
+            self.data_manager.save_data()
+            if self.callback:
+                self.callback()
+
+
     def save_changes(self):
-        new_title = self.title_var.get().strip() if hasattr(self, 'title_var') else self.note.get('title', '')
-        if not new_title:
-            new_title = 'Untitled'
-        self.note['title'] = new_title
-        try:
-            self.title(new_title)
-        except Exception:
-            pass
-        if hasattr(self, 'title_var'):
-            self.title_var.set(new_title)
         new_content = self.text_area.get("1.0", "end-1c")
         self.note['content'] = new_content
         self.data_manager.save_data()
-        messagebox.showinfo("Saved", "Title and content saved.")
+        messagebox.showinfo("Saved", "Note changes saved.")
         if self.callback:
             self.callback()
 
@@ -1507,15 +1513,8 @@ class NotebooksView:
                 self._create_note_item(note, i)
 
     def _create_note_item(self, note, index):
-        border_color = self.colors.get('card_border', self.colors.get('muted', '#68707a'))
-        card = ctk.CTkFrame(
-            self.notes_area,
-            fg_color=self.colors['card_bg'],
-            corner_radius=10,
-            border_width=1,
-            border_color=border_color
-        )
-        card.pack(fill="x", padx=10, pady=6)
+        card = ctk.CTkFrame(self.notes_area, fg_color=self.colors['card_bg'], corner_radius=10)
+        card.pack(fill="x", pady=5)
         
         # Header
         header = ctk.CTkFrame(card, fg_color="transparent")
