@@ -1,11 +1,31 @@
 {
-  "courses": {},
+  "courses": {
+    "asdf": {
+      "notes": [],
+      "tasks": [],
+      "code": "",
+      "instructor": ""
+    },
+    "Introduction to IT": {
+      "notes": [],
+      "tasks": [],
+      "code": "ITE 366",
+      "instructor": "Ma'am Grace"
+    }
+  },
   "tasks": [],
   "completed_tasks": [],
-  "unassigned_notes": [],
+  "unassigned_notes": [
+    {
+      "title": "To-Do List for Mock Defense",
+      "content": "1. Documentation\n2. Powerpoints",
+      "created": "2025-11-23 23:20",
+      "notebook": null
+    }
+  ],
   "settings": {
-    "theme": "Baby Blue",
-    "font_family": "Open Sans",
+    "theme": "CourseMate Theme",
+    "font_family": "Roboto Mono",
     "font_size": "Normal",
     "quotes": [
       "Everyday is a new day for a wise man.",
@@ -13,8 +33,12 @@
       "Tell me and I forget. Teach me and I remember. Involve me and I learn. \u2014 Benjamin Franklin",
       "Practice doesn't make perfect. Practice makes permanent. \u2014 Unknown",
       "Strive for progress, not perfection. \u2014 Unknown",
-      "We are what we repeatedly do. Excellence, then, is not an act, but a habit. \u2014 Aristotle"
+      "We are what we repeatedly do. Excellence, then, is not an act, but a habit. \u2014 Aristotle",
+      "If you want to change the world, change education."
     ],
-    "quote_timer": 5
+    "quote_timer": 5,
+    "custom_templates": {
+      "Lehi Weekly Planning": "Week:  \n\n Goals: \n-\n- \nPlans: \n-\n-"
+    }
   }
 }
