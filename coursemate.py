@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox
 import json
 from datetime import datetime
 from pathlib import Path
@@ -446,7 +446,8 @@ class CourseMateApp:
         Add a new course to your list.
         Prompts the user for a course name and saves it if valid.
         """
-        name = simpledialog.askstring("Add Course", "Enter course name:")
+        dialog = ctk.CTkInputDialog(text="Enter course name:", title="Add Course")
+        name = dialog.get_input()
        
         if name and name.strip():
             name = name.strip()
@@ -782,7 +783,8 @@ class CourseMateApp:
         """
         Quickly add a new task from the sidebar using a dialog box.
         """
-        task = simpledialog.askstring("Add To-Do", "Enter task:")
+        dialog = ctk.CTkInputDialog(text="Enter task:", title="Add To-Do")
+        task = dialog.get_input()
        
         if task and task.strip():
             self.tasks.append(task.strip())
