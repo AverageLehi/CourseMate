@@ -1,10 +1,140 @@
 {
   "courses": {
-    "Introduction to IT": {
-      "notes": [],
+    "Purposive Communication": {
+      "notes": [
+        {
+          "title": "Communication Models Overview",
+          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills",
+          "created": "2025-11-24 10:00"
+        },
+        {
+          "title": "Public Speaking Preparation",
+          "content": "Who:\n- Speaker (me)\n- Audience (classmates/professor)\n\nWhat:\n- Topic: Effective communication strategies\n- Purpose: Educate and engage\n\nWhen:\n- Date: Next class session\n- Time: 30 minutes\n\nWhere:\n- Classroom setting\n- Online platform\n\nWhy:\n- To improve presentation skills\n- Required for course\n\nHow:\n- Research topic thoroughly\n- Practice delivery\n- Use visual aids",
+          "created": "2025-11-24 11:00"
+        }
+      ],
+      "tasks": [],
+      "code": "GEN 001",
+      "instructor": "Prof. Sample"
+    },
+    "Understanding the Self": {
+      "notes": [
+        {
+          "title": "Self-Concept Development",
+          "content": "Definition:\n- Self-concept is how we perceive ourselves\n\nCharacteristics:\n- Shaped by experiences\n- Influences behavior\n- Can be positive or negative\n\nExamples:\n- Academic self-concept\n- Social self-concept\n\nNon-Examples:\n- Physical appearance only\n- Temporary moods",
+          "created": "2025-11-24 12:00"
+        },
+        {
+          "title": "Personal Growth Plan",
+          "content": "Week: Week 1\n\nGoals:\n- Improve time management\n- Build self-confidence\n- Learn new skills\n\nTasks:\n- Daily planning routine\n- Weekly reflection\n- Skill practice sessions\n\nReflection:\n- What went well this week?\n- Areas for improvement?\n\nNext Week Prep:\n- Set specific targets\n- Gather resources needed",
+          "created": "2025-11-24 13:00"
+        }
+      ],
+      "tasks": [],
+      "code": "GEN 002",
+      "instructor": "Prof. Sample"
+    },
+    "Ethics": {
+      "notes": [
+        {
+          "title": "Ethical Decision Making",
+          "content": "1. Understand the Problem:\n- Identify the ethical dilemma\n- Gather relevant facts\n- Consider stakeholders\n\n2. Devise a Plan:\n- Apply ethical theories\n- Consider consequences\n- Evaluate options\n\n3. Carry Out the Plan:\n- Implement chosen solution\n- Monitor outcomes\n\n4. Look Back:\n- Reflect on decision\n- Learn from experience\n- Adjust approach if needed",
+          "created": "2025-11-24 14:00"
+        },
+        {
+          "title": "Moral Philosophy Concepts",
+          "content": "Central Concept:\n- Ethics\n\nRelated Concept 1:\n- Deontology (duty-based)\n\nRelated Concept 2:\n- Utilitarianism (consequence-based)\n\nConnections:\n- Both aim for moral behavior\n- Different approaches to decision making\n- Complement each other in practice",
+          "created": "2025-11-24 15:00"
+        }
+      ],
+      "tasks": [],
+      "code": "GEN 006",
+      "instructor": "Prof. Sample"
+    },
+    "Physical Education": {
+      "notes": [
+        {
+          "title": "Fitness Components",
+          "content": "Main Idea: Physical fitness has multiple components that work together.\n\nDetail 1:\n- Cardiovascular endurance\n- Muscular strength\n- Muscular endurance\n\nDetail 2:\n- Flexibility\n- Body composition\n- Skill-related fitness\n\nDetail 3:\n- Importance of balance\n- Regular assessment needed\n\nSummary:\n- Holistic approach to fitness required",
+          "created": "2025-11-24 16:00"
+        },
+        {
+          "title": "Exercise Planning",
+          "content": "Week: Fitness Week 1\n\nGoals:\n- Improve cardiovascular health\n- Build muscle strength\n- Increase flexibility\n\nTasks:\n- 30 min cardio 3x/week\n- Strength training 2x/week\n- Stretching routine daily\n\nReflection:\n- Energy levels improved\n- Need better consistency\n\nNext Week Prep:\n- Track progress metrics\n- Adjust intensity as needed",
+          "created": "2025-11-24 17:00"
+        }
+      ],
+      "tasks": [],
+      "code": "PED 030",
+      "instructor": "Prof. Sample"
+    },
+    "Mathematics in the Modern World": {
+      "notes": [
+        {
+          "title": "Problem Solving with Math",
+          "content": "1. Understand the Problem:\n- Read carefully\n- Identify known/unknown\n- Draw diagram if helpful\n\n2. Devise a Plan:\n- Choose appropriate method\n- Consider multiple approaches\n\n3. Carry Out the Plan:\n- Execute calculations\n- Check work\n\n4. Look Back:\n- Verify solution\n- Consider alternative methods\n- Reflect on process",
+          "created": "2025-11-24 18:00"
+        },
+        {
+          "title": "Mathematical Concepts in Daily Life",
+          "content": "Central Concept:\n- Mathematics\n\nRelated Concept 1:\n- Statistics (data analysis)\n\nRelated Concept 2:\n- Probability (uncertainty)\n\nConnections:\n- Used in decision making\n- Essential for modern careers\n- Foundation for technology",
+          "created": "2025-11-24 19:00"
+        }
+      ],
+      "tasks": [],
+      "code": "MAT 152",
+      "instructor": "Prof. Sample"
+    },
+    "Computer Programming I Python": {
+      "notes": [
+        {
+          "title": "Python Variables and Data Types",
+          "content": "Definition:\n- Variables store data values\n\nCharacteristics:\n- Dynamic typing\n- Case-sensitive\n- Can change type\n\nExamples:\n- x = 5 (integer)\n- name = \"John\" (string)\n\nNon-Examples:\n- Starting with numbers\n- Using reserved keywords",
+          "created": "2025-11-24 20:00"
+        },
+        {
+          "title": "Programming Project Planning",
+          "content": "Week: Project Week 1\n\nGoals:\n- Learn Python basics\n- Complete first assignment\n- Understand debugging\n\nTasks:\n- Study variables and loops\n- Write sample programs\n- Test and debug code\n\nReflection:\n- Syntax is getting easier\n- Need more practice with logic\n\nNext Week Prep:\n- Review functions\n- Plan next project",
+          "created": "2025-11-24 21:00"
+        }
+      ],
+      "tasks": [],
+      "code": "ITE 260",
+      "instructor": "Prof. Sample"
+    },
+    "Introduction to Computing": {
+      "notes": [
+        {
+          "title": "Computer Systems Overview",
+          "content": "Main Idea: Computer systems consist of hardware and software working together.\n\nDetail 1:\n- Hardware components\n- Input/output devices\n- Storage systems\n\nDetail 2:\n- Operating systems\n- Application software\n- System software\n\nDetail 3:\n- Network connectivity\n- Security considerations\n\nSummary:\n- Understanding components enables better use",
+          "created": "2025-11-24 22:00"
+        },
+        {
+          "title": "Computing Ethics Discussion",
+          "content": "Who:\n- Students and instructor\n- Technology users\n\nWhat:\n- Digital responsibility\n- Privacy concerns\n\nWhen:\n- Throughout the course\n- In assignments\n\nWhere:\n- Classroom discussions\n- Online forums\n\nWhy:\n- Prevent misuse\n- Promote responsible computing\n\nHow:\n- Follow codes of conduct\n- Respect intellectual property\n- Protect personal data",
+          "created": "2025-11-24 23:00"
+        }
+      ],
       "tasks": [],
       "code": "ITE 366",
-      "instructor": "Ma'am Grace"
+      "instructor": "Prof. Sample"
+    },
+    "Civic Welfare Training Service I": {
+      "notes": [
+        {
+          "title": "Community Service Planning",
+          "content": "1. Understand the Problem:\n- Identify community needs\n- Assess available resources\n- Consider participant skills\n\n2. Devise a Plan:\n- Select appropriate project\n- Create timeline\n- Assign responsibilities\n\n3. Carry Out the Plan:\n- Execute service activities\n- Monitor progress\n- Adapt as needed\n\n4. Look Back:\n- Evaluate impact\n- Document lessons learned\n- Plan future improvements",
+          "created": "2025-11-25 00:00"
+        },
+        {
+          "title": "NSTP Program Components",
+          "content": "Central Concept:\n- Civic Welfare\n\nRelated Concept 1:\n- Community Development\n\nRelated Concept 2:\n- Social Responsibility\n\nConnections:\n- Builds citizenship skills\n- Addresses community needs\n- Fosters leadership development",
+          "created": "2025-11-25 01:00"
+        }
+      ],
+      "tasks": [],
+      "code": "NSTP",
+      "instructor": "Prof. Sample"
     }
   },
   "tasks": [],
@@ -31,6 +161,8 @@
       "If you want to change the world, change education."
     ],
     "quote_timer": 5,
-    "custom_templates": {}
+    "custom_templates": {
+      "Weekly Planning": "Week: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- "
+    }
   }
 }
