@@ -41,7 +41,14 @@
   },
   "tasks": [],
   "completed_tasks": [],
-  "unassigned_notes": [],
+  "unassigned_notes": [
+    {
+      "title": "This is test 1",
+      "content": "substance",
+      "created": "2025-11-23 19:21",
+      "notebook": null
+    }
+  ],
   "settings": {
     "theme": "CourseMate Theme",
     "font_family": "Helvetica",
