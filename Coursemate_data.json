@@ -1,11 +1,13 @@
 {
   "courses": {
-    "Purposive Communication": {
+    "GEN 001": {
+      "name": "Purposive Communication",
       "notes": [
         {
           "title": "Communication Models Overview",
           "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\nasdfghjk\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills\n\n",
-          "created": "2025-11-24 10:00"
+          "created": "2025-11-24 10:00",
+          "modified": "November 26, 2025 | 02:34AM"
         },
         {
           "title": "Public Speaking Preparation",
@@ -17,12 +19,13 @@
       "code": "GEN 001",
       "instructor": "Prof. Sample"
     },
-    "Understanding the Self": {
+    "GEN 002": {
       "notes": [
         {
           "title": "Self-Concept Development",
-          "content": "Definition:\n- Self-concept is how we perceive ourselves\n\nCharacteristics:\n- Shaped by experiences\n- Influences behavior\n- Can be positive or negative\n\nExamples:\n- Academic self-concept\n- Social self-concept\n\nNon-Examples:\n- Physical appearance only\n- Temporary moods",
-          "created": "2025-11-24 12:00"
+          "content": "Definition:\n- Self-concept is how we perceive ourselves\n\nCharacteristics:\n- Shaped by experiences\n- Influences behavior\n- Can be positive or negative\n\nExamples:\n- Academic self-concept\n- Social self-concept\n\nNon-Examples:\n- Physical appearance only\n- Temporary moods\n\n.",
+          "created": "2025-11-24 12:00",
+          "modified": "November 26, 2025 | 02:21AM"
         },
         {
           "title": "Personal Growth Plan",
@@ -32,26 +35,10 @@
       ],
       "tasks": [],
       "code": "GEN 002",
-      "instructor": "Prof. Sample"
+      "instructor": "Prof. Sample",
+      "name": "Understanding the Self"
     },
-    "Ethics": {
-      "notes": [
-        {
-          "title": "Ethical Decision Making",
-          "content": "1. Understand the Problem:\n- Identify the ethical dilemma\n- Gather relevant facts\n- Consider stakeholders\n\n2. Devise a Plan:\n- Apply ethical theories\n- Consider consequences\n- Evaluate options\n\n3. Carry Out the Plan:\n- Implement chosen solution\n- Monitor outcomes\n\n4. Look Back:\n- Reflect on decision\n- Learn from experience\n- Adjust approach if needed",
-          "created": "2025-11-24 14:00"
-        },
-        {
-          "title": "Moral Philosophy Concepts",
-          "content": "Central Concept:\n- Ethics\n\nRelated Concept 1:\n- Deontology (duty-based)\n\nRelated Concept 2:\n- Utilitarianism (consequence-based)\n\nConnections:\n- Both aim for moral behavior\n- Different approaches to decision making\n- Complement each other in practice",
-          "created": "2025-11-24 15:00"
-        }
-      ],
-      "tasks": [],
-      "code": "GEN 006",
-      "instructor": "Prof. Sample"
-    },
-    "Physical Education": {
+    "PED 030": {
       "notes": [
         {
           "title": "Fitness Components",
@@ -62,13 +49,24 @@
           "title": "Exercise Planning",
           "content": "Week: Fitness Week 1\n\nGoals:\n- Improve cardiovascular health\n- Build muscle strength\n- Increase flexibility\n\nTasks:\n- 30 min cardio 3x/week\n- Strength training 2x/week\n- Stretching routine daily\n\nReflection:\n- Energy levels improved\n- Need better consistency\n\nNext Week Prep:\n- Track progress metrics\n- Adjust intensity as needed",
           "created": "2025-11-24 17:00"
+        },
+        {
+          "title": "Quiz",
+          "content": "Module 6 and 7",
+          "tags": [
+            "#circuit training",
+            "#exercise"
+          ],
+          "created": "November 26, 2025 | 02:35AM",
+          "notebook": "Physical Education"
         }
       ],
       "tasks": [],
       "code": "PED 030",
-      "instructor": "Prof. Sample"
+      "instructor": "Prof. Sample",
+      "name": "Physical Education"
     },
-    "Mathematics in the Modern World": {
+    "MAT 152": {
       "notes": [
         {
           "title": "Problem Solving with Math",
@@ -83,9 +81,10 @@
       ],
       "tasks": [],
       "code": "MAT 152",
-      "instructor": "Prof. Sample"
+      "instructor": "Prof. Sample",
+      "name": "Mathematics in the Modern World"
     },
-    "Computer Programming I Python": {
+    "ITE 260": {
       "notes": [
         {
           "title": "Python Variables and Data Types",
@@ -100,9 +99,10 @@
       ],
       "tasks": [],
       "code": "ITE 260",
-      "instructor": "Prof. Sample"
+      "instructor": "Prof. Sample",
+      "name": "Computer Programming I Python"
     },
-    "Introduction to Computing": {
+    "ITE 366": {
       "notes": [
         {
           "title": "Computer Systems Overview",
@@ -117,30 +117,8 @@
       ],
       "tasks": [],
       "code": "ITE 366",
-      "instructor": "Prof. Sample"
-    },
-    "Civic Welfare Training Service I": {
-      "notes": [
-        {
-          "title": "Community Service Planning",
-          "content": "1. Understand the Problem:\n- Identify community needs\n- Assess available resources\n- Consider participant skills\n\n2. Devise a Plan:\n- Select appropriate project\n- Create timeline\n- Assign responsibilities\n\n3. Carry Out the Plan:\n- Execute service activities\n- Monitor progress\n- Adapt as needed\n\n4. Look Back:\n- Evaluate impact\n- Document lessons learned\n- Plan future improvements",
-          "created": "2025-11-25 00:00"
-        },
-        {
-          "title": "NSTP Program Components",
-          "content": "Central Concept:\n- Civic Welfare\n\nRelated Concept 1:\n- Community Development\n\nRelated Concept 2:\n- Social Responsibility\n\nConnections:\n- Builds citizenship skills\n- Addresses community needs\n- Fosters leadership development",
-          "created": "2025-11-25 01:00"
-        }
-      ],
-      "tasks": [],
-      "code": "NSTP",
-      "instructor": "Prof. Sample"
-    },
-    "Lehi Notes": {
-      "notes": [],
-      "tasks": [],
-      "code": "",
-      "instructor": ""
+      "instructor": "Prof. Sample",
+      "name": "Introduction to Computing"
     }
   },
   "tasks": [],
@@ -151,17 +129,11 @@
       "content": "1. Documentation\n2. Powerpoints",
       "created": "2025-11-23 23:20",
       "notebook": null
-    },
-    {
-      "title": "title",
-      "content": "Write here whatever you want",
-      "created": "2025-11-25 14:48",
-      "notebook": null
     }
   ],
   "settings": {
-    "theme": "Baby Blue",
-    "font_family": "Courier New",
+    "theme": "CourseMate Theme",
+    "font_family": "Open Sans",
     "font_size": "Normal",
     "quotes": [
       "Everyday is a new day for a wise man.",
@@ -173,7 +145,16 @@
       "If you want to change the world, change education."
     ],
     "quote_timer": 120,
-    "custom_templates": {
+    "custom_templates": {},
+    "study_templates": {
+      "Modified Frayer Model": "Definition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-"
+    },
+    "additional_templates": {
+      "Daily Planner": "Date: \n\nTop 3 Priorities:\n1. \n2. \n3. \n\nSchedule (Hour | Task):\n08:00 - \n09:00 - \n10:00 - \n11:00 - \n12:00 - \n13:00 - \n14:00 - \n15:00 - \n16:00 - \n17:00 - \n\nTasks:\n- [ ] \n- [ ] \n- [ ] \n\nNotes:\n- ",
+      "Weekly Overview": "Week Of: \n\nGoals:\n- \n- \n- \n\nMon:\nFocus: \nTasks: - [ ] \n\nTue:\nFocus: \nTasks: - [ ] \n\nWed:\nFocus: \nTasks: - [ ] \n\nThu:\nFocus: \nTasks: - [ ] \n\nFri:\nFocus: \nTasks: - [ ] \n\nWeekend Notes:\n- ",
+      "Time Block Grid": "Date: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- ",
+      "Assignment Tracker": "Course: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- ",
+      "Habit Tracker": "Month: \nHabit: \n\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |       |       |\n| 2   |       |       |\n| 3   |       |       |\n| 4   |       |       |\n| 5   |       |       |\n| 6   |       |       |\n| 7   |       |       |\n| 8   |       |       |\n| 9   |       |       |\n| 10  |       |       |\n| 11  |       |       |\n| 12  |       |       |\n| 13  |       |       |\n| 14  |       |       |\n| 15  |       |       |\n| 16  |       |       |\n| 17  |       |       |\n| 18  |       |       |\n| 19  |       |       |\n| 20  |       |       |\n| 21  |       |       |\n| 22  |       |       |\n| 23  |       |       |\n| 24  |       |       |\n| 25  |       |       |\n| 26  |       |       |\n| 27  |       |       |\n| 28  |       |       |\n| 29  |       |       |\n| 30  |       |       |\n| 31  |       |       |\n\nReflection:\n- ",
       "Weekly Planning": "Week: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- "
     }
   }
