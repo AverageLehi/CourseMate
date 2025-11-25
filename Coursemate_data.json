@@ -4,7 +4,7 @@
       "notes": [
         {
           "title": "Communication Models Overview",
-          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills\n\n",
+          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\nasdfghjk\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills\n\n",
           "created": "2025-11-24 10:00"
         },
         {
@@ -135,6 +135,12 @@
       "tasks": [],
       "code": "NSTP",
       "instructor": "Prof. Sample"
+    },
+    "Lehi Notes": {
+      "notes": [],
+      "tasks": [],
+      "code": "",
+      "instructor": ""
     }
   },
   "tasks": [],
@@ -145,12 +151,18 @@
       "content": "1. Documentation\n2. Powerpoints",
       "created": "2025-11-23 23:20",
       "notebook": null
+    },
+    {
+      "title": "title",
+      "content": "Write here whatever you want",
+      "created": "2025-11-25 14:48",
+      "notebook": null
     }
   ],
   "settings": {
-    "theme": "Dark Theme",
-    "font_family": "OpenDyslexic",
-    "font_size": "Large",
+    "theme": "Baby Blue",
+    "font_family": "Courier New",
+    "font_size": "Normal",
     "quotes": [
       "Everyday is a new day for a wise man.",
       "The only way to do great work is to love what you do. \u2014 Steve Jobs",
@@ -160,7 +172,7 @@
       "We are what we repeatedly do. Excellence, then, is not an act, but a habit. \u2014 Aristotle",
       "If you want to change the world, change education."
     ],
-    "quote_timer": 5,
+    "quote_timer": 120,
     "custom_templates": {
       "Weekly Planning": "Week: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- "
     }

@@ -1,0 +1,7 @@
+1. add template 
+2. change apply color + make it the preview for changing theme
+3. the notebooks in the dropdown of the view_notes are hard to view. Maybe a new window prompting the user to
+select a notebook and a move icon on every notebook to select it as the destination
+
+4. Make the view note rounded and add a coursemate theme as the border of the view_note window
+5. Make the colors of each theme uniform accordingly.

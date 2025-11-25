@@ -29,7 +29,10 @@ THEMES = {
         'main_text':        '#0b2740',
         'secondary_text':   "#a2b6c4",
         'dropdown_bg':      '#253241',
-        'dropdown_text':    '#F4F4F4', 
+        'dropdown_text':    '#F4F4F4',
+        'button_primary':   '#334a66',
+        'button_text':      '#ffffff',
+        'card_border':      '#c2ccd6',
         'danger':           '#e74c3c',
         'card_hover':       '#cfd8e1'
     },
@@ -51,6 +54,9 @@ THEMES = {
         'secondary_text':   '#6b7280',
         'dropdown_bg':      '#0b2740',
         'dropdown_text':    '#ffffff',
+        'button_primary':   '#1976d2',
+        'button_text':      '#ffffff',
+        'card_border':      '#e0e0e0',
         'danger':           '#f44336',
         'card_hover':       '#eeeeee'
     },
@@ -72,6 +78,9 @@ THEMES = {
         'secondary_text': '#a2b6c4',  
         'dropdown_bg':    '#253244',  
         'dropdown_text':  '#ffffff',
+        'button_primary': '#3f7fbf',
+        'button_text':    '#ffffff',
+        'card_border':    '#2d4358',
         'danger':         '#e74c3c',
         'card_hover':     '#273544'
     },
@@ -93,6 +102,9 @@ THEMES = {
         'secondary_text':   '#7b1e5f',
         'dropdown_bg':      '#0b2740',
         'dropdown_text':    '#ffffff',
+        'button_primary':   '#d81b60',
+        'button_text':      '#ffffff',
+        'card_border':      '#f8bbd0',
         'danger':           '#ef5350',
         'card_hover':       '#ffcdd2'
     },
@@ -114,6 +126,10 @@ THEMES = {
         'secondary_text':   '#2563a8',
         'dropdown_bg':      '#0b2740',
         'dropdown_text':    '#ffffff',
+        'dp_button_color':  "#ffffff",
+        'button_primary':   '#0277bd',
+        'button_text':      '#ffffff',
+        'card_border':      '#b3e5fc',
         'danger':           '#ef5350',
         'card_hover':       '#bbdefb'
     }
@@ -366,7 +382,10 @@ class CourseMate(ctk.CTk):
         self.main_area = None
         
         self._init_ui()
-        self.show_home() # Default view
+        #Deafult view
+        self.show_settings()
+        #self.show_home() 
+        # # Default view
 
     def _init_ui(self):
         # Header (top, spans sidebar + main area)
@@ -429,16 +448,26 @@ class CourseMate(ctk.CTk):
         if not os.path.exists(font_dir):
             return
 
-        # Windows Font Loading
-        gdi32 = ctypes.windll.gdi32
-        for font_file in os.listdir(font_dir):
-            if font_file.lower().endswith((".ttf", ".otf")):
-                font_path = os.path.join(font_dir, font_file)
-                ret = gdi32.AddFontResourceExW(font_path, 0x10, 0) # FR_PRIVATE = 0x10
-                if ret == 0:
-                    print(f"Failed to load font: {font_file}")
-                else:
-                    print(f"Loaded font: {font_file}")
+        # Platform-specific font loading
+        import platform
+        system = platform.system()
+        
+        if system == "Windows":
+            try:
+                gdi32 = ctypes.windll.gdi32
+                for font_file in os.listdir(font_dir):
+                    if font_file.lower().endswith((".ttf", ".otf")):
+                        font_path = os.path.join(font_dir, font_file)
+                        ret = gdi32.AddFontResourceExW(font_path, 0x10, 0) # FR_PRIVATE = 0x10
+                        if ret == 0:
+                            print(f"Failed to load font: {font_file}")
+                        else:
+                            print(f"Loaded font: {font_file}")
+            except Exception as e:
+                print(f"Font loading error: {e}")
+        else:
+            # On Linux/Mac, fonts need to be installed system-wide or tkinter uses system fonts
+            print(f"Custom font loading not implemented for {system}. Using system fonts.")
 
     def get_font(self, size_offset=0, weight="normal", slant="roman"):
         # Helper to get font tuple
@@ -537,7 +566,7 @@ class CourseMate(ctk.CTk):
     def apply_theme(self, theme_name):
         # Deprecated, use apply_settings, but kept for compatibility if needed
         self.data_manager.update_setting("theme", theme_name)
-        self.apply_settings()
+        self.apply_settings()   
 
     def truncate_text(self, text, limit=25):
         if len(text) > limit:
@@ -940,7 +969,7 @@ class HomeView:
         templates = ["Select..."] + list(self.TEMPLATES.keys())
         self.template_dropdown = ctk.CTkOptionMenu(controls, variable=self.template_var, values=templates,
                        command=self.insert_template,
-                       fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
+                       fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('accent'),
                        text_color=self.colors.get('dropdown_text', 'white'), width=150)
         self.template_dropdown.pack(side="left")
         # Save Button
@@ -985,7 +1014,7 @@ class HomeView:
         else:
             self.notebook_dropdown = ctk.CTkOptionMenu(self.controls_frame, variable=self.notebook_var, values=notebooks,
                                                        command=self.handle_notebook_selection,
-                                                       fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
+                                                       fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('accent'),
                                                        text_color=self.colors.get('dropdown_text', 'white'), width=180)
             self.notebook_dropdown.pack(side="left", padx=(0, 20))
 
@@ -1239,7 +1268,7 @@ class NoteWindow(ctk.CTkToplevel):
         self.notebook_map["• Unassigned Notes"] = None
             
         self.notebook_dropdown = ctk.CTkOptionMenu(move_frame, variable=self.notebook_var, values=notebooks,
-                       fg_color=colors.get('dropdown_bg', colors['main_text']), button_color=colors.get('primary'),
+                       fg_color=colors.get('dropdown_bg', colors['main_text']), button_color=colors.get('accent'),
                        text_color=colors.get('dropdown_text', 'white'))
         self.notebook_dropdown.pack(side="left", padx=(0, 10))
 
@@ -1504,22 +1533,38 @@ class NotebooksView:
             self._create_notebook_card(name, data, row, col)
 
     def _create_notebook_card(self, name, data, row, col):
-        # Card Frame
-        card = ctk.CTkFrame(self.grid_frame, fg_color=self.colors['card_bg'], corner_radius=15)
+        # Card Frame with border
+        border_color = self.colors.get('card_border', self.colors.get('muted', '#68707a'))
+        card = ctk.CTkFrame(self.grid_frame, fg_color=self.colors['card_bg'], corner_radius=15,
+                           border_width=1, border_color=border_color)
         card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
         
-        # Make card clickable
-        for widget in [card]: # We'll bind children too if needed, but frame binding usually works if children don't block
-             widget.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
-             widget.bind("<Enter>", lambda e, c=card: c.configure(fg_color=self.colors.get('card_hover', self.colors['sidebar_hover'])))
-             widget.bind("<Leave>", lambda e, c=card: c.configure(fg_color=self.colors['card_bg']))
-
-        # Content
-        # Title
+        # Header with icon buttons
+        header = ctk.CTkFrame(card, fg_color="transparent")
+        header.pack(fill="x", padx=15, pady=(15, 10))
+        
+        # Title on the left
         display_name = self.truncate_text(name, 20)
-        lbl_title = ctk.CTkLabel(card, text=display_name, font=self.get_font(2, "bold"), text_color=self.colors['main_text'])
-        lbl_title.pack(padx=15, pady=(15, 5), anchor="w")
-        lbl_title.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
+        lbl_title = ctk.CTkLabel(header, text=display_name, font=self.get_font(2, "bold"), 
+                                 text_color=self.colors['main_text'])
+        lbl_title.pack(side="left")
+        
+        # Icon buttons on the right
+        # Delete button (trash icon) with border
+        ctk.CTkButton(header, text="🗑️", width=30, height=25, 
+                     command=lambda n=name: self.delete_notebook(n),
+                     fg_color="transparent", hover_color=self.colors['danger'], 
+                     text_color=self.colors['danger'],
+                     border_width=1, border_color=self.colors.get('muted', '#9e9e9e'),
+                     font=self.get_font(-2)).pack(side="right", padx=(5, 0))
+        
+        # Edit button (pen icon) with border
+        ctk.CTkButton(header, text="✏️", width=30, height=25, 
+                     command=lambda n=name: self.rename_notebook(n),
+                     fg_color="transparent", hover_color=self.colors['info'], 
+                     text_color=self.colors['info'],
+                     border_width=1, border_color=self.colors.get('muted', '#9e9e9e'),
+                     font=self.get_font(-2)).pack(side="right", padx=(5, 0))
         
         # Meta (Code | Instructor)
         meta = []
@@ -1527,27 +1572,21 @@ class NotebooksView:
         if data.get("instructor"): meta.append(data["instructor"])
         meta_text = " • ".join(meta) if meta else "No details"
         
-        lbl_meta = ctk.CTkLabel(card, text=meta_text, font=self.get_font(-2), text_color=self.colors['secondary_text'])
-        lbl_meta.pack(padx=15, pady=(0, 10), anchor="w")
-        lbl_meta.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
+        lbl_meta = ctk.CTkLabel(card, text=meta_text, font=self.get_font(-2), 
+                               text_color=self.colors['secondary_text'])
+        lbl_meta.pack(padx=15, pady=(0, 8), anchor="w")
         
         # Stats (Note Count)
         note_count = len(data.get("notes", []))
-        lbl_count = ctk.CTkLabel(card, text=f"{note_count} Notes", font=self.get_font(-2, "bold"), text_color=self.colors['accent'])
-        lbl_count.pack(padx=15, pady=(0, 15), anchor="w")
-        lbl_count.bind("<Button-1>", lambda e, n=name: self.show_notebook(n))
+        lbl_count = ctk.CTkLabel(card, text=f"{note_count} Notes", font=self.get_font(-2, "bold"), 
+                                text_color=self.colors['accent'])
+        lbl_count.pack(padx=15, pady=(0, 10), anchor="w")
 
-        # Actions Row
-        actions_frame = ctk.CTkFrame(card, fg_color="transparent")
-        actions_frame.pack(fill="x", padx=10, pady=(0, 10))
-        
-        ctk.CTkButton(actions_frame, text="Rename", width=60, height=25, 
-              command=lambda n=name: self.rename_notebook(n),
-              fg_color=self.colors['info'], font=self.get_font(-3)).pack(side="left", padx=(0, 5), expand=True, fill="x")
-                      
-        ctk.CTkButton(actions_frame, text="Delete", width=60, height=25, 
-              command=lambda n=name: self.delete_notebook(n),
-              fg_color=self.colors['danger'], font=self.get_font(-3)).pack(side="right", padx=(5, 0), expand=True, fill="x")
+        # Open Notebook Button at bottom
+        ctk.CTkButton(card, text="Open Notebook", command=lambda n=name: self.show_notebook(n),
+                     fg_color=self.colors.get('button_primary', self.colors['primary']), 
+                     text_color=self.colors.get('button_text', 'white'),
+                     height=30, font=self.get_font(-2)).pack(fill="x", padx=15, pady=(0, 15))
 
     def show_notebook(self, name):
         self.selected_notebook = name
@@ -1613,7 +1652,9 @@ class NotebooksView:
         
         # Open Button
         ctk.CTkButton(card, text="Open Note", command=lambda: self.open_note(note),
-                  fg_color=self.colors['primary'], height=25, font=self.get_font(-3)).pack(fill="x", padx=15, pady=(0, 10))
+                  fg_color=self.colors.get('button_primary', self.colors['primary']), 
+                  text_color=self.colors.get('button_text', 'white'),
+                  height=25, font=self.get_font(-3)).pack(fill="x", padx=15, pady=(0, 10))
 
     def add_notebook(self):
         # Open dialog
@@ -1751,11 +1792,11 @@ class SettingsView:
         
         self.theme_var = ctk.StringVar(value=self.settings.get("theme", "CourseMate Theme"))
         themes = list(THEMES.keys())
-        # OptionMenu now previews theme on selection; use Apply to save
-        ctk.CTkOptionMenu(row1, variable=self.theme_var, values=themes, command=self.preview_theme,
-              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
+        # OptionMenu or Dropdown 
+        ctk.CTkOptionMenu(row1, variable=self.theme_var, values=themes, command=lambda: self.preview_theme,
+              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('accent'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="left", padx=(50,0))
         ctk.CTkButton(row1, text="Apply", width=80, command=lambda: self.change_theme(self.theme_var.get()),
-                  fg_color=self.colors['info']).pack(side="right", padx=(8,8))
+                  fg_color=self.colors['info']).pack(side="left", padx=(8,8))
         
         # Font Family
         row2 = ctk.CTkFrame(frame, fg_color="transparent")
@@ -1765,8 +1806,7 @@ class SettingsView:
         self.font_var = ctk.StringVar(value=self.settings.get("font_family", "Open Sans"))
         fonts = [ "Alice", "Courier New", "OpenDyslexic", "Open Sans"]
         ctk.CTkOptionMenu(row2, variable=self.font_var, values=fonts, command=lambda v: self.update_setting("font_family", v),
-              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
-
+              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('accent'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="left", padx=(58,0))
         # Font Size
         row3 = ctk.CTkFrame(frame, fg_color="transparent")
         row3.pack(fill="x", padx=20, pady=(5, 20))
@@ -1775,64 +1815,64 @@ class SettingsView:
         self.size_var = ctk.StringVar(value=self.settings.get("font_size", "Normal"))
         sizes = ["Normal", "Large"]
         ctk.CTkOptionMenu(row3, variable=self.size_var, values=sizes, command=lambda v: self.update_setting("font_size", v),
-              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="right")
+              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('accent'), text_color=self.colors.get('dropdown_text', 'white')).pack(side="left", padx=(66,0))
 
-        # Live Theme Preview
-        preview_container = ctk.CTkFrame(frame, fg_color="transparent")
-        preview_container.pack(fill="x", padx=20, pady=(8, 12))
+        # # Live Theme Preview
+        # preview_container = ctk.CTkFrame(frame, fg_color="transparent")
+        # preview_container.pack(fill="x", padx=20, pady=(8, 12))
 
-        self.preview_header = ctk.CTkFrame(preview_container, fg_color=self.colors['primary_dark'], corner_radius=6)
-        self.preview_header.pack(fill="x")
-        self.preview_header_label = ctk.CTkLabel(self.preview_header, text="Header Preview", font=self.master.master.get_font(-1, "bold"), text_color=self.colors['header_text'])
-        self.preview_header_label.pack(expand=True)
+        # self.preview_header = ctk.CTkFrame(preview_container, fg_color=self.colors['primary_dark'], corner_radius=6)
+        # self.preview_header.pack(fill="x")
+        # self.preview_header_label = ctk.CTkLabel(self.preview_header, text="Header Preview", font=self.master.master.get_font(-1, "bold"), text_color=self.colors['header_text'])
+        # self.preview_header_label.pack(expand=True)
 
-        sample_row = ctk.CTkFrame(preview_container, fg_color="transparent")
-        sample_row.pack(fill="x", pady=(8,0))
+        # sample_row = ctk.CTkFrame(preview_container, fg_color="transparent")
+        # sample_row.pack(fill="x", pady=(8,0))
 
-        self.preview_sidebar = ctk.CTkFrame(sample_row, fg_color=self.colors['primary'], width=120, height=80, corner_radius=6)
-        self.preview_sidebar.pack(side="left", padx=(0,8))
-        self.preview_sidebar_label = ctk.CTkLabel(self.preview_sidebar, text="Sidebar", font=self.master.master.get_font(-2), text_color=self.colors['sidebar_text'])
-        self.preview_sidebar_label.pack(expand=True)
+        # self.preview_sidebar = ctk.CTkFrame(sample_row, fg_color=self.colors['primary'], width=120, height=80, corner_radius=6)
+        # self.preview_sidebar.pack(side="left", padx=(0,8))
+        # self.preview_sidebar_label = ctk.CTkLabel(self.preview_sidebar, text="Sidebar", font=self.master.master.get_font(-2), text_color=self.colors['sidebar_text'])
+        # self.preview_sidebar_label.pack(expand=True)
 
-        self.preview_main = ctk.CTkFrame(sample_row, fg_color=self.colors['background'], corner_radius=6)
-        self.preview_main.pack(fill="x", expand=True)
-        self.preview_main_label = ctk.CTkLabel(self.preview_main, text="Main Area", font=self.master.master.get_font(-2), text_color=self.colors['main_text'])
-        self.preview_main_label.pack(padx=8, pady=8, anchor="w")
+        # self.preview_main = ctk.CTkFrame(sample_row, fg_color=self.colors['background'], corner_radius=6)
+        # self.preview_main.pack(fill="x", expand=True)
+        # self.preview_main_label = ctk.CTkLabel(self.preview_main, text="Main Area", font=self.master.master.get_font(-2), text_color=self.colors['main_text'])
+        # self.preview_main_label.pack(padx=8, pady=8, anchor="w")
 
-        # Add additional sample controls to the preview so users can see how
-        # dropdowns, entries and buttons will look in the selected theme.
-        sample_controls = ctk.CTkFrame(self.preview_main, fg_color="transparent")
-        sample_controls.pack(fill="x", padx=8, pady=(6, 10))
+        # # Add additional sample controls to the preview so users can see how
+        # # dropdowns, entries and buttons will look in the selected theme.
+        # sample_controls = ctk.CTkFrame(self.preview_main, fg_color="transparent")
+        # sample_controls.pack(fill="x", padx=8, pady=(6, 10))
 
-        # Sample label
-        self.preview_sample_label = ctk.CTkLabel(sample_controls, text="Sample Label:", font=self.master.master.get_font(-3), text_color=self.colors['secondary_text'])
-        self.preview_sample_label.pack(side="left", padx=(0, 8))
+        # # Sample label
+        # self.preview_sample_label = ctk.CTkLabel(sample_controls, text="Sample Label:", font=self.master.master.get_font(-3), text_color=self.colors['secondary_text'])
+        # self.preview_sample_label.pack(side="left", padx=(0, 8))
 
-        # Sample dropdown
-        self.preview_sample_var = ctk.StringVar(value="Option 1")
-        self.preview_sample_dropdown = ctk.CTkOptionMenu(sample_controls, variable=self.preview_sample_var, values=["Option 1", "Option 2"], width=140,
-                     fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
-                     text_color=self.colors.get('dropdown_text', 'white'))
-        self.preview_sample_dropdown.pack(side="left", padx=(0, 8))
+        # # Sample dropdown
+        # self.preview_sample_var = ctk.StringVar(value="Option 1")
+        # self.preview_sample_dropdown = ctk.CTkOptionMenu(sample_controls, variable=self.preview_sample_var, values=["Option 1", "Option 2"], width=140,
+        #              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
+        #              text_color=self.colors.get('dropdown_text', 'white'))
+        # self.preview_sample_dropdown.pack(side="left", padx=(0, 8))
 
-        # Sample entry
-        self.preview_sample_entry = ctk.CTkEntry(sample_controls, placeholder_text="Type...", width=180,
-                             fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
-        self.preview_sample_entry.pack(side="left", padx=(0, 8))
+        # # Sample entry
+        # self.preview_sample_entry = ctk.CTkEntry(sample_controls, placeholder_text="Type...", width=180,
+        #                      fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
+        # self.preview_sample_entry.pack(side="left", padx=(0, 8))
 
-        # Sample action buttons
-        btns = ctk.CTkFrame(self.preview_main, fg_color="transparent")
-        btns.pack(fill="x", padx=8, pady=(0, 8))
-        self.preview_sample_primary = ctk.CTkButton(btns, text="Primary", width=100, fg_color=self.colors.get('accent'), text_color="white")
-        self.preview_sample_primary.pack(side="left", padx=(0, 8))
-        self.preview_sample_secondary = ctk.CTkButton(btns, text="Secondary", width=100, fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
-        self.preview_sample_secondary.pack(side="left")
+        # # Sample action buttons
+        # btns = ctk.CTkFrame(self.preview_main, fg_color="transparent")
+        # btns.pack(fill="x", padx=8, pady=(0, 8))
+        # self.preview_sample_primary = ctk.CTkButton(btns, text="Primary", width=100, fg_color=self.colors.get('accent'), text_color="white")
+        # self.preview_sample_primary.pack(side="left", padx=(0, 8))
+        # self.preview_sample_secondary = ctk.CTkButton(btns, text="Secondary", width=100, fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
+        # self.preview_sample_secondary.pack(side="left")
 
-        # Initialize preview with current theme selection
-        try:
-            self.preview_theme(self.theme_var.get())
-        except Exception:
-            pass
+        # # Initialize preview with current theme selection
+        # try:
+        #     self.preview_theme(self.theme_var.get())
+        # except Exception:
+        #     pass
 
     def _setup_inspiration_section(self):
         frame = ctk.CTkFrame(self.container, fg_color=self.colors['card_bg'], corner_radius=10)
@@ -1882,10 +1922,17 @@ class SettingsView:
 
         ctk.CTkLabel(self.templates_frame, text="Templates", font=self.master.master.get_font(2, "bold"), text_color=self.colors['main_text']).pack(anchor="w", padx=20, pady=15)
         ctk.CTkLabel(self.templates_frame, text="View, create, edit, or delete templates for notes.", font=self.master.master.get_font(0), text_color=self.colors['secondary_text']).pack(anchor="w", padx=20)
+        # Add Custom Template
+
+        # Custom Template Title
+        
+        # Custom Template Textbox
 
         # Add Template Button
         ctk.CTkButton(self.templates_frame, text="+ Create New Template", command=self.create_template,
-                      fg_color=self.colors['primary'], height=35).pack(padx=20, pady=10, fill="x")
+                      fg_color=self.colors.get('button_primary', self.colors['primary']),
+                      text_color=self.colors.get('button_text', 'white'),
+                      height=35).pack(padx=20, pady=10, fill="x")
 
         # Scrollable list of templates
         template_list_frame = ctk.CTkScrollableFrame(self.templates_frame, fg_color="transparent", height=220)
@@ -1952,7 +1999,7 @@ class SettingsView:
             except Exception:
                 pass
             try:
-                self.preview_sample_dropdown.configure(fg_color=theme.get('dropdown_bg'), text_color=theme.get('dropdown_text'), button_color=theme.get('primary'))
+                self.preview_sample_dropdown.configure(fg_color=theme.get('dropdown_bg'), text_color=theme.get('dropdown_text'), button_color=theme.get('accent'))
             except Exception:
                 pass
             try:
