@@ -1,3 +1,18 @@
+## Tags UX improvements (added Nov 26, 2025)
+
+Two small but important UX changes were added to make tags easier to use and less error-prone:
+
+- Tag sanitization: tags are now normalized and deduplicated automatically in both the Home write flow and the Note editor. Normalization rules:
+    - Strips punctuation, lowercases characters, collapses whitespace and joins words with hyphens
+    - Ensures each tag is prefixed with a single `#` and duplicates are removed
+    - Example: ` , #Cornell Notes, cornell-notes, #cornell NOTES  ,` becomes `#cornell-notes`
+
+- Tag chips: the tags field now renders visual tag "chips" below the tags entry in the Write area and the Note editor. These chips:
+    - Help users see what tags are currently applied in a glance
+    - Allow quick removal (click the ✕ on a chip)
+    - Update live as you type or when a template automatically adds a tag
+
+These improvements prevent duplicate/dirty tags, make the template-to-tag convention easier to demo, and improve the overall UX when preparing notes for the mock defense.
 # CourseMate Code Walkthrough
 
 ## Introduction
@@ -127,3 +142,49 @@ This creates the app instance and starts the GUI event loop.
 4. Modify the sidebar layout
 
 This walkthrough should give your group a solid foundation to understand and modify the CourseMate application.
+
+## Updated dataset & scenarios (added Nov 26, 2025)
+
+To support testing and the mock defense, the companion dataset `Coursemate_data.json` now includes examples that exercise every built-in study template and every planner template. There are also two new notebooks added: **Ethics in Computing (ETH 100)** and **Planner Examples (PLN 001)**. These are intended to help reviewers see all UI flows and tag behaviors.
+
+What was added
+- Study templates used (one or more notes added across notebooks):
+    - Cornell Notes — `GEN 001` ("Cornell Notes - Speech Outline")
+    - Main Idea & Details — `GEN 002` ("Main Idea & Details - Identity")
+    - Modified Frayer Model — `ITE 260` ("Frayer - Variables")
+    - Polya's 4 Steps — `GEN 001` and `PED 030` (practice examples)
+    - 5W1H — `MAT 152` ("5W1H - Word Problems")
+    - Concept Map — `ITE 366` and `ETH 100` (concept maps)
+
+- Planner templates used in `PLN 001` (Planner Examples):
+    - Daily Planner
+    - Weekly Overview
+    - Time Block Grid
+    - Assignment Tracker
+    - Habit Tracker
+    - Weekly Planning
+
+Tags and edge cases
+- Several notes include example tags (e.g. `#ethics`, `#planner`, `#cornell`, `#exercise`), and the Note editor now sanitizes whitespace-only tag inputs so the placeholder is visible and tags are normalized on save.
+
+Tag sidebar & overflow handling
+
+If users add a large number of tags, the UI will no longer expand and push other elements because:
+
+- Chips are rendered inside a bounded scrollable frame (fixed height) so the main layout remains stable.
+- A separate "Open Tag Sidebar" button is available in both the Home write area and the Note editor; opening it displays a small popup with a scrollable list of tags and per-tag "Remove" buttons so you can manage many tags comfortably.
+
+How to validate these scenarios locally
+1. Open the app and go to "Notebooks" → pick a notebook (e.g. "Purposive Communication" or "Ethics in Computing").
+2. Open a note that corresponds to a template (see list above) and confirm that the content reflects the template structure.
+3. Edit tags in `NoteWindow` — try entering whitespace-only content ("   ") then click out — the entry will clear and the placeholder text will show.
+4. Enter tags using a comma-separated list including spaces and stray commas (e.g. " , #exam,  practice ,, #math "). Move focus out — the system will normalize to `#exam, #practice, #math` and save as a list.
+5. Use the Planner notebook `PLN 001` to review sample planner templates and confirm tags, content, and that these notes are represented in the app view.
+
+Test checklist for the mock defense:
+- Verify each of the study templates above appears in at least one note.
+- Verify all planner templates are present as notes in `PLN 001`.
+- Verify tags display correctly in lists and in NoteWindow and placeholders appear when appropriate.
+- Confirm export & copy actions work for individual notes (NoteWindow) and that word count updates while typing.
+
+If you'd like, I can also add a small unit-test style script (Python) that validates the JSON dataset contains at least one note for each template — would you like that created in the repo?

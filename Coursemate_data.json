@@ -4,8 +4,17 @@
       "name": "Purposive Communication",
       "notes": [
         {
+          "title": "Cornell Notes - Speech Outline",
+          "content": "Title: Public Speaking Preparation\n\nQuestion/Keyword\n- Main idea: audience analysis\n\nNotes\n- Intro: Hook + thesis\n- Body: 3 main points w/ examples\n- Conclusion: summary + call to action\n\nSummary\n- Audience-centered preparation helps clarity\n",
+          "created": "2025-11-25 09:00",
+          "tags": [
+            "#speech",
+            "#cornell"
+          ]
+        },
+        {
           "title": "Communication Models Overview",
-          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\nasdfghjk\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills\n\n",
+          "content": "Main Idea: Communication is the process of sharing information between individuals.\n\nDetail 1:\n- Linear Model: One-way communication\n- Interactive Model: Two-way with feedback\n- Transactional Model: Simultaneous exchange\n\nDetail 2:\n- Verbal vs Non-verbal communication\n- Barriers to effective communication\n\nDetail 3:\n- Importance in academic and professional settings\n\nSummary:\n- Understanding models helps improve communication skills\n",
           "created": "2025-11-24 10:00",
           "modified": "November 26, 2025 | 02:34AM"
         },
@@ -13,6 +22,15 @@
           "title": "Public Speaking Preparation",
           "content": "Who:\n- Speaker (me)\n- Audience (classmates/professor)\n\nWhat:\n- Topic: Effective communication strategies\n- Purpose: Educate and engage\n\nWhen:\n- Date: Next class session\n- Time: 30 minutes\n\nWhere:\n- Classroom setting\n- Online platform\n\nWhy:\n- To improve presentation skills\n- Required for course\n\nHow:\n- Research topic thoroughly\n- Practice delivery\n- Use visual aids",
           "created": "2025-11-24 11:00"
+        },
+        {
+          "title": "Polya's 4 Steps - Practice Problem",
+          "content": "1. Understand the Problem:\n- Identify audience constraints\n\n2. Devise a Plan:\n- Structure into intro, problem examples, takeaways\n\n3. Carry Out the Plan:\n- Draft 30 minute talk, rehearse\n\n4. Look Back:\n- Collect feedback",
+          "created": "2025-11-25 10:00",
+          "tags": [
+            "#practice",
+            "#polya"
+          ]
         }
       ],
       "tasks": [],
@@ -23,13 +41,22 @@
       "notes": [
         {
           "title": "Self-Concept Development",
-          "content": "Definition:\n- Self-concept is how we perceive ourselves\n\nCharacteristics:\n- Shaped by experiences\n- Influences behavior\n- Can be positive or negative\n\nExamples:\n- Academic self-concept\n- Social self-concept\n\nNon-Examples:\n- Physical appearance only\n- Temporary moods\n\n.",
+          "content": "Definition:\n- Self-concept is how we perceive ourselves\n\nCharacteristics:\n- Shaped by experiences\n- Influences behavior\n- Can be positive or negative\n\nExamples:\n- Academic self-concept\n- Social self-concept\n\nNon-Examples:\n- Physical appearance only\n- Temporary moods",
           "created": "2025-11-24 12:00",
           "modified": "November 26, 2025 | 02:21AM"
         },
         {
+          "title": "Main Idea & Details - Identity",
+          "content": "Main Idea: Self-concept is shaped by experiences.\n\nDetail 1:\n- Family, peers\n\nDetail 2:\n- Academic performance\n\nDetail 3:\n- Online persona\n\nSummary:\n- Multiple influences shape self-concept",
+          "created": "2025-11-25 11:00",
+          "tags": [
+            "#self",
+            "#mainidea"
+          ]
+        },
+        {
           "title": "Personal Growth Plan",
-          "content": "Week: Week 1\n\nGoals:\n- Improve time management\n- Build self-confidence\n- Learn new skills\n\nTasks:\n- Daily planning routine\n- Weekly reflection\n- Skill practice sessions\n\nReflection:\n- What went well this week?\n- Areas for improvement?\n\nNext Week Prep:\n- Set specific targets\n- Gather resources needed",
+          "content": "Week: Week 1\n\nGoals:\n- Improve time management\n- Build self-confidence\n- Learn new skills\n\nTasks:\n- Daily planning routine\n- Weekly reflection\n- Skill practice sessions",
           "created": "2025-11-24 13:00"
         }
       ],
@@ -47,7 +74,7 @@
         },
         {
           "title": "Exercise Planning",
-          "content": "Week: Fitness Week 1\n\nGoals:\n- Improve cardiovascular health\n- Build muscle strength\n- Increase flexibility\n\nTasks:\n- 30 min cardio 3x/week\n- Strength training 2x/week\n- Stretching routine daily\n\nReflection:\n- Energy levels improved\n- Need better consistency\n\nNext Week Prep:\n- Track progress metrics\n- Adjust intensity as needed",
+          "content": "Week: Fitness Week 1\n\nGoals:\n- Improve cardiovascular health\n- Build muscle strength\n- Increase flexibility\n\nTasks:\n- 30 min cardio 3x/week\n- Strength training 2x/week\n- Stretching routine daily",
           "created": "2025-11-24 17:00"
         },
         {
@@ -59,6 +86,15 @@
           ],
           "created": "November 26, 2025 | 02:35AM",
           "notebook": "Physical Education"
+        },
+        {
+          "title": "Polya's 4 Steps - Exercise Plan",
+          "content": "1. Understand the Problem:\n- Need balanced fitness plan\n\n2. Devise a Plan:\n- Mix cardio, strength, flexibility\n\n3. Carry Out the Plan:\n- Schedule and measure\n\n4. Look Back:\n- Adjust intensity",
+          "created": "2025-11-25 12:00",
+          "tags": [
+            "#exercise",
+            "#polya"
+          ]
         }
       ],
       "tasks": [],
@@ -72,6 +108,15 @@
           "title": "Problem Solving with Math",
           "content": "1. Understand the Problem:\n- Read carefully\n- Identify known/unknown\n- Draw diagram if helpful\n\n2. Devise a Plan:\n- Choose appropriate method\n- Consider multiple approaches\n\n3. Carry Out the Plan:\n- Execute calculations\n- Check work\n\n4. Look Back:\n- Verify solution\n- Consider alternative methods\n- Reflect on process",
           "created": "2025-11-24 18:00"
+        },
+        {
+          "title": "5W1H - Word Problems",
+          "content": "Who:\n- Students\n\nWhat:\n- Solve word problems\n\nWhen:\n- During class practice\n\nWhere:\n- Worksheets, exams\n\nWhy:\n- Develop reasoning\n\nHow:\n- Identify variables, set equations",
+          "created": "2025-11-25 14:00",
+          "tags": [
+            "#problem-solving",
+            "#5w1h"
+          ]
         },
         {
           "title": "Mathematical Concepts in Daily Life",
@@ -93,8 +138,17 @@
         },
         {
           "title": "Programming Project Planning",
-          "content": "Week: Project Week 1\n\nGoals:\n- Learn Python basics\n- Complete first assignment\n- Understand debugging\n\nTasks:\n- Study variables and loops\n- Write sample programs\n- Test and debug code\n\nReflection:\n- Syntax is getting easier\n- Need more practice with logic\n\nNext Week Prep:\n- Review functions\n- Plan next project",
+          "content": "Week: Project Week 1\n\nGoals:\n- Learn Python basics\n- Complete first assignment\n- Understand debugging\n\nTasks:\n- Study variables and loops\n- Write sample programs\n- Test and debug code",
           "created": "2025-11-24 21:00"
+        },
+        {
+          "title": "Frayer - Variables",
+          "content": "Definition:\n- Variables store values\n\nCharacteristics:\n- Mutable, named, typed\n\nExamples:\n- x = 5\n\nNon-Examples:\n- 5x (invalid)",
+          "created": "2025-11-25 15:30",
+          "tags": [
+            "#variables",
+            "#frayer"
+          ]
         }
       ],
       "tasks": [],
@@ -113,12 +167,110 @@
           "title": "Computing Ethics Discussion",
           "content": "Who:\n- Students and instructor\n- Technology users\n\nWhat:\n- Digital responsibility\n- Privacy concerns\n\nWhen:\n- Throughout the course\n- In assignments\n\nWhere:\n- Classroom discussions\n- Online forums\n\nWhy:\n- Prevent misuse\n- Promote responsible computing\n\nHow:\n- Follow codes of conduct\n- Respect intellectual property\n- Protect personal data",
           "created": "2025-11-24 23:00"
+        },
+        {
+          "title": "Concept Map - Systems",
+          "content": "Central Concept:\n- Computer Systems\n\nRelated Concept 1:\n- Hardware\n\nRelated Concept 2:\n- Software\n\nConnections:\n- OS manages hardware and software",
+          "created": "2025-11-25 16:45",
+          "tags": [
+            "#systems",
+            "#conceptmap"
+          ]
         }
       ],
       "tasks": [],
       "code": "ITE 366",
       "instructor": "Prof. Sample",
       "name": "Introduction to Computing"
+    },
+    "ETH 100": {
+      "notes": [
+        {
+          "title": "Computing Ethics Overview",
+          "content": "Main Idea: Ethics guide professional behavior in computing.\n\nDetail 1:\n- Privacy concerns\n\nDetail 2:\n- Responsibility in AI\n\nSummary:\n- Ethical guidelines protect users",
+          "created": "2025-11-26 09:00",
+          "tags": [
+            "#ethics",
+            "#policy"
+          ]
+        },
+        {
+          "title": "Concept Map - Ethics",
+          "content": "Central Concept:\n- Computing Ethics\n\nRelated Concept 1:\n- Privacy\n\nRelated Concept 2:\n- Bias in AI\n\nConnections:\n- Policy and design decisions",
+          "created": "2025-11-26 09:30",
+          "tags": [
+            "#ethics",
+            "#conceptmap"
+          ]
+        }
+      ],
+      "tasks": [],
+      "code": "ETH 100",
+      "instructor": "Prof. Ethics",
+      "name": "Ethics in Computing"
+    },
+    "PLN 001": {
+      "notes": [
+        {
+          "title": "Daily Planner - Mock Defense Day",
+          "content": "Date: 2025-11-28\n\nTop 3 Priorities:\n1. Finalize slides\n2. Rehearse Q&A\n3. Print handouts",
+          "created": "2025-11-26 08:00",
+          "tags": [
+            "#planner",
+            "#daily"
+          ]
+        },
+        {
+          "title": "Weekly Overview - Week of Defense",
+          "content": "Week Of: 2025-11-24\n\nGoals:\n- Rehearse presentation\n- Finish demo",
+          "created": "2025-11-26 08:10",
+          "tags": [
+            "#planner",
+            "#weekly"
+          ]
+        },
+        {
+          "title": "Time Block Grid - Work Blocks",
+          "content": "Date: 2025-11-26\n\n08:00 - Slide prep\n09:00 - Code demo\n10:00 - Practice",
+          "created": "2025-11-26 08:20",
+          "tags": [
+            "#timeblock",
+            "#planning"
+          ]
+        },
+        {
+          "title": "Assignment Tracker - Project Milestones",
+          "content": "Course: ITE 260\n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n| Demo | 2025-11-28 | In progress | Final testing ",
+          "created": "2025-11-26 08:30",
+          "tags": [
+            "#tracker",
+            "#milestone"
+          ]
+        },
+        {
+          "title": "Habit Tracker - Prep Routine",
+          "content": "Month: November\nHabit: Daily rehearsal\n\n1 - Done\n2 - Done",
+          "created": "2025-11-26 08:40",
+          "tags": [
+            "#habit",
+            "#rehearse"
+          ]
+        },
+        {
+          "title": "Weekly Planning - Defense Week Plan",
+          "content": "Week: Defense Week\n\nGoals:\n- Final checks\n- Team practice",
+          "created": "2025-11-26 08:50",
+          "tags": [
+            "#planning",
+            "#defense"
+          ]
+        }
+      ],
+      "tasks": [],
+      "completed_tasks": [],
+      "code": "PLN 001",
+      "instructor": "Planner Bot",
+      "name": "Planner Examples"
     }
   },
   "tasks": [],
@@ -129,11 +281,80 @@
       "content": "1. Documentation\n2. Powerpoints",
       "created": "2025-11-23 23:20",
       "notebook": null
+    },
+    {
+      "title": "123",
+      "content": "Title: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\n1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-\n\nWeek Of: \n\nGoals:\n- \n- \n- \n\nMon:\nFocus: \nTasks: - [ ] \n\nTue:\nFocus: \nTasks: - [ ] \n\nWed:\nFocus: \nTasks: - [ ] \n\nThu:\nFocus: \nTasks: - [ ] \n\nFri:\nFocus: \nTasks: - [ ] \n\nWeekend Notes:\n-",
+      "tags": [
+        "#cornell-notes",
+        "#cornell-notes",
+        "#polyas-4-steps",
+        "#weekly-overview"
+      ],
+      "created": "November 26, 2025 | 03:26AM",
+      "notebook": null
+    },
+    {
+      "title": "kb",
+      "content": "Title: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nDefinition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\nDate: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- \n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nWho:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\n\nWhy:\n-\n\nHow:\n-\n\nDefinition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\nWeek Of: \n\nGoals:\n- \n- \n- \n\nMon:\nFocus: \nTasks: - [ ] \n\nTue:\nFocus: \nTasks: - [ ] \n\nWed:\nFocus: \nTasks: - [ ] \n\nThu:\nFocus: \nTasks: - [ ] \n\nFri:\nFocus: \nTasks: - [ ] \n\nWeekend Notes:\n- \n\nCourse: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- \n\n1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-\n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- \n\nCentral Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n-",
+      "tags": [
+        "#modifiedfrayermodel",
+        "#timeblockgrid",
+        "#cornellnotes",
+        "#5w1h",
+        "#weeklyoverview",
+        "#assignmenttracker",
+        "#polyas4steps",
+        "#weeklyplanning",
+        "#conceptmap"
+      ],
+      "created": "November 26, 2025 | 03:36AM",
+      "notebook": null
+    },
+    {
+      "title": "456",
+      "content": "Definition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\n1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-\n\nCourse: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- \n\nWho:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\n\nWhy:\n-\n\nHow:\n-\n\nCourse: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- \n\nCentral Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n-\n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- \n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nDate: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- \n\nMain Idea: ___\n\nDetail 1:\n-\n\nDetail 2:\n-\n\nDetail 3:\n-\n\nSummary:\n-\n\nDefinition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\nDefinition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\nWho:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\n\nWhy:\n-\n\nHow:\n-\n\nDate: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- \n\nDate: \n\nTop 3 Priorities:\n1. \n2. \n3. \n\nSchedule (Hour | Task):\n08:00 - \n09:00 - \n10:00 - \n11:00 - \n12:00 - \n13:00 - \n14:00 - \n15:00 - \n16:00 - \n17:00 - \n\nTasks:\n- [ ] \n- [ ] \n- [ ] \n\nNotes:\n- \n\nWeek Of: \n\nGoals:\n- \n- \n- \n\nMon:\nFocus: \nTasks: - [ ] \n\nTue:\nFocus: \nTasks: - [ ] \n\nWed:\nFocus: \nTasks: - [ ] \n\nThu:\nFocus: \nTasks: - [ ] \n\nFri:\nFocus: \nTasks: - [ ] \n\nWeekend Notes:\n- \n\nDate: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- \n\nMonth: \nHabit: \n\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |       |       |\n| 2   |       |       |\n| 3   |       |       |\n| 4   |       |       |\n| 5   |       |       |\n| 6   |       |       |\n| 7   |       |       |\n| 8   |       |       |\n| 9   |       |       |\n| 10  |       |       |\n| 11  |       |       |\n| 12  |       |       |\n| 13  |       |       |\n| 14  |       |       |\n| 15  |       |       |\n| 16  |       |       |\n| 17  |       |       |\n| 18  |       |       |\n| 19  |       |       |\n| 20  |       |       |\n| 21  |       |       |\n| 22  |       |       |\n| 23  |       |       |\n| 24  |       |       |\n| 25  |       |       |\n| 26  |       |       |\n| 27  |       |       |\n| 28  |       |       |\n| 29  |       |       |\n| 30  |       |       |\n| 31  |       |       |\n\nReflection:\n- \n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n-",
+      "tags": [
+        "#modifiedfrayermodel",
+        "#polyas4steps",
+        "#assignmenttracker",
+        "#5w1h",
+        "#conceptmap",
+        "#weeklyplanning",
+        "#cornellnotes",
+        "#timeblockgrid",
+        "#mainideadetails",
+        "#dailyplanner",
+        "#weeklyoverview",
+        "#habittracker"
+      ],
+      "created": "November 26, 2025 | 03:37AM",
+      "notebook": null
+    },
+    {
+      "title": "wer",
+      "content": "Title: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nCourse: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- \n\n1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-\n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- \n\nWho:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\n\nWhy:\n-\n\nHow:\n-\n\nDate: \n\nTop 3 Priorities:\n1. \n2. \n3. \n\nSchedule (Hour | Task):\n08:00 - \n09:00 - \n10:00 - \n11:00 - \n12:00 - \n13:00 - \n14:00 - \n15:00 - \n16:00 - \n17:00 - \n\nTasks:\n- [ ] \n- [ ] \n- [ ] \n\nNotes:\n- \n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nCentral Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n-\n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- \n\nDefinition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- \n\n1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-\n\nMonth: \nHabit: \n\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |       |       |\n| 2   |       |       |\n| 3   |       |       |\n| 4   |       |       |\n| 5   |       |       |\n| 6   |       |       |\n| 7   |       |       |\n| 8   |       |       |\n| 9   |       |       |\n| 10  |       |       |\n| 11  |       |       |\n| 12  |       |       |\n| 13  |       |       |\n| 14  |       |       |\n| 15  |       |       |\n| 16  |       |       |\n| 17  |       |       |\n| 18  |       |       |\n| 19  |       |       |\n| 20  |       |       |\n| 21  |       |       |\n| 22  |       |       |\n| 23  |       |       |\n| 24  |       |       |\n| 25  |       |       |\n| 26  |       |       |\n| 27  |       |       |\n| 28  |       |       |\n| 29  |       |       |\n| 30  |       |       |\n| 31  |       |       |\n\nReflection:\n- \n\nCentral Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n-\n\nWeek: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- \n\nMonth: \nHabit: \n\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |       |       |\n| 2   |       |       |\n| 3   |       |       |\n| 4   |       |       |\n| 5   |       |       |\n| 6   |       |       |\n| 7   |       |       |\n| 8   |       |       |\n| 9   |       |       |\n| 10  |       |       |\n| 11  |       |       |\n| 12  |       |       |\n| 13  |       |       |\n| 14  |       |       |\n| 15  |       |       |\n| 16  |       |       |\n| 17  |       |       |\n| 18  |       |       |\n| 19  |       |       |\n| 20  |       |       |\n| 21  |       |       |\n| 22  |       |       |\n| 23  |       |       |\n| 24  |       |       |\n| 25  |       |       |\n| 26  |       |       |\n| 27  |       |       |\n| 28  |       |       |\n| 29  |       |       |\n| 30  |       |       |\n| 31  |       |       |\n\nReflection:\n- \n\nCourse: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- \n\nDate: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- \n\nWeek Of: \n\nGoals:\n- \n- \n- \n\nMon:\nFocus: \nTasks: - [ ] \n\nTue:\nFocus: \nTasks: - [ ] \n\nWed:\nFocus: \nTasks: - [ ] \n\nThu:\nFocus: \nTasks: - [ ] \n\nFri:\nFocus: \nTasks: - [ ] \n\nWeekend Notes:\n- \n\nTitle: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_\n\nDefinition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-\n\n1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-\n\nWho:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\n\nWhy:\n-\n\nHow:\n-\n\nCentral Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n-",
+      "tags": [
+        "#cornellnotes",
+        "#assignmenttracker",
+        "#polyaswe4steps",
+        "#weeklyplanning",
+        "#5w1h",
+        "#dailyplanner",
+        "#conceptmap",
+        "#modifiedfrayermodel",
+        "#polyas4steps",
+        "#habittracker",
+        "#timeblockgrid",
+        "#weeklyoverview"
+      ],
+      "created": "November 26, 2025 | 03:45AM",
+      "notebook": null
     }
   ],
   "settings": {
     "theme": "CourseMate Theme",
-    "font_family": "Open Sans",
+    "font_family": "Alice",
     "font_size": "Normal",
     "quotes": [
       "Everyday is a new day for a wise man.",

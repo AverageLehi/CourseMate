@@ -92,3 +92,48 @@
 User Action → UI Component → DataManager → JSON File → UI Update
 
 This flowchart shows the high-level architecture and user interaction flow of the CourseMate application.
+
+## Flowchart updates for mock defense (Nov 26, 2025)
+
+I've expanded the flowchart to include important decision points and added a short legend listing the standard shapes we used so the reviewers understand the diagram semantics.
+
+Shapes Legend (use these in the updated diagram):
+- Terminator / Start-End (rounded rectangle) — marks application start and graceful shutdown
+- Process (rectangle) — standard operation or step (e.g., Initialize UI, Save Data)
+- Decision (diamond) — branching logic (e.g., "search term present?", "note saved successfully?")
+- Input/Output (parallelogram) — user input elements such as forms / file dialogs
+- Document (rectangle with wavy base) — saved outputs like exported .txt files
+- Data / Storage (cylinder) — persistent storage (the JSON file or database)
+
+Example places to use shapes in the diagram (mapping):
+- Start App — Terminator
+- Load Data — Process
+- Initialize UI — Process
+- User Input (Write note, Search, Tag input) — Input/Output
+- Search term present? — Decision
+    - Yes → Filter notes (Process)
+    - No → Show all notes (Process)
+- Save Changes → Process → Decision "Write success?" → Yes → UI refresh; No → Show error dialog (Document)
+- Export Note → Process → Document (exported file)
+- DataManager writes to JSON — Data Storage (cylinder)
+
+Updated flow (ASCII + shapes hint):
+
+Start (Terminator rounded) -> Load Data (Process) -> Initialize UI (Process)
+    |
+    -> Home View (Process) -> Write Note (I/O) -> Save (Process) -> DataManager -> JSON file (Data)
+        |
+        -> Decision: Note saved? (Decision diamond) — Yes: Refresh UI (Process) — No: Show error (Document)
+
+Search Flow:
+User enters search (I/O) -> Decision: search term present? (diamond)
+    - Yes -> Filter notes (Process) -> Show filtered list
+    - No -> Show all notes (Process)
+
+Notes/Notebooks UI flows and shapes are now aligned with the new edits:
+- All cards use consistent borders and corner radii (visual consistency) — illustrated with Process boxes in the visual diagram.
+
+If you want, I can render a simple PNG export of the flowchart or produce a draw.io / mermaid diagram with exact coordinates and shape types for your presentation. Which format do you prefer for the mock defense: PNG or Mermaid (text diagram)?
+
+Note on tags (UI update):
+- Tag sanitization & visual chips live-update when typing or when templates are applied. This is a small UI flow that should be shown at the point where notes are created or edited; draw it as an Input/Output box -> Process (sanitize) -> Process (render chips) -> DataManager save.
