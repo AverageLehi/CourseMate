@@ -118,6 +118,11 @@ def highlight_hashtags_in_textbox(ctk_textbox, fg_color="#4a90e2"):
     except Exception:
         # Be defensive: never allow tagging to break the app
         pass
+
+def apply_visual_formatting_to_textbox(*_args, **_kwargs):
+    """Formatting system removed; legacy no-op placeholder."""
+    return
+
 import ctypes
 import os
 
@@ -1310,6 +1315,8 @@ class HomeView:
                 fg_color=self.colors['background'], text_color=self.colors['main_text'], border_width=0)
         self.title_entry.pack(fill="x", padx=20, pady=(0, 10))
         
+        # Formatting toolbar removed.
+        
         # Note: tags are now embedded directly in content as hashtags (e.g. #math).
         # We no longer present a separate tag entry or chips UI in the write area.
         
@@ -1318,9 +1325,12 @@ class HomeView:
                 fg_color=self.colors['background'], text_color=self.colors['main_text'],
                 wrap="word", corner_radius=10)
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-        # Highlight hashtags as user types
+        
+        # Formatting model removed; plain text only.
+        
+        # Highlight hashtags as user types and handle formatting
         try:
-            self.text_area.bind("<KeyRelease>", lambda e: highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2')))
+            self.text_area.bind("<KeyRelease>", lambda e: self._on_text_area_key_release(e))
             # ensure any initial content is highlighted
             highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
         except Exception:
@@ -1455,6 +1465,65 @@ class HomeView:
                 self.planner_template_var.set("Select...")
             except Exception:
                 pass
+    
+    # Formatting toolbar removed.
+    def _on_text_area_key_release(self, event):
+        """Handle key releases: auto-bullet + hashtag highlight."""
+        if event.keysym == "Return":
+            self._handle_enter_key()
+        try:
+            highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
+        except Exception:
+            pass
+    
+    # Removed _sync_content_model; no model exists.
+    
+    def _handle_enter_key(self):
+        """Auto-create bullet on next line if current line has bullet and content."""
+        try:
+            text_content = self.text_area.get("1.0", "end-1c")
+            cursor_pos = self.text_area.index("insert")
+            line_num = int(cursor_pos.split('.')[0])
+            col_num = int(cursor_pos.split('.')[1])
+            
+            # Get current line content
+            line_start = f"{line_num}.0"
+            line_end = f"{line_num}.end"
+            current_line = self.text_area.get(line_start, line_end)
+            
+            # Check if current line starts with bullet and has content after bullet
+            if current_line.startswith('• ') and len(current_line.strip()) > 2:
+                # Schedule bullet addition on next line
+                self.after(10, lambda: self._add_bullet_to_next_line(line_num + 1))
+        except Exception:
+            pass
+    
+    def _add_bullet_to_next_line(self, line_num):
+        """Add bullet to the specified line if it's empty."""
+        try:
+            line_start = f"{line_num}.0"
+            line_end = f"{line_num}.end"
+            line_content = self.text_area.get(line_start, line_end)
+            
+            if line_content.strip() == "":
+                self.text_area.insert(line_start, "• ")
+        except Exception:
+            pass
+    
+    def _get_text_selection_or_cursor(self):
+        """Get selected text and indices, or current cursor position."""
+        try:
+            sel_first = self.text_area.index("sel.first")
+            sel_last = self.text_area.index("sel.last")
+            return sel_first, sel_last, True
+        except tk.TclError:
+            # No selection, use cursor position
+            cursor = self.text_area.index("insert")
+            return cursor, cursor, False
+    
+    # Removed _apply_formatting and inline formatting logic.
+    
+    # Formatting button handlers removed.
 
     def save_note(self):
         title = self.title_entry.get().strip()
@@ -1652,14 +1721,17 @@ class NoteWindow(ctk.CTkToplevel):
 
         self.text_area = ctk.CTkTextbox(self, font=get_font(0), fg_color=colors['background'], text_color=colors['main_text'], wrap="word")
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(5, 0))
-        self.text_area.insert("1.0", note.get('content', ''))
-        # Live update word count plus highlight hashtags
+        
+        # Insert raw content directly (no formatting model)
+        initial_content = note.get('content', '')
+        self.text_area.insert("1.0", initial_content)
         try:
-            self.text_area.bind("<KeyRelease>", lambda e: (self.update_word_count(), highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))))
-            # Initial pass to highlight hashtags that exist in the note
+            def on_key_release(e):
+                self.update_word_count()
+                highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
+            self.text_area.bind("<KeyRelease>", on_key_release)
             highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
         except Exception:
-            # Fallback: at minimum keep the word count binding
             try:
                 self.text_area.bind("<KeyRelease>", self.update_word_count)
             except Exception:
@@ -1775,9 +1847,11 @@ class NoteWindow(ctk.CTkToplevel):
 
 
     def save_changes(self):
+        # Get content with markers (like bullets are saved)
+        new_content = self.text_area.get("1.0", "end-1c")
+        
         # Extract tags from the content text (hashtags embedded in content)
         try:
-            new_content = self.text_area.get("1.0", "end-1c")
             parsed_tags = extract_hashtags_from_text(new_content)
             self.note['tags'] = parsed_tags
         except Exception:
@@ -1793,9 +1867,10 @@ class NoteWindow(ctk.CTkToplevel):
             pass
         if hasattr(self, 'title_var'):
             self.title_var.set(new_title)
-        # Ensure content and tags stay in sync
-        new_content = self.text_area.get("1.0", "end-1c")
+        
+        # Save content with markers
         self.note['content'] = new_content
+        self.content_model.set_text(new_content)
         
         # Update modified timestamp
         self.note['modified'] = datetime.now().strftime("%B %d, %Y | %I:%M%p")
