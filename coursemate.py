@@ -1,3 +1,9 @@
+"""CourseMate Application Module
+
+Core definitions for data persistence, themed UI components, note/dialog views,
+and the main application shell. Comments are concise for panel review.
+"""
+
 import customtkinter as ctk
 import json
 from datetime import datetime
@@ -291,6 +297,13 @@ DEFAULT_QUOTES = [
 # ============================================================================
 
 class DataManager:
+    """Persistent storage layer.
+
+    Responsibilities:
+    - Load / save JSON data file
+    - Migrate legacy structures to current schema
+    - Provide helper methods for notebooks, notes, tasks, and settings.
+    """
     def __init__(self, filepath="Coursemate_data.json"):
         self.filepath = Path(filepath)
         self.data = {
@@ -511,6 +524,10 @@ class DataManager:
 # ============================================================================
 
 class CourseMate(ctk.CTk):
+    """Main application window.
+
+    Sets up global theme, fonts, header, sidebar, and view switching.
+    """
     def __init__(self):
         super().__init__()
         
@@ -701,8 +718,19 @@ class CourseMate(ctk.CTk):
             print(f"Custom font loading not implemented for {system}. Using system fonts.")
 
     def get_font(self, size_offset=0, weight="normal", slant="roman"):
-        # Helper to get font tuple
+        """Return a font tuple applying adaptive scaling.
+
+        OpenDyslexic renders visually larger at the same point size; apply
+        a reduction factor so normal and large modes remain readable and
+        avoid overflow in compact UI areas (e.g., inspiration section).
+        """
         size = self.base_font_size + size_offset
+        try:
+            if self.font_family.lower().startswith("opendyslexic"):
+                # Empirical adjustment: reduce about 15% while preserving legibility
+                size = max(8, int(round(size * 0.85)))
+        except Exception:
+            pass
         return (self.font_family, size, weight, slant)
 
     def apply_settings(self):
@@ -835,6 +863,7 @@ class CourseMate(ctk.CTk):
 # ============================================================================
 
 class Sidebar(ctk.CTkFrame):
+    """Left navigation panel displaying navigation, notebooks list, and inspiration quotes."""
     def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb):
         super().__init__(master, width=250, corner_radius=0, fg_color=colors['primary_dark'])
         self.colors = colors
@@ -1097,6 +1126,7 @@ class Sidebar(ctk.CTkFrame):
 
 # Small modal dialog used for creating/editing templates
 class TemplateDialog(ctk.CTkToplevel):
+    """Modal dialog for creating or editing a user template."""
     def __init__(self, master, title_init="", structure_init="", on_save=None, is_edit=False):
         super().__init__(master)
         self.on_save = on_save
@@ -1109,14 +1139,23 @@ class TemplateDialog(ctk.CTkToplevel):
             self.grab_set()
         except Exception:
             pass
+        
+        # Get app instance for font access
+        app = self._get_app_instance(master)
+        font_normal = app.get_font(-2) if app else ("Open Sans", 12)
+        font_bold = app.get_font(-2, "bold") if app else ("Open Sans", 12, "bold")
 
-        ctk.CTkLabel(self, text="Template title:", font=("Open Sans", 12, "bold")).pack(anchor="w", padx=16, pady=(12, 4))
-        self.title_entry = ctk.CTkEntry(self, placeholder_text="Enter template title", font=("Open Sans", 12))
+        ctk.CTkLabel(self, text="Template title:", font=font_bold).pack(anchor="w", padx=16, pady=(12, 4))
+        self.title_entry = ctk.CTkEntry(self, placeholder_text="Enter template title", font=font_normal,
+                                         fg_color=master.colors.get('card_bg', master.colors['background']),
+                                         text_color=master.colors['main_text'])
         self.title_entry.pack(fill="x", padx=16, pady=(0, 8))
         self.title_entry.insert(0, title_init)
 
-        ctk.CTkLabel(self, text="Template structure:", font=("Open Sans", 12, "bold")).pack(anchor="w", padx=16, pady=(0, 4))
-        self.structure_text = ctk.CTkTextbox(self, font=("Open Sans", 12), height=200)
+        ctk.CTkLabel(self, text="Template structure:", font=font_bold).pack(anchor="w", padx=16, pady=(0, 4))
+        self.structure_text = ctk.CTkTextbox(self, font=font_normal, height=200,
+                                              fg_color=master.colors.get('background', '#ffffff'),
+                                              text_color=master.colors['main_text'])
         self.structure_text.pack(fill="both", expand=True, padx=16, pady=(0, 8))
         self.structure_text.insert("1.0", structure_init)
 
@@ -1138,10 +1177,23 @@ class TemplateDialog(ctk.CTkToplevel):
                 messagebox.showerror("Error", str(e))
                 return
         self.destroy()
+    
+    def _get_app_instance(self, widget):
+        """Walk up widget hierarchy to find CourseMate app instance."""
+        try:
+            current = widget
+            while current:
+                if isinstance(current, CourseMate):
+                    return current
+                current = current.master if hasattr(current, 'master') else None
+        except Exception:
+            pass
+        return None
 
 
 # Small modal dialog for input (replaces simpledialog.askstring)
 class InputDialog(ctk.CTkToplevel):
+    """Generic single-field input dialog used in place of simpledialog.askstring."""
     def __init__(self, master, title, prompt, initialvalue=""):
         super().__init__(master)
         self.title(title)
@@ -1154,10 +1206,16 @@ class InputDialog(ctk.CTkToplevel):
             pass
 
         self.result = None
+        
+        # Get app instance for font access
+        app = self._get_app_instance(master)
+        font_normal = app.get_font(-3) if app else ("Open Sans", 11)
 
-        ctk.CTkLabel(self, text=prompt, font=("Open Sans", 11)).pack(pady=(20, 10), padx=20, anchor="w")
+        ctk.CTkLabel(self, text=prompt, font=font_normal).pack(pady=(20, 10), padx=20, anchor="w")
 
-        self.entry = ctk.CTkEntry(self, width=360)
+        self.entry = ctk.CTkEntry(self, width=360,
+                                   fg_color=master.colors.get('card_bg', master.colors['background']),
+                                   text_color=master.colors['main_text'])
         self.entry.pack(padx=20, pady=(0, 20))
         self.entry.insert(0, initialvalue)
         self.entry.focus()
@@ -1174,40 +1232,27 @@ class InputDialog(ctk.CTkToplevel):
     def _on_ok(self):
         self.result = self.entry.get().strip()
         self.destroy()
+    
+    def _get_app_instance(self, widget):
+        """Walk up widget hierarchy to find CourseMate app instance."""
+        try:
+            current = widget
+            while current:
+                if isinstance(current, CourseMate):
+                    return current
+                current = current.master if hasattr(current, 'master') else None
+        except Exception:
+            pass
+        return None
 
 
 class HomeView:
-    TEMPLATES = {
-        "Cornell Notes": "Title: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_",
-        "Main Idea & Details": "Main Idea: ___\n\nDetail 1:\n-\n\nDetail 2:\n-\n\nDetail 3:\n-\n\nSummary:\n-",
-        "Modified Frayer Model": "Definition:\n-\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-",
-        "Polya's 4 Steps": "1. Understand the Problem:\n-\n\n2. Devise a Plan:\n-\n\n3. Carry Out the Plan:\n-\n\n4. Look Back:\n-",
-        "5W1H": "Who:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\n\nWhy:\n-\n\nHow:\n-",
-        "Concept Map": "Central Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n-"
-    }
+    """Primary note authoring view.
 
-    def __init__(self, master, data_manager, colors, app):
-        self.master = master
-        self.data_manager = data_manager
-        self.colors = colors
-        self.app = app
-        # Load custom templates
-        custom_templates = data_manager.get_settings().get("custom_templates", {})
-        self.TEMPLATES.update(custom_templates)
-        # Main container with two columns
-        self.container = ctk.CTkFrame(master, fg_color="transparent")
-        self.container.pack(fill="both", expand=True, padx=20, pady=20)
-        # Left Column: Write Frame (70% width)
-        self.write_frame = ctk.CTkFrame(self.container, fg_color=colors['card_bg'], corner_radius=15)
-        self.write_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
-        # Right Column: Notes List (30% width)
-        self.notes_frame = ctk.CTkFrame(self.container, fg_color=colors['card_bg'], corner_radius=15, width=300)
-        self.notes_frame.pack(side="right", fill="y", padx=(10, 0))
-        self._setup_write_ui()
-        self._setup_notes_ui()
-    # ...existing HomeView methods go here...
-
-# TemplateDialog will be defined after HomeView methods to avoid interrupting the class body
+    Provides template insertion, notebook assignment, hashtag-based tagging,
+    and plain-text editing with lightweight bullet assistance.
+    """
+    # Removed legacy duplicate initialization block.
     TEMPLATES = {
         "Cornell Notes": "Title: \n\nQuestion/Keyword\n-\n-\n\nNotes\n-\n-\n\nSummary\n-\n_",
         "Main Idea & Details": "Main Idea: ___\n\nDetail 1:\n-\n\nDetail 2:\n-\n\nDetail 3:\n-\n\nSummary:\n-",
@@ -1283,7 +1328,8 @@ class HomeView:
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
-            width=180
+            width=180,
+            font=self.app.get_font(0)
         )
         self.study_template_dropdown.pack(side="left")
         # Planner (additional) templates dropdown
@@ -1297,18 +1343,17 @@ class HomeView:
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
-            width=180
+            width=180,
+            font=self.app.get_font(0)
         )
         self.planner_template_dropdown.pack(side="left")
 
-        # Second row for action buttons to reduce crowding
+        # Actions row (Save only). Clear content relocated above textbox.
         self.actions_frame = ctk.CTkFrame(self.write_frame, fg_color="transparent")
         self.actions_frame.pack(fill="x", padx=20, pady=(0, 10))
-        # Clear on the left (west), Save on the right (east)
-        ctk.CTkButton(self.actions_frame, text="Clear", command=self.clear_write_area,
-                  fg_color=self.colors['danger'], hover_color='#c0392b', text_color="white", width=90).pack(side="left", pady=(2,0))
         ctk.CTkButton(self.actions_frame, text="Save Note", command=self.save_note,
-                  fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=110).pack(side="right", pady=(2,0))
+              fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=110,
+              font=self.app.get_font(0, "bold")).pack(side="right", pady=(2,0))
         # Title Entry
         self.title_entry = ctk.CTkEntry(self.write_frame, placeholder_text="Note Title (Required)", 
                 font=self.app.get_font(0, "bold"), height=40,
@@ -1320,11 +1365,23 @@ class HomeView:
         # Note: tags are now embedded directly in content as hashtags (e.g. #math).
         # We no longer present a separate tag entry or chips UI in the write area.
         
-        # Text Area
-        self.text_area = ctk.CTkTextbox(self.write_frame, font=self.app.get_font(0), 
-                fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                wrap="word", corner_radius=10)
+        # Clear Content button above textbox
+        content_controls = ctk.CTkFrame(self.write_frame, fg_color="transparent")
+        content_controls.pack(fill="x", padx=20, pady=(0,4))
+        ctk.CTkButton(content_controls, text="Clear Content", command=self.clear_content_area,
+              fg_color=self.colors['danger'], hover_color='#c0392b', text_color="white", width=120,
+              font=self.app.get_font(-1, "bold")).pack(side="right")
+        # Text Area with placeholder support
+        self.text_area = ctk.CTkTextbox(self.write_frame, font=self.app.get_font(0),
+            fg_color=self.colors['background'], text_color=self.colors['main_text'],
+            wrap="word", corner_radius=10)
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        self._content_placeholder_text = (
+            "Start writing your note here... Use #hashtags (e.g. #math). "
+            "Type '- ' (dash-space) for bullets; press Enter to continue the list."
+        )
+        self._placeholder_active = False
+        self._init_content_placeholder()
         
         # Formatting model removed; plain text only.
         
@@ -1363,7 +1420,8 @@ class HomeView:
             self.notebook_dropdown = ctk.CTkOptionMenu(self.controls_frame, variable=self.notebook_var, values=notebooks,
                                                        command=self.handle_notebook_selection,
                                                        fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('accent'),
-                                                       text_color=self.colors.get('dropdown_text', 'white'), width=180)
+                                                       text_color=self.colors.get('dropdown_text', 'white'), width=180,
+                                                       font=self.app.get_font(0))
             self.notebook_dropdown.pack(side="left", padx=(0, 20))
 
     def _setup_notes_ui(self):
@@ -1375,9 +1433,9 @@ class HomeView:
         search_frame = ctk.CTkFrame(self.notes_frame, fg_color="transparent")
         search_frame.pack(fill="x", padx=20, pady=(0, 10))
         
-        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Filter unassigned notes...", 
+        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Find by name, tags, and keywords", 
                                          fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30)
+                                         height=30, font=self.app.get_font(0))
         self.search_entry.pack(side="left", fill="x", expand=True)
         self.search_entry.bind("<KeyRelease>", self.filter_notes)
         
@@ -1451,50 +1509,116 @@ class HomeView:
              self.master.master.sidebar.refresh_notebooks_list()
              self.master.master.sidebar.refresh_stats()
 
+    def clear_content_area(self):
+        """Clear only the content textbox and restore placeholder (title remains)."""
+        current = self.text_area.get("1.0", "end-1c").strip()
+        if not current:
+            return
+        if messagebox.askyesno("Clear Content", "Clear all note content? Title will remain."):
+            self.text_area.delete("1.0", "end")
+            self._restore_content_placeholder_if_empty()
+
     def clear_write_area(self):
+        """Legacy full clear (title + content); retained for compatibility."""
         if not self.text_area.get("1.0", "end-1c").strip() and not self.title_entry.get().strip():
-            return # Already empty
-            
-        if messagebox.askyesno("Clear Note", "Are you sure you want to clear the current note?"):
+            return
+        if messagebox.askyesno("Clear Note", "Are you sure you want to clear the current note (title + content)?"):
             self.title_entry.delete(0, "end")
             self.text_area.delete("1.0", "end")
             self.notebook_var.set("• Unassigned Notes")
-            # Reset both template dropdowns
             try:
                 self.study_template_var.set("Select...")
                 self.planner_template_var.set("Select...")
             except Exception:
                 pass
+            self._restore_content_placeholder_if_empty()
     
     # Formatting toolbar removed.
     def _on_text_area_key_release(self, event):
-        """Handle key releases: auto-bullet + hashtag highlight."""
+        """Handle key releases: auto-bullet conversion, continuation + hashtag highlight."""
         if event.keysym == "Return":
             self._handle_enter_key()
+        elif event.keysym == "space":
+            self._convert_dash_to_bullet()
         try:
             highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
         except Exception:
             pass
     
-    # Removed _sync_content_model; no model exists.
-    
-    def _handle_enter_key(self):
-        """Auto-create bullet on next line if current line has bullet and content."""
+    def _convert_dash_to_bullet(self):
+        """Convert '- ' to '• ' when user types dash-space."""
         try:
-            text_content = self.text_area.get("1.0", "end-1c")
             cursor_pos = self.text_area.index("insert")
             line_num = int(cursor_pos.split('.')[0])
             col_num = int(cursor_pos.split('.')[1])
             
-            # Get current line content
+            # Get current line content up to cursor
             line_start = f"{line_num}.0"
-            line_end = f"{line_num}.end"
-            current_line = self.text_area.get(line_start, line_end)
+            current_line = self.text_area.get(line_start, cursor_pos)
             
-            # Check if current line starts with bullet and has content after bullet
-            if current_line.startswith('• ') and len(current_line.strip()) > 2:
-                # Schedule bullet addition on next line
-                self.after(10, lambda: self._add_bullet_to_next_line(line_num + 1))
+            # Check if line ends with "- " (dash + space we just typed)
+            if current_line.endswith("- "):
+                # Remove the "- " and insert "• "
+                delete_start = f"{line_num}.{col_num - 2}"
+                self.text_area.delete(delete_start, cursor_pos)
+                self.text_area.insert(delete_start, "• ")
+        except Exception:
+            pass
+
+    def _init_content_placeholder(self):
+        """Insert placeholder text if empty; style with secondary color."""
+        if self.text_area.get("1.0", "end-1c").strip():
+            return
+        if not self._placeholder_active:
+            self._placeholder_active = True
+            self.text_area.insert("1.0", self._content_placeholder_text)
+            self.text_area.configure(text_color=self.colors.get('muted', '#9aa6b1'))
+        # Event bindings (repeat binds acceptable)
+        self.text_area.bind("<FocusIn>", lambda e: self._remove_content_placeholder_if_needed())
+        self.text_area.bind("<KeyPress>", lambda e: self._remove_content_placeholder_if_needed())
+        self.text_area.bind("<FocusOut>", lambda e: self._restore_content_placeholder_if_empty())
+
+    def _remove_content_placeholder_if_needed(self):
+        if self._placeholder_active:
+            current = self.text_area.get("1.0", "end-1c")
+            if current == self._content_placeholder_text:
+                self.text_area.delete("1.0", "end")
+            self._placeholder_active = False
+            self.text_area.configure(text_color=self.colors.get('main_text', '#000000'))
+
+    def _restore_content_placeholder_if_empty(self):
+        if not self.text_area.get("1.0", "end-1c").strip():
+            self._placeholder_active = False
+            self._init_content_placeholder()
+    
+    # Removed _sync_content_model; no model exists.
+    
+    def _handle_enter_key(self):
+        """Auto-create bullet on next line if current line has bullet and content.
+        Remove empty bullet if Enter pressed on bullet-only line."""
+        try:
+            # Note: When this is called, cursor is already on the NEW line after Enter
+            cursor_pos = self.text_area.index("insert")
+            current_line_num = int(cursor_pos.split('.')[0])
+            
+            # The line we just left is the previous line
+            prev_line_num = current_line_num - 1
+            if prev_line_num > 0:
+                prev_line_start = f"{prev_line_num}.0"
+                prev_line_end = f"{prev_line_num}.end"
+                prev_line = self.text_area.get(prev_line_start, prev_line_end)
+                
+                # If previous line is just "• " with nothing else, remove it and don't add new bullet
+                if prev_line.strip() == "•":
+                    self.text_area.delete(prev_line_start, f"{prev_line_num}.end")
+                    # Also remove the newline we just created
+                    self.text_area.delete(f"{prev_line_num}.end", cursor_pos)
+                    return
+                
+                # If previous line has bullet and content, add bullet to current (new) line
+                if prev_line.startswith('• ') and len(prev_line.strip()) > 1:
+                    # Add bullet to current line immediately
+                    self.text_area.insert(cursor_pos, "• ")
         except Exception:
             pass
     
@@ -1526,8 +1650,14 @@ class HomeView:
     # Formatting button handlers removed.
 
     def save_note(self):
+        """Persist the authored note.
+
+        Extracts hashtags from content, validates duplicate titles, and stores
+        into either a selected notebook or the unassigned notes collection.
+        """
         title = self.title_entry.get().strip()
-        content = self.text_area.get("1.0", "end-1c").strip()
+        raw_content = self.text_area.get("1.0", "end-1c").strip()
+        content = "" if (self._placeholder_active and raw_content == self._content_placeholder_text.strip()) else raw_content
         assigned_notebook = self.notebook_var.get()
         
         # Extract tags from content (hashtags written in the text area)
@@ -1586,6 +1716,7 @@ class HomeView:
     # Tags are now embedded in content; write-area tag helpers removed.
 
     def refresh_notes_list(self):
+        """Rebuild the unassigned notes list applying search filtering."""
         for widget in self.notes_list.winfo_children():
             widget.destroy()
             
@@ -1672,10 +1803,11 @@ class HomeView:
             lbl_tags.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
 
     def open_note_window(self, note):
-        # Open note in new window
+        """Open a dedicated window for viewing / editing a single note."""
         NoteWindow(self.master, note, self.colors, self.data_manager, self.refresh_notes_list)
 
 class NoteWindow(ctk.CTkToplevel):
+    """Modal editor for an individual note with word count, move/export features."""
     def __init__(self, master, note, colors, data_manager, callback):
         super().__init__(master)
         self.title(note.get('title', 'Note'))
@@ -1766,16 +1898,16 @@ class NoteWindow(ctk.CTkToplevel):
         actions_frame.pack(fill="x", padx=20, pady=(0, 20))
         
         # Save Button
-        ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white").pack(side="left", padx=(0, 10))
+        ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white", font=get_font(0)).pack(side="left", padx=(0, 10))
         
         # Export Button
-        ctk.CTkButton(actions_frame, text="Export", command=self.export_note, fg_color=colors['info'], text_color="white", width=80).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(actions_frame, text="Export", command=self.export_note, fg_color=colors['info'], text_color="white", width=80, font=get_font(0)).pack(side="left", padx=(0, 10))
 
         # Copy Button
-        ctk.CTkButton(actions_frame, text="Copy", command=self.copy_content, fg_color=colors['accent'], text_color="white", width=80).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(actions_frame, text="Copy", command=self.copy_content, fg_color=colors['accent'], text_color="white", width=80, font=get_font(0)).pack(side="left", padx=(0, 10))
 
         # Delete Button
-        ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white").pack(side="right")
+        ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white", font=get_font(0)).pack(side="right")
         
         # Move to Notebook
         move_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -1803,12 +1935,12 @@ class NoteWindow(ctk.CTkToplevel):
             
         self.notebook_dropdown = ctk.CTkOptionMenu(move_frame, variable=self.notebook_var, values=notebooks,
                        fg_color=colors.get('dropdown_bg', colors['main_text']), button_color=colors.get('accent'),
-                       text_color=colors.get('dropdown_text', 'white'))
+                       text_color=colors.get('dropdown_text', 'white'), font=get_font(0))
         self.notebook_dropdown.pack(side="left", padx=(0, 10))
 
         # Move Button
         ctk.CTkButton(move_frame, text="Move", command=self.move_note, width=60,
-                      fg_color=colors['info'], text_color="white").pack(side="left")
+                      fg_color=colors['info'], text_color="white", font=get_font(0)).pack(side="left")
 
     def update_word_count(self, event=None):
         text = self.text_area.get("1.0", "end-1c")
@@ -2025,17 +2157,17 @@ class EditNotebookDialog(ctk.CTkToplevel):
         
         # Notebook Name
         ctk.CTkLabel(self, text="Notebook Name:", font=get_font(-1), text_color=colors['main_text']).pack(anchor="w", padx=50, pady=(5, 0))
-        self.name_entry = ctk.CTkEntry(self, placeholder_text="Notebook Name (Required)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'])
+        self.name_entry = ctk.CTkEntry(self, placeholder_text="Notebook Name (Required)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'], font=get_font(-1))
         self.name_entry.pack(pady=(0, 10))
         
         # Course Code
         ctk.CTkLabel(self, text="Course Code:", font=get_font(-1), text_color=colors['main_text']).pack(anchor="w", padx=50, pady=(5, 0))
-        self.code_entry = ctk.CTkEntry(self, placeholder_text="Course Code (Required)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'])
+        self.code_entry = ctk.CTkEntry(self, placeholder_text="Course Code (Required)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'], font=get_font(-1))
         self.code_entry.pack(pady=(0, 10))
         
         # Instructor
         ctk.CTkLabel(self, text="Instructor:", font=get_font(-1), text_color=colors['main_text']).pack(anchor="w", padx=50, pady=(5, 0))
-        self.instructor_entry = ctk.CTkEntry(self, placeholder_text="Instructor (Optional)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'])
+        self.instructor_entry = ctk.CTkEntry(self, placeholder_text="Instructor (Optional)", width=300, fg_color=colors['card_bg'], text_color=colors['main_text'], font=get_font(-1))
         self.instructor_entry.pack(pady=(0, 10))
         
         # If editing, populate with current values
@@ -2177,9 +2309,9 @@ class NotebooksView:
         search_frame = ctk.CTkFrame(self.container, fg_color="transparent")
         search_frame.pack(fill="x", padx=0, pady=(0, 10))
         
-        self.notebook_search_entry = ctk.CTkEntry(search_frame, placeholder_text="Filter notebooks...", 
+        self.notebook_search_entry = ctk.CTkEntry(search_frame, placeholder_text="Find by name and course code", 
                                          fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30)
+                                         height=30, font=self.master.master.get_font(0))
         self.notebook_search_entry.pack(side="left", fill="x", expand=True)
         self.notebook_search_entry.bind("<KeyRelease>", self.filter_notebooks)
         
@@ -2341,9 +2473,9 @@ class NotebooksView:
         search_frame = ctk.CTkFrame(self.container, fg_color="transparent")
         search_frame.pack(fill="x", padx=0, pady=(0, 10))
         
-        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Filter notes...", 
+        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Find by name, tags, and keywords", 
                                          fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30)
+                                         height=30, font=self.master.master.get_font(0))
         self.search_entry.pack(side="left", fill="x", expand=True)
         self.search_entry.bind("<KeyRelease>", self.filter_notes)
                
@@ -2603,7 +2735,8 @@ class SettingsView:
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
-            width=control_width
+            width=control_width,
+            font=self.master.master.get_font(0)
         )
         theme_menu.grid(row=0, column=1, sticky="e", padx=(30, 0))
         
@@ -2624,7 +2757,8 @@ class SettingsView:
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
-            width=control_width
+            width=control_width,
+            font=self.master.master.get_font(0)
         )
         font_menu.grid(row=0, column=1, sticky="e", padx=(30, 0))
         # Font Size
@@ -2644,7 +2778,8 @@ class SettingsView:
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
-            width=control_width
+            width=control_width,
+            font=self.master.master.get_font(0)
         )
         size_menu.grid(row=0, column=1, sticky="e", padx=(30, 0))
 
@@ -2716,23 +2851,23 @@ class SettingsView:
         row1.pack(fill="x", padx=20, pady=5)
         ctk.CTkLabel(row1, text="Change Quote Every (seconds):", font=self.master.master.get_font(0), text_color=self.colors['main_text']).pack(side="left")
         
-        self.timer_entry = ctk.CTkEntry(row1, width=60, placeholder_text="30", fg_color=self.colors['background'], text_color=self.colors['main_text'])
+        self.timer_entry = ctk.CTkEntry(row1, width=60, placeholder_text="e.g. 30", fg_color=self.colors['background'], text_color=self.colors['main_text'], font=self.master.master.get_font(0))
         self.timer_entry.insert(0, str(self.settings.get("quote_timer", 30)))
         self.timer_entry.pack(side="left", padx=10)
         
         ctk.CTkButton(row1, text="Save Timer", width=80, command=self.save_timer,
-                      fg_color=self.colors['info']).pack(side="left")
+                      fg_color=self.colors['info'], font=self.master.master.get_font(0)).pack(side="left")
         
         # Add Quote
         row2 = ctk.CTkFrame(frame, fg_color="transparent")
         row2.pack(fill="x", padx=20, pady=(15, 5))
         ctk.CTkLabel(row2, text="Add New Quote:", font=self.master.master.get_font(0), text_color=self.colors['main_text']).pack(anchor="w")
         
-        self.quote_entry = ctk.CTkEntry(row2, placeholder_text="Enter a favorite quote...", fg_color=self.colors['background'], text_color=self.colors['main_text'])
+        self.quote_entry = ctk.CTkEntry(row2, placeholder_text="Enter an inspirational quote with author...", fg_color=self.colors['background'], text_color=self.colors['main_text'], font=self.master.master.get_font(0))
         self.quote_entry.pack(fill="x", pady=5)
         
         ctk.CTkButton(row2, text="Add Quote", command=self.add_quote,
-                  fg_color=self.colors['success']).pack(anchor="e", pady=5)
+                  fg_color=self.colors['success'], font=self.master.master.get_font(0)).pack(anchor="e", pady=5)
 
         # Quotes display area (shows all saved quotes, default + user-added)
         self.quotes_display_frame = ctk.CTkFrame(frame, fg_color="transparent")
@@ -2773,7 +2908,7 @@ class SettingsView:
         form.pack(fill="x", padx=20, pady=(0, 6))
 
         ctk.CTkLabel(form, text="Title", font=self.master.master.get_font(0), text_color=self.colors['main_text']).grid(row=0, column=0, sticky="w", padx=(0,8), pady=(0,6))
-        self.new_template_title = ctk.CTkEntry(form, placeholder_text="Template Title", fg_color=self.colors['background'], text_color=self.colors['main_text'])
+        self.new_template_title = ctk.CTkEntry(form, placeholder_text="e.g. My Custom Study Template", fg_color=self.colors['background'], text_color=self.colors['main_text'], font=self.master.master.get_font(0))
         self.new_template_title.grid(row=0, column=1, sticky="ew", pady=(0,6))
 
         ctk.CTkLabel(form, text="Category", font=self.master.master.get_font(0), text_color=self.colors['main_text']).grid(row=0, column=2, sticky="w", padx=(16,8))
@@ -2785,7 +2920,8 @@ class SettingsView:
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
-            width=120
+            width=120,
+            font=self.master.master.get_font(0)
         )
         self.new_template_category_menu.grid(row=0, column=3, sticky="w")
         form.grid_columnconfigure(1, weight=1)
@@ -2793,12 +2929,17 @@ class SettingsView:
         # Content textbox (full width)
         self.new_template_text = ctk.CTkTextbox(self.templates_frame, height=120, fg_color=self.colors['background'], text_color=self.colors['main_text'])
         self.new_template_text.pack(fill="x", padx=20, pady=(0, 8))
+        
+        # Placeholder support for template content
+        self._template_placeholder_text = "Enter template structure here...\n\nFor Study Templates (e.g., Cornell Notes, Concept Maps):\nTopic: \n\nKey Points:\n- \n- \n\nSummary:\n- \n\nFor Planner Templates (e.g., Daily/Weekly Plans):\nDate: \n\nTasks:\n- [ ] \n- [ ] \n\nNotes:\n- "
+        self._template_placeholder_active = False
+        self._init_template_placeholder()
 
         # Action buttons
         btns = ctk.CTkFrame(self.templates_frame, fg_color="transparent")
         btns.pack(fill="x", padx=20, pady=(0, 15))
-        ctk.CTkButton(btns, text="Clear", width=100, fg_color=self.colors['danger'], command=self.clear_new_template_inputs).pack(side="left")
-        ctk.CTkButton(btns, text="Add Template", width=130, fg_color=self.colors['success'], command=self.add_new_template).pack(side="right")
+        ctk.CTkButton(btns, text="Clear", width=100, fg_color=self.colors['danger'], command=self.clear_new_template_inputs, font=self.master.master.get_font(0)).pack(side="left")
+        ctk.CTkButton(btns, text="Add Template", width=130, fg_color=self.colors['success'], command=self.add_new_template, font=self.master.master.get_font(0)).pack(side="right")
 
         # --- Separator line ---
         separator2 = ctk.CTkFrame(self.templates_frame, fg_color=self.colors.get('card_border', self.colors['secondary_text']), height=1)
@@ -2832,7 +2973,8 @@ class SettingsView:
             actions = ctk.CTkFrame(row, fg_color="transparent")
             actions.pack(side="right", padx=12, pady=2)
             ctk.CTkButton(actions, text="Edit", width=72, height=26, fg_color=self.colors['info'],
-                          command=lambda t=title: self.edit_template_dialog(t, "Study")).pack(side="left")
+                          command=lambda t=title: self.edit_template_dialog(t, "Study"),
+                          font=self.master.master.get_font(-1)).pack(side="left")
 
         # Right Column: Planner Templates
         planner_column = ctk.CTkFrame(columns_container, fg_color="transparent")
@@ -2854,9 +2996,11 @@ class SettingsView:
             actions = ctk.CTkFrame(row, fg_color="transparent")
             actions.pack(side="right", padx=12, pady=4)
             ctk.CTkButton(actions, text="Edit", width=72, height=26, fg_color=self.colors['info'],
-                          command=lambda t=title: self.edit_template_dialog(t, "Planner")).pack(side="left", padx=(0,8))
+                          command=lambda t=title: self.edit_template_dialog(t, "Planner"),
+                          font=self.master.master.get_font(-1)).pack(side="left", padx=(0,8))
             ctk.CTkButton(actions, text="Delete", width=72, height=26, fg_color=self.colors['danger'],
-                          command=lambda t=title: self.delete_template(t, "Planner")).pack(side="left")
+                          command=lambda t=title: self.delete_template(t, "Planner"),
+                          font=self.master.master.get_font(-1)).pack(side="left")
 
     def update_setting(self, key, value):
         self.data_manager.update_setting(key, value)
@@ -2969,9 +3113,9 @@ class SettingsView:
             actions.pack(side="right", padx=8, pady=6)
 
             # Edit button
-            ctk.CTkButton(actions, text="Edit", width=70, height=28, fg_color=self.colors['info'], command=lambda i=idx: self.edit_quote(i)).pack(side="left", padx=(0,6))
+            ctk.CTkButton(actions, text="Edit", width=70, height=28, fg_color=self.colors['info'], command=lambda i=idx: self.edit_quote(i), font=self.master.master.get_font(-1)).pack(side="left", padx=(0,6))
             # Delete button
-            ctk.CTkButton(actions, text="Delete", width=70, height=28, fg_color=self.colors['danger'], command=lambda i=idx: self.delete_quote(i)).pack(side="left")
+            ctk.CTkButton(actions, text="Delete", width=70, height=28, fg_color=self.colors['danger'], command=lambda i=idx: self.delete_quote(i), font=self.master.master.get_font(-1)).pack(side="left")
 
     def edit_quote(self, index):
         """Edit an existing quote by index."""
@@ -3007,7 +3151,9 @@ class SettingsView:
 
     def add_new_template(self):
         title = (self.new_template_title.get() or "").strip()
-        content = (self.new_template_text.get("1.0", "end-1c") or "").strip()
+        raw_content = (self.new_template_text.get("1.0", "end-1c") or "").strip()
+        # Exclude placeholder from content
+        content = "" if (self._template_placeholder_active and raw_content == self._template_placeholder_text.strip()) else raw_content
         category = self.new_template_category.get()
         if not title or not content:
             messagebox.showwarning("Invalid", "Please enter both a title and content.")
@@ -3035,6 +3181,45 @@ class SettingsView:
             self.new_template_title.delete(0, "end")
             self.new_template_text.delete("1.0", "end")
             self.new_template_category.set("Study")
+            self._template_placeholder_active = False
+            self._init_template_placeholder()
+        except Exception:
+            pass
+
+    def _init_template_placeholder(self):
+        """Insert placeholder text in template content if empty."""
+        try:
+            if self.new_template_text.get("1.0", "end-1c").strip():
+                return
+            if not self._template_placeholder_active:
+                self._template_placeholder_active = True
+                self.new_template_text.insert("1.0", self._template_placeholder_text)
+                self.new_template_text.configure(text_color=self.colors.get('muted', '#9aa6b1'))
+            # Event bindings
+            self.new_template_text.bind("<FocusIn>", lambda e: self._remove_template_placeholder())
+            self.new_template_text.bind("<KeyPress>", lambda e: self._remove_template_placeholder())
+            self.new_template_text.bind("<FocusOut>", lambda e: self._restore_template_placeholder())
+        except Exception:
+            pass
+    
+    def _remove_template_placeholder(self):
+        """Remove placeholder when user starts typing."""
+        try:
+            if self._template_placeholder_active:
+                current = self.new_template_text.get("1.0", "end-1c")
+                if current == self._template_placeholder_text:
+                    self.new_template_text.delete("1.0", "end")
+                self._template_placeholder_active = False
+                self.new_template_text.configure(text_color=self.colors.get('main_text', '#000000'))
+        except Exception:
+            pass
+    
+    def _restore_template_placeholder(self):
+        """Restore placeholder if textbox is empty."""
+        try:
+            if not self.new_template_text.get("1.0", "end-1c").strip():
+                self._template_placeholder_active = False
+                self._init_template_placeholder()
         except Exception:
             pass
 
