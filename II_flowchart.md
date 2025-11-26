@@ -24,7 +24,7 @@
 ┌─────────────────┐     ┌─────────────────┐
 │   Home View     │     │   Navigation    │
 │                 │     │                 │
-│ • Write Notes   │     │ • Home Button   │
+│ • Write Notes (hashtags inline)   │     │ • Home Button   │
 │ • Select Template│     │ • Notebooks     │
 │ • Assign to NB   │     │ • Settings      │
 │ • View Notes     │     │                 │
@@ -136,4 +136,5 @@ Notes/Notebooks UI flows and shapes are now aligned with the new edits:
 If you want, I can render a simple PNG export of the flowchart or produce a draw.io / mermaid diagram with exact coordinates and shape types for your presentation. Which format do you prefer for the mock defense: PNG or Mermaid (text diagram)?
 
 Note on tags (UI update):
-- Tag sanitization & visual chips live-update when typing or when templates are applied. This is a small UI flow that should be shown at the point where notes are created or edited; draw it as an Input/Output box -> Process (sanitize) -> Process (render chips) -> DataManager save.
+- Tag sanitization is preserved, but the UX rose to a simpler model: hashtags are typed inline inside notes and are highlighted as you type. On save, the app extracts, normalizes, and persists hashtags into the note's tag list.
+    Draw the flow as: Content (user types note with #hashtags) -> Process (extract & sanitize tags) -> DataManager save.

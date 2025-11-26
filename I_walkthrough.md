@@ -1,18 +1,15 @@
-## Tags UX improvements (added Nov 26, 2025)
+## Tags UX update (added Nov 26, 2025)
 
-Two small but important UX changes were added to make tags easier to use and less error-prone:
+CourseMate now handles tags as in-content hashtags. Instead of a separate tag entry and chips UI, users type hashtags directly into the note content (for example, "#exam" or "#main-idea"). Highlights and extraction rules:
 
-- Tag sanitization: tags are now normalized and deduplicated automatically in both the Home write flow and the Note editor. Normalization rules:
-    - Strips punctuation, lowercases characters, collapses whitespace and joins words with hyphens
-    - Ensures each tag is prefixed with a single `#` and duplicates are removed
-    - Example: ` , #Cornell Notes, cornell-notes, #cornell NOTES  ,` becomes `#cornell-notes`
+- Hashtag extraction and sanitization: on save, hashtags embedded in the text are detected, normalized and de-duplicated before being persisted into the note's `tags` list.
+    - Normalization rules: strips punctuation, lowercases characters, collapses whitespace and joins words with hyphens
+    - Each stored tag is canonicalized and stored with a leading `#` (e.g. `#cornell-notes`)
+    - Example: text containing `#Cornell Notes` will persist as `#cornell-notes` in the data model
 
-- Tag chips: the tags field now renders visual tag "chips" below the tags entry in the Write area and the Note editor. These chips:
-    - Help users see what tags are currently applied in a glance
-    - Allow quick removal (click the ✕ on a chip)
-    - Update live as you type or when a template automatically adds a tag
+- Inline editing model: there is no tags sidebar or chips UI anymore. Hashtags are highlighted inside the content area as-you-type; on Save / Export the app extracts them and stores them in the note metadata.
 
-These improvements prevent duplicate/dirty tags, make the template-to-tag convention easier to demo, and improve the overall UX when preparing notes for the mock defense.
+This simplifies the UX and reduces duplication — tags are now kept in a single place (the note content) and the UI highlights them for quick scanning.
 # CourseMate Code Walkthrough
 
 ## Introduction
@@ -165,14 +162,11 @@ What was added
     - Weekly Planning
 
 Tags and edge cases
-- Several notes include example tags (e.g. `#ethics`, `#planner`, `#cornell`, `#exercise`), and the Note editor now sanitizes whitespace-only tag inputs so the placeholder is visible and tags are normalized on save.
+ - Several notes include example tags (e.g. `#ethics`, `#planner`, `#cornell`, `#exercise`). The Note editor highlights in-content hashtags and extracts/normalizes them on save.
 
 Tag sidebar & overflow handling
 
-If users add a large number of tags, the UI will no longer expand and push other elements because:
-
-- Chips are rendered inside a bounded scrollable frame (fixed height) so the main layout remains stable.
-- A separate "Open Tag Sidebar" button is available in both the Home write area and the Note editor; opening it displays a small popup with a scrollable list of tags and per-tag "Remove" buttons so you can manage many tags comfortably.
+If users add a large number of tags, tags remain inline in the content and will not expand any additional tag UI layers — tagging is handled within the note text itself.
 
 How to validate these scenarios locally
 1. Open the app and go to "Notebooks" → pick a notebook (e.g. "Purposive Communication" or "Ethics in Computing").

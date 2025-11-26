@@ -5,6 +5,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 import re
+from tags_utils import extract_hashtags_from_text
 
 
 # ------------------------
@@ -50,6 +51,73 @@ def sanitize_tags_from_text(text: str) -> list:
         seen.add(token)
         out.append('#' + token)
     return out
+
+
+# ------------------------
+# Hashtag highlighting helpers
+# ------------------------
+def _get_underlying_text_widget(ctk_textbox):
+    """Try to find the underlying tk.Text widget for a CTkTextbox.
+    CTkTextbox implementations vary; try several common attribute names then fall back to the object itself.
+    """
+    if ctk_textbox is None:
+        return None
+    # Common internal attribute names used by CTkTextbox wrappers
+    candidates = ['_text', 'textbox', 'text', 'text_widget', '_textbox', '_text_widget']
+    for a in candidates:
+        if hasattr(ctk_textbox, a):
+            candidate = getattr(ctk_textbox, a)
+            # Most likely candidate will be a tk.Text instance
+            if isinstance(candidate, tk.Text):
+                return candidate
+    # If the provided object is itself a tk.Text, return it
+    if isinstance(ctk_textbox, tk.Text):
+        return ctk_textbox
+    return None
+
+
+def highlight_hashtags_in_textbox(ctk_textbox, fg_color="#4a90e2"):
+    """Highlight hashtag ranges in a CTkTextbox (falls back gracefully if internals differ).
+
+    This will add a 'hashtag' tag colored with fg_color over any '#token' occurrences.
+    """
+    tk_text = _get_underlying_text_widget(ctk_textbox)
+    if tk_text is None:
+        return
+    try:
+        # Remove any previous ranges for this tag and configure appearance
+        try:
+            tk_text.tag_remove('hashtag', '1.0', 'end')
+        except Exception:
+            pass
+        try:
+            tk_text.tag_configure('hashtag', foreground=fg_color)
+        except Exception:
+            pass
+
+        content = tk_text.get('1.0', 'end-1c')
+        for m in re.finditer(r"#([0-9A-Za-z_-]+)", content):
+            s = m.start()
+            e = m.end()
+            # Convert absolute char offsets into Tk text indices (line.column)
+            line = content.count('\n', 0, s) + 1
+            prev_nl = content.rfind('\n', 0, s)
+            col = s - (prev_nl + 1) if prev_nl != -1 else s
+            start_index = f"{line}.{col}"
+
+            line_e = content.count('\n', 0, e) + 1
+            prev_nl_e = content.rfind('\n', 0, e)
+            col_e = e - (prev_nl_e + 1) if prev_nl_e != -1 else e
+            end_index = f"{line_e}.{col_e}"
+
+            try:
+                tk_text.tag_add('hashtag', start_index, end_index)
+            except Exception:
+                # Some underlying widget API might reject indexes from our calc — ignore
+                pass
+    except Exception:
+        # Be defensive: never allow tagging to break the app
+        pass
 import ctypes
 import os
 
@@ -1242,71 +1310,21 @@ class HomeView:
                 fg_color=self.colors['background'], text_color=self.colors['main_text'], border_width=0)
         self.title_entry.pack(fill="x", padx=20, pady=(0, 10))
         
-        # Tags Entry
-        self.tags_entry = ctk.CTkEntry(self.write_frame, placeholder_text="Tags (comma separated, e.g. #exam, #math)", 
-                font=self.app.get_font(0), height=40,
-                fg_color=self.colors['background'], text_color=self.colors['main_text'], border_width=0)
-        self.tags_entry.pack(fill="x", padx=20, pady=(0, 10))
-        
-        # Tag chips area (horizontal scroller): render chips in a horizontally-scrollable canvas
-        # We keep `self.tags_chip_frame` as the inner frame so existing helper methods remain compatible.
-        self.tags_chip_container = ctk.CTkFrame(self.write_frame, fg_color="transparent")
-        self.tags_chip_container.pack(fill="x", padx=20, pady=(0, 10))
-
-        # canvas provides horizontal scrolling for a thin row of chips
-        self.tags_chip_canvas = tk.Canvas(
-            self.tags_chip_container,
-            height=44,
-            bd=0,
-            highlightthickness=0,
-            background=self.colors.get('background', '#ffffff'),
-            relief='flat'
-        )
-        self.tags_chip_canvas.pack(side='top', fill='x', expand=True)
-
-        # inner CTkFrame holds the chips; keep the name `tags_chip_frame` for compatibility
-        self.tags_chip_frame = ctk.CTkFrame(self.tags_chip_canvas, fg_color="transparent")
-        self.tags_chip_window = self.tags_chip_canvas.create_window((0, 0), window=self.tags_chip_frame, anchor='nw')
-
-        # horizontal scrollbar
-        self.tags_chip_scrollbar = tk.Scrollbar(self.tags_chip_container, orient='horizontal', command=self.tags_chip_canvas.xview)
-        self.tags_chip_scrollbar.pack(side='bottom', fill='x')
-        self.tags_chip_canvas.configure(xscrollcommand=self.tags_chip_scrollbar.set)
-
-        # keep canvas scrolled region in sync with inner frame size
-        def _sync_write_chip_scroll(event=None):
-            try:
-                self.tags_chip_canvas.configure(scrollregion=self.tags_chip_canvas.bbox('all'))
-            except Exception:
-                pass
-
-        # when inner frame changes size update scrollregion
-        self.tags_chip_frame.bind('<Configure>', lambda e: _sync_write_chip_scroll())
-
-        # Small control area for opening a separate tags sidebar (useful when many tags exist)
-        tags_ctrl = ctk.CTkFrame(self.write_frame, fg_color="transparent")
-        tags_ctrl.pack(fill="x", padx=20, pady=(0, 8))
-        ctk.CTkButton(tags_ctrl, text="Open Tag Sidebar", width=160, command=self._open_write_tag_sidebar, fg_color=self.colors.get('accent')).pack(side="right")
-
-        # Helper hint below tags field so users always see instructions even if placeholder doesn't render
-        ctk.CTkLabel(self.write_frame, text="Enter tags separated by commas — e.g. #exam, #math", font=self.app.get_font(-3), text_color=self.colors['secondary_text']).pack(anchor="w", padx=20, pady=(0, 10))
-        # Update chips live and sanitize on focus out
-        try:
-            self.tags_entry.bind("<KeyRelease>", lambda e: self._update_write_tag_chips())
-            self.tags_entry.bind("<FocusOut>", lambda e: self._sanitize_write_tags())
-        except Exception:
-            pass
-        # initial chips render in case tags_entry has pre-filled text
-        try:
-            self._update_write_tag_chips()
-        except Exception:
-            pass
+        # Note: tags are now embedded directly in content as hashtags (e.g. #math).
+        # We no longer present a separate tag entry or chips UI in the write area.
         
         # Text Area
         self.text_area = ctk.CTkTextbox(self.write_frame, font=self.app.get_font(0), 
                 fg_color=self.colors['background'], text_color=self.colors['main_text'],
                 wrap="word", corner_radius=10)
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # Highlight hashtags as user types
+        try:
+            self.text_area.bind("<KeyRelease>", lambda e: highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2')))
+            # ensure any initial content is highlighted
+            highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
+        except Exception:
+            pass
     def update_notebook_dropdown(self):
         # Add bullets to notebook names and truncate
         self.notebook_map = {} # Map display name -> full name
@@ -1382,27 +1400,16 @@ class HomeView:
                 token = '-'.join(token_base.split())
                 if token:
                     new_tag = f"#{token}"
-                    # Read existing tags from the entry (if present) and normalize
-                    existing_raw = self.tags_entry.get().strip() if hasattr(self, 'tags_entry') else ''
-                    if existing_raw:
-                        existing = [t.strip() for t in existing_raw.split(',') if t.strip()]
-                    else:
-                        existing = []
-                    # Build a set of normalized tag tokens (without '#') for dedup checking
-                    seen = {re.sub(r'[^0-9a-zA-Z]+', '', t.lstrip('#')).strip().lower() for t in existing}
+                    # Ensure we don't duplicate tags already in content — check existing content hashtags
+                    current_text = self.text_area.get("1.0", "end-1c")
+                    existing = extract_hashtags_from_text(current_text)
+                    seen = {t.lstrip('#') for t in existing}
                     if token not in seen:
-                        existing.append(new_tag)
-                        # Update the tags entry and variable
-                        try:
-                            self.tags_entry.delete(0, 'end')
-                            self.tags_entry.insert(0, ', '.join(existing))
-                        except Exception:
-                            pass
-                        # refresh chips if present
-                        try:
-                            self._update_write_tag_chips()
-                        except Exception:
-                            pass
+                        # Append the new tag to the end of the content so it's stored in-text
+                        if current_text.strip():
+                            self.text_area.insert("end", " \n" + new_tag)
+                        else:
+                            self.text_area.insert("1.0", new_tag)
             except Exception:
                 pass
         # Reset the invoking dropdown regardless
@@ -1440,7 +1447,6 @@ class HomeView:
             
         if messagebox.askyesno("Clear Note", "Are you sure you want to clear the current note?"):
             self.title_entry.delete(0, "end")
-            self.tags_entry.delete(0, "end")
             self.text_area.delete("1.0", "end")
             self.notebook_var.set("• Unassigned Notes")
             # Reset both template dropdowns
@@ -1455,9 +1461,8 @@ class HomeView:
         content = self.text_area.get("1.0", "end-1c").strip()
         assigned_notebook = self.notebook_var.get()
         
-        # Process and sanitize tags
-        tags_text = self.tags_entry.get().strip()
-        tags = sanitize_tags_from_text(tags_text)
+        # Extract tags from content (hashtags written in the text area)
+        tags = extract_hashtags_from_text(content)
         
         if not title:
             messagebox.showwarning("Missing Title", "A title is required to save the note.")
@@ -1495,131 +1500,21 @@ class HomeView:
             
         # Clear inputs
         self.title_entry.delete(0, "end")
-        self.tags_entry.delete(0, "end")
-        # clear chips as well
+        # text-based tags are extracted from content, so we don't keep a separate tags entry here
+            # clear any previous chips (safe no-op if chips removed later)
         try:
-            for w in self.tags_chip_frame.winfo_children():
-                w.destroy()
+            chip_frame = getattr(self, 'tags_chip_frame', None)
+            if chip_frame is not None:
+                for w in chip_frame.winfo_children():
+                    w.destroy()
         except Exception:
+            # Some older states may not have tags_chip_frame yet — ignore
             pass
         self.text_area.delete("1.0", "end")
         self.notebook_var.set("• Unassigned Notes")
-        # ensure chips are reset after save
-        try:
-            for w in self.tags_chip_frame.winfo_children():
-                w.destroy()
-        except Exception:
-            pass
+        # we no longer maintain a separate tags chip UI (tags embedded in content)
 
-    def _update_write_tag_chips(self, event=None):
-        """Render tag chips based on the current tags entry (sanitized preview)."""
-        try:
-            raw = self.tags_entry.get().strip()
-        except Exception:
-            raw = ''
-        tags = sanitize_tags_from_text(raw)
-        # local font helper (safe fallback)
-        try:
-            font_for_chip = self.master.master.get_font(-3)
-        except Exception:
-            font_for_chip = ("Open Sans", 11)
-        gf = self.master.master.get_font if hasattr(self.master.master, 'get_font') else lambda s=0, w='normal': ('Open Sans', 14+s, w)
-        # helper font
-        gf = self.master.master.get_font if hasattr(self.master.master, 'get_font') else lambda s=0, w='normal': ('Open Sans', 14+s, w)
-        # Clear existing chips
-        try:
-            for w in self.tags_chip_frame.winfo_children():
-                w.destroy()
-        except Exception:
-            pass
-
-        # get font helper from master if available
-        gf = self.master.master.get_font if hasattr(self.master.master, 'get_font') else lambda s=0, w='normal': ('Open Sans', 14+s, w)
-        # font helper inside method
-        gf = self.master.master.get_font if hasattr(self.master.master, 'get_font') else lambda s=0, w='normal': ('Open Sans', 14+s, w)
-        for t in tags:
-            try:
-                chip = ctk.CTkFrame(self.tags_chip_frame, fg_color=self.colors['card_bg'], corner_radius=8)
-                chip.pack(side='left', padx=(0, 8), pady=4)
-                ctk.CTkLabel(chip, text=t, font=self.app.get_font(-3), text_color=self.colors['main_text']).pack(side='left', padx=(8, 6))
-                # small remove button
-                ctk.CTkButton(chip, text='✕', width=22, height=20, fg_color='transparent', text_color=self.colors['danger'], command=lambda x=t: self._remove_write_tag(x)).pack(side='left', padx=(0, 6))
-            except Exception:
-                pass
-
-    def _remove_write_tag(self, tag):
-        try:
-            raw = self.tags_entry.get().strip()
-            tags = sanitize_tags_from_text(raw)
-            tags = [t for t in tags if t != tag]
-            # update entry
-            self.tags_entry.delete(0, 'end')
-            self.tags_entry.insert(0, ', '.join(tags))
-            self._update_write_tag_chips()
-        except Exception:
-            pass
-
-    def _sanitize_write_tags(self, event=None):
-        try:
-            raw = self.tags_entry.get().strip()
-            tags = sanitize_tags_from_text(raw)
-            self.tags_entry.delete(0, 'end')
-            self.tags_entry.insert(0, ', '.join(tags))
-            self._update_write_tag_chips()
-        except Exception:
-            pass
-
-    def _open_write_tag_sidebar(self):
-        """Open a small sidebar window listing all current write-tags, with controls to remove tags."""
-        try:
-            parent = self.master.master if hasattr(self.master, 'master') else self.master
-            sidebar = ctk.CTkToplevel(parent)
-            sidebar.title("Tags")
-            sidebar.geometry("320x420")
-            sidebar.transient(parent)
-
-            ctk.CTkLabel(sidebar, text="Tags", font=self.app.get_font(3, 'bold'), text_color=self.colors['main_text']).pack(anchor='w', padx=12, pady=(12,8))
-            body = ctk.CTkScrollableFrame(sidebar, fg_color=self.colors['card_bg'])
-            body.pack(fill='both', expand=True, padx=12, pady=(0,12))
-
-            raw = self.tags_entry.get().strip() if hasattr(self, 'tags_entry') else ''
-            tags = sanitize_tags_from_text(raw)
-
-            if not tags:
-                ctk.CTkLabel(body, text="No tags", font=self.app.get_font(0, 'italic'), text_color=self.colors['secondary_text']).pack(padx=8, pady=8)
-            else:
-                for t in tags:
-                    row = ctk.CTkFrame(body, fg_color='transparent')
-                    row.pack(fill='x', pady=6, padx=8)
-                    ctk.CTkLabel(row, text=t, font=self.app.get_font(-2), text_color=self.colors['main_text']).pack(side='left')
-                    ctk.CTkButton(row, text='Remove', width=80, command=lambda x=t: (_remove_write_callback(x)), fg_color=self.colors['danger'], text_color='white').pack(side='right')
-
-            # helper remove function closures
-            def _remove_write_callback(tag):
-                try:
-                    self._remove_write_tag(tag)
-                    # refresh sidebar body
-                    for w in body.winfo_children():
-                        w.destroy()
-                    new_tags = sanitize_tags_from_text(self.tags_entry.get())
-                    if not new_tags:
-                        ctk.CTkLabel(body, text="No tags", font=self.app.get_font(0, 'italic'), text_color=self.colors['secondary_text']).pack(padx=8, pady=8)
-                    else:
-                        for t2 in new_tags:
-                            r2 = ctk.CTkFrame(body, fg_color='transparent')
-                            r2.pack(fill='x', pady=6, padx=8)
-                            ctk.CTkLabel(r2, text=t2, font=self.app.get_font(-2), text_color=self.colors['main_text']).pack(side='left')
-                            ctk.CTkButton(r2, text='Remove', width=80, command=lambda x=t2: (_remove_write_callback(x)), fg_color=self.colors['danger'], text_color='white').pack(side='right')
-                except Exception:
-                    pass
-
-            ctk.CTkButton(sidebar, text='Close', width=80, command=sidebar.destroy).pack(pady=(0,12))
-        except Exception:
-            pass
-        
-        # Refresh sidebar stats
-        if isinstance(self.master.master, CourseMate):
-             self.master.master.sidebar.refresh_stats()
+    # Tags are now embedded in content; write-area tag helpers removed.
 
     def refresh_notes_list(self):
         for widget in self.notes_list.winfo_children():
@@ -1749,71 +1644,7 @@ class NoteWindow(ctk.CTkToplevel):
         )
         self.title_entry.pack(fill="x", padx=20, pady=(5, 10))
         
-        # Tags Entry
-        # Normalize any tags list from the note (trim each tag and drop blanks)
-        raw_tags = note.get('tags', []) or []
-        # Normalize any existing tags into canonical sanitized form (e.g. '#cornell-notes')
-        tags_init_list = sanitize_tags_from_text(', '.join(raw_tags)) if raw_tags else []
-        tags_init = ", ".join(tags_init_list)
-        # If tags are only whitespace or empty, keep the variable empty so CTkEntry shows the placeholder
-        if not tags_init:
-            tags_init = ""
-        self.tags_var = tk.StringVar(value=tags_init)
-        
-        # Tags Label
-        ctk.CTkLabel(self, text="Tags", font=get_font(0, "bold"), text_color=colors['main_text']).pack(anchor="w", padx=20, pady=(0, 0))
-
-        self.tags_entry = ctk.CTkEntry(
-            self,
-            textvariable=self.tags_var,
-            placeholder_text="Tags (comma separated, e.g. #exam, #math)",
-            font=get_font(0),
-            fg_color=colors.get('card_bg', colors['background']),
-            text_color=colors['main_text'],
-            border_width=1,
-            border_color=colors.get('card_border', colors.get('muted', '#68707a'))
-        )
-        self.tags_entry.pack(fill="x", padx=20, pady=(5, 2))
-
-        # Helper hint below tags field so users always see instructions even if placeholder doesn't render
-        ctk.CTkLabel(self, text="Enter tags separated by commas — e.g. #exam, #math", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w", padx=20, pady=(0, 10))
-
-        # Tag chips area (horizontal scroller) — keep `self.tags_chip_frame` as inner container
-        self.tags_chip_container = ctk.CTkFrame(self, fg_color="transparent")
-        self.tags_chip_container.pack(fill="x", padx=20, pady=(0, 8))
-
-        self.tags_chip_canvas = tk.Canvas(
-            self.tags_chip_container,
-            height=40,
-            bd=0,
-            highlightthickness=0,
-            background=colors.get('card_bg', colors.get('background', '#ffffff')),
-            relief='flat'
-        )
-        self.tags_chip_canvas.pack(side='top', fill='x', expand=True)
-
-        self.tags_chip_frame = ctk.CTkFrame(self.tags_chip_canvas, fg_color="transparent")
-        self.tags_chip_window = self.tags_chip_canvas.create_window((0, 0), window=self.tags_chip_frame, anchor='nw')
-
-        self.tags_chip_scrollbar = tk.Scrollbar(self.tags_chip_container, orient='horizontal', command=self.tags_chip_canvas.xview)
-        self.tags_chip_scrollbar.pack(side='bottom', fill='x')
-        self.tags_chip_canvas.configure(xscrollcommand=self.tags_chip_scrollbar.set)
-
-        # Keep scroll region updated
-        self.tags_chip_frame.bind('<Configure>', lambda e: self.tags_chip_canvas.configure(scrollregion=self.tags_chip_canvas.bbox('all')))
-
-        # Clean up tags if the user focuses out (remove whitespace-only entries and update placeholder)
-        try:
-            self.tags_entry.bind("<FocusOut>", self._clean_tags_entry)
-            # Live chips update while typing
-            self.tags_entry.bind("<KeyRelease>", lambda e: self._update_note_tag_chips())
-            # Initial render of chips for existing note tags
-            try:
-                self._update_note_tag_chips()
-            except Exception:
-                pass
-        except Exception:
-            pass
+        # Tagging is now handled inline — hashtags are discovered in the content itself.
         
         # Content
         # Content Label
@@ -1822,7 +1653,17 @@ class NoteWindow(ctk.CTkToplevel):
         self.text_area = ctk.CTkTextbox(self, font=get_font(0), fg_color=colors['background'], text_color=colors['main_text'], wrap="word")
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(5, 0))
         self.text_area.insert("1.0", note.get('content', ''))
-        self.text_area.bind("<KeyRelease>", self.update_word_count)
+        # Live update word count plus highlight hashtags
+        try:
+            self.text_area.bind("<KeyRelease>", lambda e: (self.update_word_count(), highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))))
+            # Initial pass to highlight hashtags that exist in the note
+            highlight_hashtags_in_textbox(self.text_area, self.colors.get('accent', '#4a90e2'))
+        except Exception:
+            # Fallback: at minimum keep the word count binding
+            try:
+                self.text_area.bind("<KeyRelease>", self.update_word_count)
+            except Exception:
+                pass
 
         # Word Count Label
         self.word_count_label = ctk.CTkLabel(self, text="Word Count: 0", font=get_font(-2), text_color=colors['secondary_text'])
@@ -1922,7 +1763,9 @@ class NoteWindow(ctk.CTkToplevel):
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(f"Title: {self.title_var.get()}\n")
-                    f.write(f"Tags: {self.tags_var.get()}\n")
+                    # Export tags derived from content (keep consistent with save behavior)
+                    exported_tags = extract_hashtags_from_text(self.text_area.get("1.0", "end-1c"))
+                    f.write(f"Tags: {', '.join(exported_tags)}\n")
                     f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
                     f.write("-" * 40 + "\n\n")
                     f.write(self.text_area.get("1.0", "end-1c"))
@@ -1930,36 +1773,12 @@ class NoteWindow(ctk.CTkToplevel):
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to export note: {e}")
 
-    def _clean_tags_entry(self, event=None):
-        """Normalize the tags entry when user leaves the field.
-        Ensures whitespace-only input is cleared so placeholder text appears,
-        and trims individual tags when present.
-        """
-        try:
-            current = self.tags_var.get() if hasattr(self, 'tags_var') else ''
-            tokens = sanitize_tags_from_text(current)
-            cleaned = ', '.join(tokens)
-            # Update the variable/entry to reflect the cleaned value (or empty)
-            self.tags_var.set(cleaned)
-            try:
-                self.tags_entry.delete(0, 'end')
-                if cleaned:
-                    self.tags_entry.insert(0, cleaned)
-            except Exception:
-                pass
-            # update chips to reflect cleaned tokens
-            try:
-                self._update_note_tag_chips()
-            except Exception:
-                pass
-        except Exception:
-            pass
 
     def save_changes(self):
-        # First, normalize tags and store as a list on the note
+        # Extract tags from the content text (hashtags embedded in content)
         try:
-            raw_tags = self.tags_var.get() if hasattr(self, 'tags_var') else ''
-            parsed_tags = sanitize_tags_from_text(raw_tags)
+            new_content = self.text_area.get("1.0", "end-1c")
+            parsed_tags = extract_hashtags_from_text(new_content)
             self.note['tags'] = parsed_tags
         except Exception:
             self.note['tags'] = []
@@ -1974,6 +1793,7 @@ class NoteWindow(ctk.CTkToplevel):
             pass
         if hasattr(self, 'title_var'):
             self.title_var.set(new_title)
+        # Ensure content and tags stay in sync
         new_content = self.text_area.get("1.0", "end-1c")
         self.note['content'] = new_content
         
@@ -1985,88 +1805,7 @@ class NoteWindow(ctk.CTkToplevel):
         if self.callback:
             self.callback()
 
-    def _update_note_tag_chips(self, event=None):
-        try:
-            raw = self.tags_var.get() if hasattr(self, 'tags_var') else ''
-        except Exception:
-            raw = ''
-        tags = sanitize_tags_from_text(raw)
-        # refresh chip frame
-        try:
-            for w in self.tags_chip_frame.winfo_children():
-                w.destroy()
-        except Exception:
-            pass
-        for t in tags:
-            try:
-                chip = ctk.CTkFrame(self.tags_chip_frame, fg_color=self.colors['card_bg'], corner_radius=8)
-                chip.pack(side='left', padx=(0, 8), pady=4)
-                ctk.CTkLabel(chip, text=t, font=("Open Sans", 11), text_color=self.colors['main_text']).pack(side='left', padx=(8, 6))
-                ctk.CTkButton(chip, text='✕', width=22, height=20, fg_color='transparent', text_color=self.colors['danger'], command=lambda x=t: self._remove_note_tag(x)).pack(side='left', padx=(0, 6))
-            except Exception:
-                pass
-
-    def _remove_note_tag(self, tag):
-        try:
-            raw = self.tags_var.get() if hasattr(self, 'tags_var') else ''
-            tags = sanitize_tags_from_text(raw)
-            tags = [t for t in tags if t != tag]
-            self.tags_var.set(', '.join(tags))
-            try:
-                self.tags_entry.delete(0, 'end')
-                self.tags_entry.insert(0, ', '.join(tags))
-            except Exception:
-                pass
-            self._update_note_tag_chips()
-        except Exception:
-            pass
-
-    def _open_note_tag_sidebar(self):
-        """Open a small sidebar Toplevel for the NoteWindow showing tags with remove buttons."""
-        try:
-            sidebar = ctk.CTkToplevel(self)
-            sidebar.title("Tags")
-            sidebar.geometry("320x420")
-            sidebar.transient(self)
-
-            get_font = self.master.master.get_font if hasattr(self.master.master, 'get_font') else lambda s=0, w='normal': ('Open Sans', 14+s, w)
-            ctk.CTkLabel(sidebar, text="Tags", font=get_font(3, 'bold'), text_color=self.colors['main_text']).pack(anchor='w', padx=12, pady=(12,8))
-            body = ctk.CTkScrollableFrame(sidebar, fg_color=self.colors['card_bg'])
-            body.pack(fill='both', expand=True, padx=12, pady=(0,12))
-
-            raw = self.tags_var.get() if hasattr(self, 'tags_var') else ''
-            tags = sanitize_tags_from_text(raw)
-
-            if not tags:
-                ctk.CTkLabel(body, text="No tags", font=get_font(0, 'italic'), text_color=self.colors['secondary_text']).pack(padx=8, pady=8)
-            else:
-                for t in tags:
-                    row = ctk.CTkFrame(body, fg_color='transparent')
-                    row.pack(fill='x', pady=6, padx=8)
-                    ctk.CTkLabel(row, text=t, font=get_font(-2), text_color=self.colors['main_text']).pack(side='left')
-                    ctk.CTkButton(row, text='Remove', width=80, command=lambda x=t: (_remove_note_callback(x)), fg_color=self.colors['danger'], text_color='white').pack(side='right')
-
-            def _remove_note_callback(tag):
-                try:
-                    self._remove_note_tag(tag)
-                    # rebuild the body
-                    for w in body.winfo_children():
-                        w.destroy()
-                    new_tags = sanitize_tags_from_text(self.tags_var.get())
-                    if not new_tags:
-                        ctk.CTkLabel(body, text="No tags", font=get_font(0, 'italic'), text_color=self.colors['secondary_text']).pack(padx=8, pady=8)
-                    else:
-                        for t2 in new_tags:
-                            r2 = ctk.CTkFrame(body, fg_color='transparent')
-                            r2.pack(fill='x', pady=6, padx=8)
-                            ctk.CTkLabel(r2, text=t2, font=get_font(-2), text_color=self.colors['main_text']).pack(side='left')
-                            ctk.CTkButton(r2, text='Remove', width=80, command=lambda x=t2: (_remove_note_callback(x)), fg_color=self.colors['danger'], text_color='white').pack(side='right')
-                except Exception:
-                    pass
-
-            ctk.CTkButton(sidebar, text='Close', width=80, command=sidebar.destroy).pack(pady=(0,12))
-        except Exception:
-            pass
+    # NoteWindow tag-entry helpers removed — tags are extracted from content instead.
 
     def delete_note(self):
         if messagebox.askyesno("Delete Note", "Are you sure you want to delete this note? This cannot be undone."):
