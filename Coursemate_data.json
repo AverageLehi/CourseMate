@@ -31,6 +31,13 @@
             "#practice",
             "#polya"
           ]
+        },
+        {
+          "title": "test 3",
+          "content": "teste 5",
+          "tags": [],
+          "created": "November 27, 2025 | 09:10PM",
+          "notebook": "Purposive Communication"
         }
       ],
       "tasks": [],
@@ -122,6 +129,13 @@
           "title": "Mathematical Concepts in Daily Life",
           "content": "Central Concept:\n- Mathematics\n\nRelated Concept 1:\n- Statistics (data analysis)\n\nRelated Concept 2:\n- Probability (uncertainty)\n\nConnections:\n- Used in decision making\n- Essential for modern careers\n- Foundation for technology",
           "created": "2025-11-24 19:00"
+        },
+        {
+          "title": "test 3",
+          "content": "test 5",
+          "tags": [],
+          "created": "November 27, 2025 | 09:10PM",
+          "notebook": "Mathematics in the Modern World"
         }
       ],
       "tasks": [],
@@ -277,24 +291,15 @@
   "completed_tasks": [],
   "unassigned_notes": [
     {
-      "title": "To-Do List for Mock Defense",
-      "content": "1. Documentation\n2. Powerpoints",
-      "created": "2025-11-23 23:20",
-      "notebook": null
-    },
-    {
-      "title": "Today",
-      "content": "#today\n\nWhile we wait #today \n#1",
-      "tags": [
-        "#today",
-        "#1"
-      ],
-      "created": "November 26, 2025 | 03:19PM",
+      "title": "test 1",
+      "content": "test 2",
+      "tags": [],
+      "created": "November 27, 2025 | 09:09PM",
       "notebook": null
     }
   ],
   "settings": {
-    "theme": "Baby Blue",
+    "theme": "CourseMate Theme",
     "font_family": "Courier New",
     "font_size": "Normal",
     "quotes": [
@@ -319,6 +324,7 @@
       "Habit Tracker": "Month: \nHabit: \n\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |       |       |\n| 2   |       |       |\n| 3   |       |       |\n| 4   |       |       |\n| 5   |       |       |\n| 6   |       |       |\n| 7   |       |       |\n| 8   |       |       |\n| 9   |       |       |\n| 10  |       |       |\n| 11  |       |       |\n| 12  |       |       |\n| 13  |       |       |\n| 14  |       |       |\n| 15  |       |       |\n| 16  |       |       |\n| 17  |       |       |\n| 18  |       |       |\n| 19  |       |       |\n| 20  |       |       |\n| 21  |       |       |\n| 22  |       |       |\n| 23  |       |       |\n| 24  |       |       |\n| 25  |       |       |\n| 26  |       |       |\n| 27  |       |       |\n| 28  |       |       |\n| 29  |       |       |\n| 30  |       |       |\n| 31  |       |       |\n\nReflection:\n- ",
       "Weekly Planning": "Week: ___\n\nGoals:\n- \n- \n- \n\nTasks:\n- \n- \n- \n\nReflection:\n- \n\nNext Week Prep:\n- ",
       "Covey's": "7 Habits Week Template Planner\nHabit 1:\nHabit 2:\nHabit 3:\nHabit 4:\nHabit 5:\nHabit 6:\nHabit 7:"
-    }
+    },
+    "ai_model": "llama3"
   }
 }

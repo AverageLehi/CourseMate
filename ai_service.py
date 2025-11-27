@@ -20,15 +20,18 @@ def _ollama_generate(prompt: str, temperature: float = 0.2, system: Optional[str
         "stream": False,
         "options": {
             "temperature": temperature,
+            "num_predict": 512,  # Limit output tokens for faster response
         }
     }
     if system:
         payload["system"] = system
     try:
-        r = requests.post(url, json=payload, timeout=60)
+        r = requests.post(url, json=payload, timeout=180)  # Increased timeout for model inference
         r.raise_for_status()
         data = r.json()
         return data.get("response", "")
+    except requests.Timeout:
+        raise AIServiceError("Ollama request timed out - model may be slow or overloaded")
     except requests.RequestException as e:
         raise AIServiceError(f"Ollama request failed: {e}")
     except json.JSONDecodeError:
