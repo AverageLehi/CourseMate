@@ -10,6 +10,10 @@ from datetime import datetime
 from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox, simpledialog
+try:
+    import ai_service
+except Exception:
+    ai_service = None
 import re
 from tags_utils import extract_hashtags_from_text
 
@@ -270,7 +274,9 @@ DEFAULT_SETTINGS = {
     "study_templates": {},
     "additional_templates": {},
     # Legacy key retained for backward compatibility; migrated into study_templates then cleared
-    "custom_templates": {}
+    "custom_templates": {},
+    # AI model selection (used by offline AI integration); defaults to local llama3
+    "ai_model": "llama3"
 }
 
 # Default planner / organizational templates for the new Additional Templates category
@@ -1352,8 +1358,23 @@ class HomeView:
         self.actions_frame = ctk.CTkFrame(self.write_frame, fg_color="transparent")
         self.actions_frame.pack(fill="x", padx=20, pady=(0, 10))
         ctk.CTkButton(self.actions_frame, text="Save Note", command=self.save_note,
-              fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=110,
-              font=self.app.get_font(0, "bold")).pack(side="right", pady=(2,0))
+                  fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=110,
+                  font=self.app.get_font(0, "bold")).pack(side="right", pady=(2,0))
+        # AI actions (offline via Ollama)
+        ai_btn_frame = ctk.CTkFrame(self.actions_frame, fg_color="transparent")
+        ai_btn_frame.pack(side="left", padx=0)
+        ctk.CTkButton(ai_btn_frame, text="Summarize", width=110,
+                  command=self._ai_summarize,
+                  fg_color=self.colors.get('info', self.colors['accent']),
+                  text_color='white', font=self.app.get_font(-1, "bold")).pack(side="left", padx=(0,6))
+        ctk.CTkButton(ai_btn_frame, text="Extract Tags", width=120,
+                  command=self._ai_extract_tags,
+                  fg_color=self.colors.get('button_primary', self.colors['accent']),
+                  text_color='white', font=self.app.get_font(-1, "bold")).pack(side="left", padx=(0,6))
+        ctk.CTkButton(ai_btn_frame, text="Ask AI", width=100,
+                  command=self._ai_ask,
+                  fg_color=self.colors.get('accent', '#4a90e2'),
+                  text_color='white', font=self.app.get_font(-1, "bold")).pack(side="left")
         # Title Entry
         self.title_entry = ctk.CTkEntry(self.write_frame, placeholder_text="Note Title (Required)", 
                 font=self.app.get_font(0, "bold"), height=40,
@@ -1712,6 +1733,59 @@ class HomeView:
         self.text_area.delete("1.0", "end")
         self.notebook_var.set("• Unassigned Notes")
         # we no longer maintain a separate tags chip UI (tags embedded in content)
+
+    # --- Offline AI helpers ---
+    def _ensure_ai(self) -> bool:
+        if ai_service is None:
+            messagebox.showerror("AI Not Available", "AI module not loaded. Ensure 'ai_service.py' exists.")
+            return False
+        return True
+
+    def _ai_summarize(self):
+        if not self._ensure_ai():
+            return
+        content = self.text_area.get("1.0", "end-1c").strip()
+        try:
+            summary = ai_service.summarize(content)
+            # Show in dialog, allow insert at cursor
+            dlg = TemplateDialog(self.master.master, title_init="AI Summary", structure_init=summary, on_save=None, is_edit=False)
+        except Exception as e:
+            messagebox.showerror("AI Error", str(e))
+
+    def _ai_extract_tags(self):
+        if not self._ensure_ai():
+            return
+        content = self.text_area.get("1.0", "end-1c").strip()
+        try:
+            tags = ai_service.extract_tags(content)
+            if tags:
+                # Append tags to content (end) if not already present
+                existing = extract_hashtags_from_text(content)
+                existing_set = {t.lower() for t in existing}
+                to_add = [t for t in tags if t.lower() not in existing_set]
+                if to_add:
+                    if content.strip():
+                        self.text_area.insert("end", "\n" + " ".join(to_add))
+                    else:
+                        self.text_area.insert("1.0", " ".join(to_add))
+                messagebox.showinfo("AI Tags", f"Added tags: {' '.join(to_add) if to_add else 'None'}")
+            else:
+                messagebox.showinfo("AI Tags", "No tags extracted.")
+        except Exception as e:
+            messagebox.showerror("AI Error", str(e))
+
+    def _ai_ask(self):
+        if not self._ensure_ai():
+            return
+        q = simpledialog.askstring("Ask AI", "Enter your question:")
+        if not q:
+            return
+        context = self.text_area.get("1.0", "end-1c").strip()
+        try:
+            answer = ai_service.answer_question(context, q)
+            dlg = TemplateDialog(self.master.master, title_init="AI Answer", structure_init=answer, on_save=None, is_edit=False)
+        except Exception as e:
+            messagebox.showerror("AI Error", str(e))
 
     # Tags are now embedded in content; write-area tag helpers removed.
 
@@ -2935,6 +3009,46 @@ class SettingsView:
         self._template_placeholder_active = False
         self._init_template_placeholder()
 
+        # --- AI Assisted Template Generation ---
+        ai_gen = ctk.CTkFrame(self.templates_frame, fg_color="transparent")
+        ai_gen.pack(fill="x", padx=20, pady=(0, 6))
+        ctk.CTkLabel(ai_gen, text="AI Assisted Generation", font=self.master.master.get_font(0, "bold"), text_color=self.colors['main_text']).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0,4))
+
+        # Model selector (if multiple models available)
+        self.ai_model_var = ctk.StringVar(value=self.settings.get("ai_model", "llama3"))
+        try:
+            model_values = []
+            if ai_service and hasattr(ai_service, "list_models"):
+                model_values = ai_service.list_models() or []
+            if not model_values:
+                model_values = [self.ai_model_var.get()]
+        except Exception:
+            model_values = [self.ai_model_var.get()]
+        ctk.CTkLabel(ai_gen, text="Model", font=self.master.master.get_font(-1), text_color=self.colors['main_text']).grid(row=1, column=0, sticky="w")
+        self.ai_model_menu = ctk.CTkOptionMenu(
+            ai_gen,
+            variable=self.ai_model_var,
+            values=model_values,
+            command=self._change_ai_model,
+            fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
+            button_color=self.colors.get('accent'),
+            text_color=self.colors.get('dropdown_text', 'white'),
+            width=140,
+            font=self.master.master.get_font(-1)
+        )
+        self.ai_model_menu.grid(row=1, column=1, sticky="w", padx=(8,20), pady=(0,4))
+
+        # Prompt entry for AI generation
+        self.ai_template_prompt = ctk.CTkEntry(ai_gen, placeholder_text="Describe topic or planning context for AI template...", fg_color=self.colors['background'], text_color=self.colors['main_text'], font=self.master.master.get_font(-1))
+        self.ai_template_prompt.grid(row=2, column=0, columnspan=3, sticky="ew", pady=(4,6))
+        ai_gen.grid_columnconfigure(2, weight=1)
+
+        btn_ai = ctk.CTkFrame(ai_gen, fg_color="transparent")
+        btn_ai.grid(row=3, column=0, columnspan=3, sticky="ew")
+        ctk.CTkButton(btn_ai, text="AI Study Template", width=140, fg_color=self.colors['info'], command=lambda: self._ai_generate_template('Study'), font=self.master.master.get_font(-1)).pack(side="left", padx=(0,8), pady=(4,2))
+        ctk.CTkButton(btn_ai, text="AI Planner Template", width=160, fg_color=self.colors['accent'], command=lambda: self._ai_generate_template('Planner'), font=self.master.master.get_font(-1)).pack(side="left", padx=(0,8), pady=(4,2))
+        ctk.CTkButton(btn_ai, text="Clear Prompt", width=110, fg_color=self.colors['danger'], command=lambda: self.ai_template_prompt.delete(0,"end"), font=self.master.master.get_font(-1)).pack(side="right", pady=(4,2))
+
         # Action buttons
         btns = ctk.CTkFrame(self.templates_frame, fg_color="transparent")
         btns.pack(fill="x", padx=20, pady=(0, 15))
@@ -3271,6 +3385,50 @@ class SettingsView:
         self.settings = self.data_manager.get_settings()
         messagebox.showinfo("Deleted", "Template deleted.")
         self._setup_templates_section()
+
+    def _change_ai_model(self, model_name):
+        # Persist selection
+        try:
+            self.update_setting("ai_model", model_name)
+            if ai_service and hasattr(ai_service, "set_model"):
+                ai_service.set_model(model_name)
+        except Exception:
+            messagebox.showwarning("AI Model", "Could not apply model change.")
+
+    def _ai_generate_template(self, kind):
+        # kind: 'Study' or 'Planner'
+        if ai_service is None:
+            messagebox.showwarning("AI Unavailable", "AI service not loaded. Ensure Ollama is running.")
+            return
+        prompt = (self.ai_template_prompt.get() or "").strip()
+        if not prompt:
+            messagebox.showinfo("Need Prompt", "Please describe the topic or planning context first.")
+            return
+        try:
+            # Map kind to ai_service expected kind values
+            service_kind = 'study' if kind == 'Study' else 'planner'
+            generated = ai_service.generate_template(service_kind, prompt)
+            if not generated:
+                messagebox.showwarning("AI", "Model returned empty template.")
+                return
+            # Populate UI fields
+            self.new_template_category.set(kind)
+            # Suggest a title
+            suggested_title = f"AI Generated {kind} Template"
+            existing_title = self.new_template_title.get().strip()
+            if not existing_title:
+                self.new_template_title.insert(0, suggested_title)
+            # Replace textbox content
+            try:
+                self.new_template_text.delete("1.0", "end")
+            except Exception:
+                pass
+            self.new_template_text.insert("1.0", generated.strip())
+            self._template_placeholder_active = False
+            self.new_template_text.configure(text_color=self.colors.get('main_text', '#000000'))
+            messagebox.showinfo("AI Template", "Template generated. Review and click 'Add Template' to save.")
+        except Exception as ex:
+            messagebox.showerror("AI Error", f"Failed to generate template: {ex}")
 
 
 class SearchView:

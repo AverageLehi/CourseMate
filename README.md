@@ -62,6 +62,25 @@ CourseMate addresses the common student struggle of staying organized while appl
 3.  Run the application:
     `python coursemate.py`
 
+### Optional: Offline AI Features (Local LLM via Ollama)
+
+CourseMate can generate study/planner templates, summarize notes, extract tags, and answer questions using a local Large Language Model (LLM)—no cloud required.
+
+1. Install Ollama (Windows/macOS/Linux): https://ollama.com
+2. Pull a model (example): `ollama pull llama3`
+3. (Optional) Pull additional models (e.g. `ollama pull mistral`, `ollama pull phi3`)
+4. Start Ollama (service usually autostarts after install). Default host: `http://localhost:11434`
+5. Launch CourseMate. AI actions appear in Home view and AI template generation + model selection appear in Settings.
+6. Change active model in Settings (Model dropdown). The app persists your choice in settings (`ai_model`).
+
+If the AI buttons warn that the service is unavailable, ensure Ollama is running and at least one model is pulled.
+
+Environment overrides:
+`OLLAMA_HOST` to change host (default `http://localhost:11434`).
+`OLLAMA_MODEL` to set initial model (overridden when selecting in-app).
+
+No data is sent to external servers; all inference is local.
+
 ---
 
 ## 🧑‍💻 Contributing
