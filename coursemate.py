@@ -21,10 +21,41 @@ except ImportError:
     PIL_AVAILABLE = False
     print("Warning: PIL (Pillow) not available. Icons will not be displayed.")
 
+def load_icon(filename, size=(20, 20)):
+    """Load an icon and return a CTkImage.
+    
+    Simple implementation - loads the icon file as-is without tinting.
+    Used for sidebar icons with pre-colored versions.
+    """
+    if not PIL_AVAILABLE:
+        return None
+    
+    try:
+        icon_dir = os.path.join(os.path.dirname(__file__), 'assets', 'icons')
+        icon_path = os.path.join(icon_dir, filename)
+        
+        if not os.path.exists(icon_path):
+            print(f"Icon file not found: {icon_path}")
+            return None
+        
+        # Load and resize
+        img = Image.open(icon_path).convert('RGBA')
+        img = img.resize(size, Image.LANCZOS)
+        
+        # Create CTkImage
+        ctk_img = CTkImage(light_image=img, dark_image=img, size=size)
+        
+        return ctk_img
+    except Exception as e:
+        print(f"Error loading icon {filename}: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
 def load_and_tint_icon(filename, tint_color, size=(20, 20)):
     """Load and tint an icon, returning a CTkImage.
     
-    Simple implementation - loads fresh each time to avoid caching issues.
+    Used for utility icons (refresh, edit, delete, etc.) that need dynamic coloring.
     """
     if not PIL_AVAILABLE:
         return None
@@ -56,12 +87,95 @@ def load_and_tint_icon(filename, tint_color, size=(20, 20)):
         import traceback
         traceback.print_exc()
         return None
+
 try:
     import ai_service
 except Exception:
     ai_service = None
 import re
 from tags_utils import extract_hashtags_from_text
+
+
+# ------------------------
+# Color utilities
+# ------------------------
+def darken_color(hex_color, percentage=12):
+    """Darken a hex color by a given percentage.
+    
+    Args:
+        hex_color: Hex color string (e.g., '#ffffff' or 'ffffff')
+        percentage: Percentage to darken (0-100), default 12%
+    
+    Returns:
+        Darkened hex color string with leading #
+    
+    Example:
+        >>> darken_color('#f5f5f5', 12)
+        '#d8d8d8'
+    """
+    try:
+        # Remove # if present and ensure we have a valid hex
+        hex_color = hex_color.lstrip('#')
+        if len(hex_color) != 6:
+            return f'#{hex_color}' if not hex_color.startswith('#') else hex_color
+        
+        # Convert to RGB
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        
+        # Darken by percentage (use absolute value in case negative)
+        factor = 1.0 - (abs(percentage) / 100.0)
+        r = int(r * factor)
+        g = int(g * factor)
+        b = int(b * factor)
+        
+        # Ensure values stay in valid range
+        r = max(0, min(255, r))
+        g = max(0, min(255, g))
+        b = max(0, min(255, b))
+        
+        # Convert back to hex
+        return f'#{r:02x}{g:02x}{b:02x}'
+    except Exception as e:
+        # On any error, return original color
+        print(f"Warning: Could not darken color {hex_color}: {e}")
+        return f'#{hex_color}' if not hex_color.startswith('#') else hex_color
+
+
+# ------------------------
+# Simple tooltip class for hover text
+# ------------------------
+class ToolTip:
+    """Create a tooltip for a given widget."""
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        self.widget.bind("<Enter>", self.show_tooltip, add="+")
+        self.widget.bind("<Leave>", self.hide_tooltip, add="+")
+    
+    def show_tooltip(self, event=None):
+        if self.tooltip_window or not self.text:
+            return
+        x = self.widget.winfo_rootx() + self.widget.winfo_width() + 5
+        y = self.widget.winfo_rooty() + (self.widget.winfo_height() // 2)
+        
+        self.tooltip_window = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        
+        label = tk.Label(tw, text=self.text, justify='left',
+                        background="#333333", foreground="#ffffff",
+                        relief='solid', borderwidth=1,
+                        font=("Open Sans", 10, "normal"),
+                        padx=8, pady=4)
+        label.pack()
+    
+    def hide_tooltip(self, event=None):
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
 
 
 # ------------------------
@@ -212,13 +326,13 @@ THEMES = {
         'card_hover':       '#cfd8e1'
     },
     'Light Theme': {
-        'primary_dark':     '#e0e0e0',
+        'primary_dark':     '#253241',
         'primary':          '#f5f5f5',
         'accent':           '#2196f3',
         'background':       '#ffffff',
-        'sidebar_button':   '#f5f5f5',
-        'sidebar_hover':    '#ebebeb',
-        'sidebar_text':     '#0b2740',
+        'sidebar_button':   '#334a66',
+        'sidebar_hover':    '#405977',
+        'sidebar_text':     '#F4F4F4',
         'card_bg':          '#f5f5f5',
         'success':          '#4caf50',
         'info':             '#2196f3',
@@ -253,7 +367,7 @@ THEMES = {
         'secondary_text': '#a2b6c4',  
         'dropdown_bg':    '#253244',  
         'dropdown_text':  '#ffffff',
-        'button_primary': '#3f7fbf',
+        'button_primary': '#253244',
         'button_text':    '#ffffff',
         'card_border':    '#2d4358',
         'danger':         '#e74c3c',
@@ -265,7 +379,6 @@ THEMES = {
         'accent':           '#ec407a',
         'background':       '#fff0f5',
         'sidebar_button':   '#fce4ec',
-        'sidebar_hover':    '#fad7e5',
         'sidebar_text':     '#0b2740',
         'card_bg':          '#ffebee',
         'success':          '#66bb6a',
@@ -289,7 +402,6 @@ THEMES = {
         'accent':           '#29b6f6',
         'background':       '#f0f8ff',
         'sidebar_button':   '#e1f5fe',
-        'sidebar_hover':    '#cdeefc',
         'sidebar_text':     '#0b2740',
         'card_bg':          '#e3f2fd',
         'success':          '#66bb6a',
@@ -805,9 +917,12 @@ class CourseMate(ctk.CTk):
         self.font_size_mode = settings.get("font_size", "Normal")
         self.base_font_size = 14 if self.font_size_mode == "Normal" else 18
         
+        # Preserve current active page before destroying sidebar
+        current_active_page = self.sidebar.active_page if self.sidebar else "Home"
+        
         # Update Sidebar (keep it in row 1 so header stays in row 0)
         self.sidebar.destroy()
-        self.sidebar = Sidebar(self, self.data_manager, self.colors, self.show_home, self.show_notebooks, self.show_settings, about_cb=self.show_about)
+        self.sidebar = Sidebar(self, self.data_manager, self.colors, self.show_home, self.show_notebooks, self.show_settings, about_cb=self.show_about, initial_page=current_active_page)
         self.sidebar.grid(row=1, column=0, sticky="nsew")
         
         # Update Main Area Background
@@ -922,7 +1037,7 @@ class CourseMate(ctk.CTk):
 
 class Sidebar(ctk.CTkFrame):
     """Left navigation panel displaying navigation, notebooks list, and inspiration quotes."""
-    def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb, about_cb=None):
+    def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb, about_cb=None, initial_page="Home"):
         super().__init__(master, width=250, corner_radius=0, fg_color=colors['primary_dark'])
         self.colors = colors
         self.data_manager = data_manager
@@ -930,6 +1045,16 @@ class Sidebar(ctk.CTkFrame):
         self.notebooks_cb = notebooks_cb
         self.settings_cb = settings_cb
         self.about_cb = about_cb
+        
+        # Track active page for navigation highlighting
+        self.active_page = initial_page  # Use provided initial page instead of hardcoded "Home"
+        self.nav_buttons = {}  # Store references to nav buttons
+        
+        # Auto-calculate hover color if not provided in theme
+        if 'sidebar_hover' not in self.colors or not self.colors.get('sidebar_hover'):
+            button_color = self.colors.get('sidebar_button', '#334a66')
+            self.colors['sidebar_hover'] = darken_color(button_color, 12)
+            print(f"Auto-calculated sidebar_hover: {self.colors['sidebar_hover']} from {button_color}")
         
         # (Title moved to top header) — keep sidebar compact without duplicate title
 
@@ -939,12 +1064,11 @@ class Sidebar(ctk.CTkFrame):
         self.nav_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.nav_frame.pack(fill="x", pady=3)
 
-        # Navigation buttons with icons (tinted black for visibility)
-        icon_color = '#000000'  # Black for maximum visibility
-        self._create_nav_btn("Home", home_cb, icon_filename='icon_home_24.png', icon_color=icon_color)
-        self._create_nav_btn("Notebooks", notebooks_cb, icon_filename='icon_notebook_32.png', icon_color=icon_color)
-        self._create_nav_btn("Settings", settings_cb, icon_filename='icon_settings_24.png', icon_color=icon_color)
-        self._create_nav_btn("About", about_cb or (lambda: None), icon_filename='icon_info_32.png', icon_color=icon_color)
+        # Create navigation buttons (they'll style themselves based on active_page)
+        self._create_nav_btn("Home", home_cb, icon_filename='icon_home_32.png')
+        self._create_nav_btn("Notebooks", notebooks_cb, icon_filename='icon_notebook_32.png')
+        self._create_nav_btn("Settings", settings_cb, icon_filename='icon_settings_32.png')
+        self._create_nav_btn("About", about_cb or (lambda: None), icon_filename='icon_info_32.png')
 
         # Notebooks Quick Access (Scrollable with collapsible header)
         self.notebooks_visible = True
@@ -1042,56 +1166,110 @@ class Sidebar(ctk.CTkFrame):
         self.refresh_notebooks_list()
         self.start_quote_timer()
 
-    def _create_nav_btn(self, text, command, icon_filename=None, icon_color='#000000'):
-        """Create a navigation button with icon or text fallback."""
+    def _create_nav_btn(self, text, command, icon_filename=None):
+        """Create a navigation button with icon or text fallback.
         
-        # Try to load icon
+        Buttons use gray icons by default, white when active.
+        Background is button_primary by default, accent when active.
+        On hover, inactive buttons show sidebar_hover background and white icons.
+        Expects icon files named like: icon_home_24_gray.png and icon_home_24_white.png
+        """
+        
+        # Determine if this button is currently active
+        is_active = (text == self.active_page)
+        
+        # Set background color based on active state
+        if is_active:
+            bg_color = self.colors.get('accent', '#4a90e2')
+        else:
+            bg_color = self.colors.get('button_primary', '#334a66')
+        
+        # Try to load icon - pre-load both gray and white versions
         img = None
+        gray_img = None
+        white_img = None
+        
         if icon_filename:
+            # Pre-load both gray and white versions for performance
+            base_name = icon_filename.replace('.png', '')
+            gray_filename = f"{base_name}_gray.png"
+            white_filename = f"{base_name}_white.png"
+            
             try:
-                img = load_and_tint_icon(icon_filename, icon_color, size=(24, 24))
+                gray_img = load_icon(gray_filename, size=(24, 24))
+                white_img = load_icon(white_filename, size=(24, 24))
+                
+                # Select appropriate icon based on active state
+                img = white_img if is_active else gray_img
+                
                 if img:
-                    print(f"✓ Loaded icon for {text}: {icon_filename}")
+                    print(f"✓ Loaded icons for {text} (active: {is_active})")
                 else:
-                    print(f"✗ Icon returned None for {text}: {icon_filename}")
+                    print(f"✗ Icon returned None for {text}")
             except Exception as e:
                 print(f"✗ Failed to load icon for {text}: {e}")
                 import traceback
                 traceback.print_exc()
         
+        # Wrapper for command that updates active state
+        def on_click():
+            self.set_active_page(text)
+            command()
+        
         # Create button with icon or text fallback
         if img:
-            # Store reference to prevent garbage collection
-            if not hasattr(self, '_nav_images'):
-                self._nav_images = []
-            self._nav_images.append(img)
-            
             btn = ctk.CTkButton(
                 self.nav_frame, 
                 text="",
                 image=img,
-                command=command,
-                fg_color=self.colors.get('sidebar_button', self.colors['primary']), 
-                hover_color=self.colors['sidebar_hover'],
+                command=on_click,
+                fg_color=bg_color,
+                hover_color=self.colors.get('sidebar_hover', '#405977'),
                 width=50,
-                height=50
+                height=50,
+                corner_radius=10
             )
-            print(f"  Created icon button for {text}")
+            
+            # Add hover effect: change icon to white for inactive buttons
+            if not is_active and white_img and gray_img:
+                def on_hover_enter(event, btn_text=text):
+                    if btn_text != self.active_page and white_img:
+                        btn.configure(image=white_img)
+                
+                def on_hover_leave(event, btn_text=text):
+                    if btn_text != self.active_page and gray_img:
+                        btn.configure(image=gray_img)
+                
+                btn.bind("<Enter>", on_hover_enter, add="+")
+                btn.bind("<Leave>", on_hover_leave, add="+")
         else:
             # Fallback to text button
             print(f"  Using text fallback for {text}")
             btn = ctk.CTkButton(
                 self.nav_frame,
                 text=text,
-                command=command,
-                fg_color=self.colors.get('sidebar_button', self.colors['primary']),
-                hover_color=self.colors['sidebar_hover'],
+                command=on_click,
+                fg_color=bg_color,
+                hover_color=self.colors.get('sidebar_hover', '#405977'),
                 width=100,
                 height=40,
+                corner_radius=10,
                 font=self.master.get_font(-1, "bold")
             )
         
         btn.pack(padx=10, pady=6)
+        
+        # Add tooltip on hover
+        ToolTip(btn, text)
+        
+        # Store button references with both icon versions
+        self.nav_buttons[text] = {
+            'button': btn,
+            'icon_filename': icon_filename,
+            'image': img,
+            'gray_image': gray_img,
+            'white_image': white_img
+        }
 
     def refresh_stats(self):
         notebooks = self.data_manager.get_notebooks()
@@ -1225,6 +1403,42 @@ class Sidebar(ctk.CTkFrame):
         icon = self._nb_icon_open if self.notebooks_visible else self._nb_icon_closed
         self.notebooks_toggle_btn.configure(text=icon)
 
+    def set_active_page(self, page_name):
+        """Update the active page and refresh button styles."""
+        if self.active_page == page_name:
+            return  # Already active
+        
+        self.active_page = page_name
+        
+        # Refresh all navigation buttons
+        for btn_text, btn_info in self.nav_buttons.items():
+            is_active = (btn_text == page_name)
+            btn = btn_info['button']
+            icon_filename = btn_info['icon_filename']
+            
+            # Set background color based on active state
+            if is_active:
+                bg_color = self.colors.get('accent', '#4a90e2')
+            else:
+                bg_color = self.colors.get('button_primary', '#334a66')
+            
+            # Update button background
+            btn.configure(fg_color=bg_color)
+            
+            # Reload and update icon if present
+            if icon_filename:
+                # Determine which icon file to load based on active state
+                base_name = icon_filename.replace('.png', '')
+                suffix = 'white' if is_active else 'gray'
+                actual_filename = f"{base_name}_{suffix}.png"
+                
+                try:
+                    new_img = load_icon(actual_filename, size=(24, 24))
+                    if new_img:
+                        btn.configure(image=new_img)
+                        btn_info['image'] = new_img  # Update stored reference
+                except Exception as e:
+                    print(f"Failed to update icon for {btn_text}: {e}")
 
 
 
