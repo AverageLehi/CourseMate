@@ -302,123 +302,159 @@ import os
 
 THEMES = {
     'CourseMate Theme': {
-        'primary_dark':     '#253241',
-        'primary':          '#334a66',
-        'accent':           '#4a90e2',
-        'background':       '#f4f7fb',
+        # Header colors
+        'header_bg':        '#253241',
+        'header_text':      '#F4F4F4',
+        'header_subtext':   '#a2b6c4',
+        # Sidebar colors
+        'sidebar_bg':       '#253241',
         'sidebar_button':   '#334a66',
         'sidebar_hover':    '#405977',
         'sidebar_text':     '#F4F4F4',
+        'sidebar_label':    '#a2b6c4',
+        # Main content colors
+        'primary':          '#334a66',
+        'accent':           '#4a90e2',
+        'background':       '#f4f7fb',
         'card_bg':          '#e1e7ed',
-        'success':          '#27ae60',
-        'info':             '#3498db',
-        'warning':          '#ffe082',
-        'muted':            '#9aa6b1',
-        'header_text':      '#F4F4F4',
+        'card_border':      '#c2ccd6',
+        'card_hover':       '#cfd8e1',
         'main_text':        '#0b2740',
-        'secondary_text':   "#a2b6c4",
+        'secondary_text':   '#a2b6c4',
+        # UI element colors
         'dropdown_bg':      '#253241',
         'dropdown_text':    '#F4F4F4',
         'button_primary':   '#334a66',
         'button_text':      '#ffffff',
-        'card_border':      '#c2ccd6',
+        'success':          '#27ae60',
+        'info':             '#3498db',
+        'warning':          '#ffe082',
         'danger':           '#e74c3c',
-        'card_hover':       '#cfd8e1'
+        'muted':            '#9aa6b1'
     },
     'Light Theme': {
-        'primary_dark':     '#253241',
-        'primary':          '#f5f5f5',
-        'accent':           '#2196f3',
-        'background':       '#ffffff',
+        # Header colors
+        'header_bg':        '#e0e0e0',
+        'header_text':      '#0b2740',
+        'header_subtext':   '#6b7280',
+        # Sidebar colors  
+        'sidebar_bg':       '#e0e0e0',
         'sidebar_button':   '#334a66',
         'sidebar_hover':    '#405977',
         'sidebar_text':     '#F4F4F4',
+        'sidebar_label':    '#6b7280',
+        # Main content colors
+        'primary':          '#f5f5f5',
+        'accent':           '#2196f3',
+        'background':       '#ffffff',
         'card_bg':          '#f5f5f5',
-        'success':          '#4caf50',
-        'info':             '#2196f3',
-        'warning':          '#ffeb3b',
-        'muted':            '#9e9e9e',
-        'header_text':      '#0b2740',
+        'card_border':      '#e0e0e0',
+        'card_hover':       '#eeeeee',
         'main_text':        '#0b2740',
         'secondary_text':   '#6b7280',
+        # UI element colors
         'dropdown_bg':      '#0b2740',
         'dropdown_text':    '#ffffff',
         'button_primary':   '#1976d2',
         'button_text':      '#ffffff',
-        'card_border':      '#e0e0e0',
+        'success':          '#4caf50',
+        'info':             '#2196f3',
+        'warning':          '#ffeb3b',
         'danger':           '#f44336',
-        'card_hover':       '#eeeeee'
+        'muted':            '#9e9e9e'
     },
     'Dark Theme': {
-        'primary_dark':   '#172027', 
-        'primary':        '#253244', 
-        'accent':         '#3f7fbf',  
-        'background':     '#0b0f12',  
-        'sidebar_button': '#253244', 
-        'sidebar_hover':  '#2d4358', 
-        'sidebar_text':   '#ffffff',
-        'card_bg':        '#1a2631',  
-        'success':        '#27ae60',  
-        'info':           '#3498db',  
-        'warning':        '#cf6679',
-        'muted':          '#9aa6b1',
-        'header_text':    '#ffffff',
-        'main_text':      '#e6eef6',  
-        'secondary_text': '#a2b6c4',  
-        'dropdown_bg':    '#253244',  
-        'dropdown_text':  '#ffffff',
-        'button_primary': '#253244',
-        'button_text':    '#ffffff',
-        'card_border':    '#2d4358',
-        'danger':         '#e74c3c',
-        'card_hover':     '#273544'
+        # Header colors
+        'header_bg':        '#172027',
+        'header_text':      '#ffffff',
+        'header_subtext':   '#a2b6c4',
+        # Sidebar colors
+        'sidebar_bg':       '#172027',
+        'sidebar_button':   '#253244',
+        'sidebar_hover':    '#2d4358',
+        'sidebar_text':     '#ffffff',
+        'sidebar_label':    '#a2b6c4',
+        # Main content colors
+        'primary':          '#253244',
+        'accent':           '#3f7fbf',
+        'background':       '#0b0f12',
+        'card_bg':          '#1a2631',
+        'card_border':      '#2d4358',
+        'card_hover':       '#273544',
+        'main_text':        '#e6eef6',
+        'secondary_text':   '#a2b6c4',
+        # UI element colors
+        'dropdown_bg':      '#253244',
+        'dropdown_text':    '#ffffff',
+        'button_primary':   '#253244',
+        'button_text':      '#ffffff',
+        'success':          '#27ae60',
+        'info':             '#3498db',
+        'warning':          '#cf6679',
+        'danger':           '#e74c3c',
+        'muted':            '#9aa6b1'
     },
     'Baby Pink': {
-        'primary_dark':     '#f8bbd0',
+        # Header colors
+        'header_bg':        '#f8bbd0',
+        'header_text':      '#0b2740',
+        'header_subtext':   '#7b1e5f',
+        # Sidebar colors
+        'sidebar_bg':       '#f8bbd0',
+        'sidebar_button':   '#334a66',
+        'sidebar_hover':    '#405977',
+        'sidebar_text':     '#F4F4F4',
+        'sidebar_label':    '#7b1e5f',
+        # Main content colors
         'primary':          '#fce4ec',
         'accent':           '#ec407a',
         'background':       '#fff0f5',
-        'sidebar_button':   '#fce4ec',
-        'sidebar_text':     '#0b2740',
         'card_bg':          '#ffebee',
-        'success':          '#66bb6a',
-        'info':             '#42a5f5',
-        'warning':          '#ffee58',
-        'muted':            '#bdbdbd',
-        'header_text':      '#0b2740',
+        'card_border':      '#f8bbd0',
+        'card_hover':       '#ffcdd2',
         'main_text':        '#0b2740',
         'secondary_text':   '#7b1e5f',
+        # UI element colors
         'dropdown_bg':      '#0b2740',
         'dropdown_text':    '#ffffff',
         'button_primary':   '#d81b60',
         'button_text':      '#ffffff',
-        'card_border':      '#f8bbd0',
+        'success':          '#66bb6a',
+        'info':             '#42a5f5',
+        'warning':          '#ffee58',
         'danger':           '#ef5350',
-        'card_hover':       '#ffcdd2'
+        'muted':            '#bdbdbd'
     },
     'Baby Blue': {
-        'primary_dark':     '#b3e5fc',
+        # Header colors
+        'header_bg':        '#b3e5fc',
+        'header_text':      '#0b2740',
+        'header_subtext':   '#2563a8',
+        # Sidebar colors
+        'sidebar_bg':       '#b3e5fc',
+        'sidebar_button':   '#334a66',
+        'sidebar_hover':    '#405977',
+        'sidebar_text':     '#F4F4F4',
+        'sidebar_label':    '#2563a8',
+        # Main content colors
         'primary':          '#e1f5fe',
         'accent':           '#29b6f6',
         'background':       '#f0f8ff',
-        'sidebar_button':   '#e1f5fe',
-        'sidebar_text':     '#0b2740',
         'card_bg':          '#e3f2fd',
+        'card_border':      '#b3e5fc',
+        'card_hover':       '#bbdefb',
+        'main_text':        '#0b2740',
+        'secondary_text':   '#2563a8',
+        # UI element colors
+        'dropdown_bg':      '#0b2740',
+        'dropdown_text':    '#ffffff',
+        'button_primary':   '#0277bd',
+        'button_text':      '#ffffff',
         'success':          '#66bb6a',
         'info':             '#29b6f6',
         'warning':          '#ffee58',
-        'muted':            '#bdbdbd',
-        'header_text':      '#0b2740',
-        'main_text':        '#0b2740',
-        'secondary_text':   '#2563a8',
-        'dropdown_bg':      '#0b2740',
-        'dropdown_text':    '#ffffff',
-        'dp_button_color':  "#ffffff",
-        'button_primary':   '#0277bd',
-        'button_text':      '#ffffff',
-        'card_border':      '#b3e5fc',
         'danger':           '#ef5350',
-        'card_hover':       '#bbdefb'
+        'muted':            '#bdbdbd'
     }
 }
 
@@ -801,11 +837,11 @@ class CourseMate(ctk.CTk):
 
     def _init_ui(self):
         # Header (top, spans sidebar + main area)
-        self.header = ctk.CTkFrame(self, fg_color=self.colors['primary_dark'], corner_radius=0)
+        self.header = ctk.CTkFrame(self, fg_color=self.colors['header_bg'], corner_radius=0)
         self.header.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
         # Header content: centered title and full slogan
-        self.header_inner = ctk.CTkFrame(self.header, fg_color=self.colors['primary_dark'])
+        self.header_inner = ctk.CTkFrame(self.header, fg_color=self.colors['header_bg'])
         self.header_inner.pack(fill="both", expand=True)
 
         self.header_title_label = ctk.CTkLabel(self.header_inner, text="CourseMate",
@@ -814,7 +850,7 @@ class CourseMate(ctk.CTk):
 
         self.header_slogan_label = ctk.CTkLabel(self.header_inner,
                  text="Stay Organized • Think Smarter • Learn Deeper • Solve Problems Better",
-                 font=self.get_font(0, "bold"), text_color=self.colors['secondary_text'], wraplength=900, justify="center")
+                 font=self.get_font(0, "bold"), text_color=self.colors['header_subtext'], wraplength=900, justify="center")
         self.header_slogan_label.pack(pady=(0, 8))
 
         # Header overlay quick-stats (top-left) - placed so it doesn't affect header layout
@@ -933,14 +969,14 @@ class CourseMate(ctk.CTk):
             # Header background
             if hasattr(self, 'header') and self.header:
                 try:
-                    self.header.configure(fg_color=self.colors.get('primary_dark', self.colors.get('primary')))
+                    self.header.configure(fg_color=self.colors.get('header_bg', self.colors.get('primary')))
                 except Exception:
                     pass
                 # Update header inner frame and labels (we store references during init)
                 try:
                     if hasattr(self, 'header_inner') and self.header_inner:
                         try:
-                            self.header_inner.configure(fg_color=self.colors.get('primary_dark', self.colors.get('primary')))
+                            self.header_inner.configure(fg_color=self.colors.get('header_bg', self.colors.get('primary')))
                         except Exception:
                             pass
                     if hasattr(self, 'header_title_label') and self.header_title_label:
@@ -1038,7 +1074,7 @@ class CourseMate(ctk.CTk):
 class Sidebar(ctk.CTkFrame):
     """Left navigation panel displaying navigation, notebooks list, and inspiration quotes."""
     def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb, about_cb=None, initial_page="Home"):
-        super().__init__(master, width=250, corner_radius=0, fg_color=colors['primary_dark'])
+        super().__init__(master, width=250, corner_radius=0, fg_color=colors['sidebar_bg'])
         self.colors = colors
         self.data_manager = data_manager
         self.home_cb = home_cb
@@ -1080,7 +1116,7 @@ class Sidebar(ctk.CTkFrame):
         
         self.notebooks_label = ctk.CTkLabel(self.notebooks_header, text="NOTEBOOKS", 
                                            font=master.get_font(-2, "bold"), 
-                                           text_color=colors['secondary_text'], 
+                                           text_color=colors['sidebar_label'], 
                                            anchor="w")
         self.notebooks_label.pack(side="left", padx=2)
         
@@ -1116,7 +1152,7 @@ class Sidebar(ctk.CTkFrame):
         self.inspire_label = ctk.CTkLabel(
             self.inspiration_header,
             text="INSPIRATION",
-            text_color=colors['secondary_text'],
+            text_color=colors['sidebar_label'],
             font=master.get_font(-2, "bold"),
             anchor="w"
         )
@@ -1213,18 +1249,23 @@ class Sidebar(ctk.CTkFrame):
         
         # Wrapper for command that updates active state
         def on_click():
+            # Prevent clicking if already active
+            if text == self.active_page:
+                return
             self.set_active_page(text)
             command()
         
         # Create button with icon or text fallback
         if img:
+            # Disable hover color for active buttons
+            hover_color = bg_color if is_active else self.colors.get('sidebar_hover', '#405977')
             btn = ctk.CTkButton(
                 self.nav_frame, 
                 text="",
                 image=img,
                 command=on_click,
                 fg_color=bg_color,
-                hover_color=self.colors.get('sidebar_hover', '#405977'),
+                hover_color=hover_color,
                 width=50,
                 height=50,
                 corner_radius=10
@@ -1245,12 +1286,14 @@ class Sidebar(ctk.CTkFrame):
         else:
             # Fallback to text button
             print(f"  Using text fallback for {text}")
+            # Disable hover color for active buttons
+            hover_color = bg_color if is_active else self.colors.get('sidebar_hover', '#405977')
             btn = ctk.CTkButton(
                 self.nav_frame,
                 text=text,
                 command=on_click,
                 fg_color=bg_color,
-                hover_color=self.colors.get('sidebar_hover', '#405977'),
+                hover_color=hover_color,
                 width=100,
                 height=40,
                 corner_radius=10,
@@ -1422,8 +1465,9 @@ class Sidebar(ctk.CTkFrame):
             else:
                 bg_color = self.colors.get('button_primary', '#334a66')
             
-            # Update button background
-            btn.configure(fg_color=bg_color)
+            # Update button background and hover color
+            hover_color = bg_color if is_active else self.colors.get('sidebar_hover', '#405977')
+            btn.configure(fg_color=bg_color, hover_color=hover_color)
             
             # Reload and update icon if present
             if icon_filename:
@@ -3718,7 +3762,7 @@ class SettingsView:
         theme = THEMES.get(theme_name, THEMES['CourseMate Theme'])
         try:
             # Header
-            self.preview_header.configure(fg_color=theme.get('primary_dark'))
+            self.preview_header.configure(fg_color=theme.get('header_bg'))
             self.preview_header_label.configure(text_color=theme.get('header_text'))
             # Sidebar
             self.preview_sidebar.configure(fg_color=theme.get('primary'))
