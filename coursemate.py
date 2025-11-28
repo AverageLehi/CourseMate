@@ -1209,89 +1209,81 @@ class Sidebar(ctk.CTkFrame):
         
         # Determine if this button is currently active
         is_active = (text == self.active_page)
-        
-        # Set background color based on active state
+
+        # Set background color and state based on active state
         if is_active:
-            bg_color = self.colors.get('accent', '#4a90e2')
+            bg_color = self.colors.get('button_primary', '#334a66')
+            hover_color = self.colors.get('button_primary', '#334a66')
+            btn_state = "disabled"
         else:
             bg_color = self.colors.get('button_primary', '#334a66')
-        
+            hover_color = self.colors.get('sidebar_hover', '#405977')
+            btn_state = "normal"
+
         # Try to load icon - pre-load both gray and white versions
         img = None
         gray_img = None
         white_img = None
-        
+
         if icon_filename:
-            # Pre-load both gray and white versions for performance
             base_name = icon_filename.replace('.png', '')
             gray_filename = f"{base_name}_gray.png"
             white_filename = f"{base_name}_white.png"
-            
             try:
                 gray_img = load_icon(gray_filename, size=(24, 24))
                 white_img = load_icon(white_filename, size=(24, 24))
-                
-                # Select appropriate icon based on active state
                 img = white_img if is_active else gray_img
-                
-                if img:
-                    print(f"✓ Loaded icons for {text} (active: {is_active})")
-                else:
-                    print(f"✗ Icon returned None for {text}")
             except Exception as e:
                 print(f"✗ Failed to load icon for {text}: {e}")
                 import traceback
                 traceback.print_exc()
-        
-        # Wrapper for command that updates active state
+
         def on_click():
-            self.set_active_page(text)
-            command()
-        
+            if not is_active:
+                self.set_active_page(text)
+                command()
+
         # Create button with icon or text fallback
         if img:
             btn = ctk.CTkButton(
-                self.nav_frame, 
+                self.nav_frame,
                 text="",
                 image=img,
-                command=on_click,
+                command=on_click if not is_active else None,
                 fg_color=bg_color,
-                hover_color=self.colors.get('sidebar_hover', '#405977'),
+                hover_color=hover_color,
                 width=50,
                 height=50,
-                corner_radius=10
+                corner_radius=10,
+                state=btn_state
             )
-            
             # Add hover effect: change icon to white for inactive buttons
             if not is_active and white_img and gray_img:
                 def on_hover_enter(event, btn_text=text):
                     if btn_text != self.active_page and white_img:
                         btn.configure(image=white_img)
-                
                 def on_hover_leave(event, btn_text=text):
                     if btn_text != self.active_page and gray_img:
                         btn.configure(image=gray_img)
-                
                 btn.bind("<Enter>", on_hover_enter, add="+")
                 btn.bind("<Leave>", on_hover_leave, add="+")
         else:
-            # Fallback to text button
             print(f"  Using text fallback for {text}")
             btn = ctk.CTkButton(
                 self.nav_frame,
                 text=text,
-                command=on_click,
+                command=on_click if not is_active else None,
                 fg_color=bg_color,
-                hover_color=self.colors.get('sidebar_hover', '#405977'),
+                hover_color=hover_color,
                 width=100,
                 height=40,
                 corner_radius=10,
-                font=self.master.get_font(-1, "bold")
+                font=self.master.get_font(-1, "bold"),
+                state=btn_state
             )
-        
+
         btn.pack(padx=10, pady=6)
-        
-        # Add tooltip on hover
+
         ToolTip(btn, text)
         
         # Store button references with both icon versions
