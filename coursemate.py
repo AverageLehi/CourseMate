@@ -1280,7 +1280,7 @@ class Sidebar(ctk.CTkFrame):
                 corner_radius=10,
                 font=self.master.get_font(-1, "bold"),
                 state=btn_state
-            )
+            ) 
 
         btn.pack(padx=10, pady=6)
 
