@@ -919,6 +919,7 @@ class CourseMate(ctk.CTk):
         # Sidebar
         self.sidebar = Sidebar(self, self.data_manager, self.colors, self.show_home, self.show_notebooks, self.show_settings, about_cb=self.show_about)
         self.sidebar.grid(row=1, column=0, sticky="nsew")
+        self.sidebar.refresh_stats()
 
         # Main Content Area
         self.main_area = ctk.CTkFrame(self, fg_color=self.colors['background'], corner_radius=0)
@@ -1010,6 +1011,7 @@ class CourseMate(ctk.CTk):
         self.sidebar.destroy()
         self.sidebar = Sidebar(self, self.data_manager, self.colors, self.show_home, self.show_notebooks, self.show_settings, about_cb=self.show_about, initial_page=current_active_page)
         self.sidebar.grid(row=1, column=0, sticky="nsew")
+        self.sidebar.refresh_stats()
         
         # Update Main Area Background
         self.main_area.configure(fg_color=self.colors['background'])
@@ -1293,19 +1295,25 @@ class Sidebar(ctk.CTkFrame):
         }
 
     def refresh_stats(self):
+        # Get notebooks dict from DataManager
         notebooks = self.data_manager.get_notebooks()
-        total_notes = sum(len(nb.get('notes', [])) for nb in notebooks.values()) + len(self.data_manager.get_unassigned_notes())
+        # Count notebooks (keys in dict)
+        notebook_count = len(notebooks)
+        # Count notes in all notebooks
+        notes_count = sum(len(nb.get('notes', [])) for nb in notebooks.values())
+        # Add unassigned notes
+        notes_count += len(self.data_manager.get_unassigned_notes())
 
         # Update header overlay labels if present (overlay lives on the App instance)
         app = getattr(self, 'master', None)
         if app and hasattr(app, 'header_lbl_notebooks_count'):
             try:
-                app.header_lbl_notebooks_count.configure(text=f"Notebooks: {len(notebooks)}")
+                app.header_lbl_notebooks_count.configure(text=f"Notebooks: {notebook_count}")
             except Exception:
                 pass
         if app and hasattr(app, 'header_lbl_notes_count'):
             try:
-                app.header_lbl_notes_count.configure(text=f"Total Notes: {total_notes}")
+                app.header_lbl_notes_count.configure(text=f"Total Notes: {notes_count}")
             except Exception:
                 pass
 
@@ -1376,7 +1384,7 @@ class Sidebar(ctk.CTkFrame):
 
 # Small modal dialog used for creating/editing templates
 class LoadingDialog(ctk.CTkToplevel):
-    """Simple loading indicator for AI operations."""
+    """Simple loading indicator for operations."""
     def __init__(self, master, message="Working..."):
         super().__init__(master)
         self.title("")
@@ -1387,13 +1395,11 @@ class LoadingDialog(ctk.CTkToplevel):
             self.overrideredirect(True)  # Remove window decorations
         except Exception:
             pass
-        
         # Center on screen
         self.update_idletasks()
         x = (self.winfo_screenwidth() // 2) - (300 // 2)
         y = (self.winfo_screenheight() // 2) - (100 // 2)
         self.geometry(f"300x100+{x}+{y}")
-        
         ctk.CTkLabel(self, text=message, font=("Open Sans", 14)).pack(expand=True)
         self.update()
 
@@ -1404,8 +1410,8 @@ class TemplateDialog(ctk.CTkToplevel):
         super().__init__(master)
         self.on_save = on_save
         self.is_edit = is_edit
-        self.insert_mode = insert_mode  # New flag for AI result insertion
-        self.title("Template Editor" if not insert_mode else "AI Result")
+        self.insert_mode = insert_mode  # Insert mode for template content
+        self.title("Template Editor")
         self.geometry("480x400")
         # Safely get colors from the app instance before any widget creation
         app = self._get_app_instance(master)
@@ -1453,7 +1459,7 @@ class TemplateDialog(ctk.CTkToplevel):
         title = self.title_entry.get().strip()
         structure = self.structure_text.get("1.0", "end-1c").strip()
         if self.insert_mode:
-            # For AI results, just need content to insert
+            # For insert mode, just need content to insert
             if not structure:
                 messagebox.showwarning("Empty", "No content to insert.")
                 return
@@ -1468,7 +1474,6 @@ class TemplateDialog(ctk.CTkToplevel):
             if not title or not structure:
                 messagebox.showwarning("Invalid", "Both title and structure are required.")
                 return
-            
             if self.on_save:
                 try:
                     self.on_save(title, structure)
@@ -2068,34 +2073,39 @@ class HomeView:
 
         Extracts hashtags from content, validates duplicate titles, and stores
         into either a selected notebook or the unassigned notes collection.
+        Also ensures tags are present in both the tag list and appended to the content.
         """
         title = self.title_entry.get().strip()
         raw_content = self.text_area.get("1.0", "end-1c").strip()
         content = "" if (self._placeholder_active and raw_content == self._content_placeholder_text.strip()) else raw_content
         assigned_notebook = self.notebook_var.get()
-        
+
         # Extract tags from content (hashtags written in the text area)
         tags = extract_hashtags_from_text(content)
-        
+
+        # Ensure all tags are present in the content (append missing ones)
+        missing_tags = [tag for tag in tags if tag not in content]
+        if missing_tags:
+            if content:
+                content = content.rstrip() + "\n" + " ".join(missing_tags)
+            else:
+                content = " ".join(missing_tags)
+
         if not title:
             messagebox.showwarning("Missing Title", "A title is required to save the note.")
             return
-        
-        # Content can be empty if title is present? User said "No title, no saving". Didn't explicitly say content is required, but usually it is.
-        # Let's allow empty content if title is there, or maybe just warn.
-        # "The first three words of the text. If none, then leave it blank." implies content can be empty.
-        
+
         # Resolve full notebook name
         if assigned_notebook in self.notebook_map:
             clean_notebook_name = self.notebook_map[assigned_notebook]
         else:
             clean_notebook_name = assigned_notebook.replace("• ", "") # Fallback
-            
+
         # Check for duplicate title
         if self.data_manager.note_exists(clean_notebook_name, title):
             messagebox.showwarning("Duplicate Title", f"A note with the title '{title}' already exists in '{assigned_notebook}'.")
             return
-        
+
         note = {
             "id": str(uuid.uuid4()),
             "title": title,
@@ -2104,29 +2114,25 @@ class HomeView:
             "created": datetime.now().isoformat(),
             "notebook": clean_notebook_name if assigned_notebook != "• Unassigned Notes" else None
         }
-        
+
         if assigned_notebook != "• Unassigned Notes" and assigned_notebook != "+ Create new notebook...":
             self.data_manager.add_note_to_notebook(clean_notebook_name, note)
             messagebox.showinfo("Saved", f"Note saved to '{clean_notebook_name}'")
         else:
             self.data_manager.add_unassigned_note(note)
             self.refresh_notes_list()
-            
+
         # Clear inputs
         self.title_entry.delete(0, "end")
-        # text-based tags are extracted from content, so we don't keep a separate tags entry here
-            # clear any previous chips (safe no-op if chips removed later)
         try:
             chip_frame = getattr(self, 'tags_chip_frame', None)
             if chip_frame is not None:
                 for w in chip_frame.winfo_children():
                     w.destroy()
         except Exception:
-            # Some older states may not have tags_chip_frame yet — ignore
             pass
         self.text_area.delete("1.0", "end")
         self.notebook_var.set("• Unassigned Notes")
-        # we no longer maintain a separate tags chip UI (tags embedded in content)
 
     def refresh_notes_list(self):
         tab = self.tab_var.get()

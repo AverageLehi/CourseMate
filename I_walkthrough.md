@@ -7,7 +7,7 @@ CourseMate now handles tags as in-content hashtags. Instead of a separate tag en
     - Each stored tag is canonicalized and stored with a leading `#` (e.g. `#cornell-notes`)
     - Example: text containing `#Cornell Notes` will persist as `#cornell-notes` in the data model
 
-- Inline editing model: there is no tags sidebar or chips UI anymore. Hashtags are highlighted inside the content area as-you-type; on Save / Export the app extracts them and stores them in the note metadata.
+-- Inline editing model: there is no tags sidebar or chips UI anymore. Hashtags are highlighted inside the content area as-you-type; on Save / Export the app extracts them and stores them in the note metadata.
 
 This simplifies the UX and reduces duplication — tags are now kept in a single place (the note content) and the UI highlights them for quick scanning.
 # CourseMate Code Walkthrough
@@ -71,6 +71,7 @@ This class handles all data operations.
 - It ensures data persistence between app runs
 
 ## Section 4: UI Components
+
 Several classes build the interface:
 
 ### Sidebar
@@ -98,11 +99,13 @@ Several classes build the interface:
 ## Section 5: Main Application Class (CourseMate)
 This is the main window class inheriting from `ctk.CTk`.
 
+
 **Key Methods:**
 - `__init__`: Sets up window, loads data, initializes UI
 - `load_custom_fonts()`: Loads TTF/OTF fonts from assets
 - `apply_settings()`: Updates theme/font dynamically
 - View switching methods (`show_home()`, `show_notebooks()`, etc.)
+
 
 ## Section 6: Helper Classes
 - `InputDialog`: Custom input popup
@@ -181,4 +184,3 @@ Test checklist for the mock defense:
 - Verify tags display correctly in lists and in NoteWindow and placeholders appear when appropriate.
 - Confirm export & copy actions work for individual notes (NoteWindow) and that word count updates while typing.
 
-If you'd like, I can also add a small unit-test style script (Python) that validates the JSON dataset contains at least one note for each template — would you like that created in the repo?

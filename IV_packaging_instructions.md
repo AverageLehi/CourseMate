@@ -54,6 +54,7 @@ If you want to include the data file and assets in the executable:
 pyinstaller --onefile --windowed --add-data "Coursemate_data.json;." --add-data "assets;assets" coursemate.py
 ```
 
+
 #### Creating an Installer (Optional)
 For a more professional distribution, create an installer using tools like:
 - **Inno Setup** (free)
