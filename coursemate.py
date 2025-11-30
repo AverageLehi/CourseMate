@@ -1208,13 +1208,10 @@ class Sidebar(ctk.CTkFrame):
             # Update button background
             btn.configure(fg_color=bg_color)
             
-            # Reload and update icon if present
+                       # Reload and update icon if present
             if icon_filename:
-                # Determine which icon file to load based on active state
-                base_name = icon_filename.replace('.png', '')
-                suffix = 'white'
-                actual_filename = f"{base_name}_{suffix}.png"
-                
+                # Use the provided icon filename directly (no extra '_white' suffix)
+                actual_filename = icon_filename
                 try:
                     new_img = load_icon(actual_filename, size=(24, 24))
                     if new_img:
