@@ -1,7 +1,7 @@
 {
   "courses": {
     "GEN 001": {
-      "name": "Purposive Communication",
+      "name": "GEN 001",
       "notes": [
         {
           "title": "Cornell Notes - Speech Outline",
@@ -33,11 +33,14 @@
           ]
         },
         {
-          "title": "test 3",
-          "content": "teste 5",
-          "tags": [],
-          "created": "November 27, 2025 | 09:10PM",
-          "notebook": "Purposive Communication"
+          "title": "asdfasdfsdf",
+          "content": "dfasdf\n\nCentral Concept:\n-\n\nRelated Concept 1:\n-\n\nRelated Concept 2:\n-\n\nConnections:\n- \n#concept-map\n\n7 Habits Week Template Planner\nHabit 1:\nHabit 2:\nHabit 3:\nHabit 4:\nHabit 5:\nHabit 6:\nHabit 7: \n#coveys",
+          "tags": [
+            "#conceptmap",
+            "#coveys"
+          ],
+          "created": "November 30, 2025 | 11:39PM",
+          "notebook": "GEN 002"
         }
       ],
       "tasks": [],
@@ -71,7 +74,7 @@
       "tasks": [],
       "code": "GEN 002",
       "instructor": "Prof. Sample",
-      "name": "Understanding the Self"
+      "name": "GEN 002"
     },
     "PED 030": {
       "notes": [
@@ -108,7 +111,7 @@
       "tasks": [],
       "code": "PED 030",
       "instructor": "Prof. Sample",
-      "name": "Physical Education"
+      "name": "PED 030"
     },
     "MAT 152": {
       "notes": [
@@ -142,7 +145,7 @@
       "tasks": [],
       "code": "MAT 152",
       "instructor": "Prof. Sample",
-      "name": "Mathematics in the Modern World"
+      "name": "MAT 152"
     },
     "ITE 260": {
       "notes": [
@@ -169,7 +172,7 @@
       "tasks": [],
       "code": "ITE 260",
       "instructor": "Prof. Sample",
-      "name": "Computer Programming I Python"
+      "name": "ITE 260"
     },
     "ITE 366": {
       "notes": [
@@ -196,7 +199,7 @@
       "tasks": [],
       "code": "ITE 366",
       "instructor": "Prof. Sample",
-      "name": "Introduction to Computing"
+      "name": "ITE 366"
     },
     "ETH 100": {
       "notes": [
@@ -222,7 +225,7 @@
       "tasks": [],
       "code": "ETH 100",
       "instructor": "Prof. Ethics",
-      "name": "Ethics in Computing"
+      "name": "ETH 100"
     },
     "PLN 001": {
       "notes": [
@@ -285,19 +288,21 @@
       "completed_tasks": [],
       "code": "PLN 001",
       "instructor": "Planner Bot",
-      "name": "Planner Examples"
+      "name": "PLN 001"
     },
-    "Pyhsical Education": {
+    "PED 031": {
       "notes": [],
       "tasks": [],
       "code": "PED 031",
-      "instructor": ""
+      "instructor": "",
+      "name": "Pyhsical Education"
     },
-    "Subject": {
+    "Course 123": {
       "notes": [],
       "tasks": [],
       "code": "Course 123",
-      "instructor": ""
+      "instructor": "",
+      "name": "Subject"
     }
   },
   "tasks": [],

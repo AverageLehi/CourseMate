@@ -2370,38 +2370,71 @@ class NoteWindow(ctk.CTkToplevel):
 
     def delete_note(self):
         if messagebox.askyesno("Delete Note", "Are you sure you want to delete this note? This cannot be undone."):
-            # Determine where the note is located based on "_notebook" key
             notebook_name = self.note.get("_notebook")
+            deleted = False
+            def note_match(a, b):
+                # Match title, content, created, tags, notebook (if present)
+                def norm(x):
+                    return str(x or '').strip()
+                fields = ['title', 'content', 'created']
+                for f in fields:
+                    if norm(a.get(f)) != norm(b.get(f)):
+                        return False
+                # tags: compare as sets
+                tags_a = set(a.get('tags', []))
+                tags_b = set(b.get('tags', []))
+                if tags_a != tags_b:
+                    return False
+                # notebook: match if present
+                nb_a = norm(a.get('notebook', a.get('_notebook', None)))
+                nb_b = norm(b.get('notebook', b.get('_notebook', None)))
+                if nb_a and nb_b and nb_a != nb_b:
+                    return False
+                return True
+
+            # Try unassigned notes
             if notebook_name is None or notebook_name == "Unassigned Notes":
-                # Note is unassigned
                 unassigned = self.data_manager.get_unassigned_notes()
                 if self.note in unassigned:
                     unassigned.remove(self.note)
+                    deleted = True
+                else:
+                    for n in unassigned:
+                        if note_match(n, self.note):
+                            unassigned.remove(n)
+                            deleted = True
+                            break
+                if deleted:
                     self.data_manager.save_data()
                     self.destroy()
                     if self.callback:
                         self.callback()
-                    # Refresh sidebar stats
                     if isinstance(self.master.master, CourseMate):
-                         self.master.master.sidebar.refresh_stats()
+                        self.master.master.sidebar.refresh_stats()
                     return
             else:
-                # Note is in a specific notebook
+                # Try notebooks
                 notebooks = self.data_manager.get_notebooks()
                 for code, nb_data in notebooks.items():
                     if nb_data.get("name") == notebook_name:
                         notes = nb_data.get("notes", [])
                         if self.note in notes:
                             notes.remove(self.note)
+                            deleted = True
+                        else:
+                            for idx, n in enumerate(notes):
+                                if note_match(n, self.note):
+                                    notes.pop(idx)
+                                    deleted = True
+                                    break
+                        if deleted:
                             self.data_manager.save_data()
                             self.destroy()
                             if self.callback:
                                 self.callback()
-                            # Refresh sidebar stats
                             if isinstance(self.master.master, CourseMate):
-                                 self.master.master.sidebar.refresh_stats()
+                                self.master.master.sidebar.refresh_stats()
                             return
-            
             messagebox.showerror("Error", "Could not find note to delete.")
 
     def move_note(self):
