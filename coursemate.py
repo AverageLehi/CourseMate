@@ -6,6 +6,8 @@ and the main application shell. Comments are concise for panel review.
 
 import customtkinter as ctk
 import json
+import uuid
+from datetime import datetime
 import os
 from datetime import datetime
 from pathlib import Path
@@ -461,11 +463,7 @@ DEFAULT_SETTINGS = {
     "quote_timer": 30, # seconds
     # New template category keys (will be migrated/populated in DataManager.load_data)
     "study_templates": {},
-    "additional_templates": {},
-    # Legacy key retained for backward compatibility; migrated into study_templates then cleared
-    "custom_templates": {},
-    # AI model selection (used by offline AI integration); defaults to local llama3
-    "ai_model": "llama3"
+    "additional_templates": {}
 }
 
 # Default planner / organizational templates for the new Additional Templates category
@@ -502,113 +500,87 @@ class DataManager:
     def __init__(self, filepath="Coursemate_data.json"):
         self.filepath = Path(filepath)
         self.data = {
-            "courses": {}, # Now acting as Notebooks
-            "tasks": [],
-            "completed_tasks": [],
-            "unassigned_notes": [], # New: Notes created in Home without assignment
+            "notebooks": {},
+            "unassigned_notes": [],
             "settings": DEFAULT_SETTINGS.copy()
         }
         self.load_data()
 
     def load_data(self):
-        if self.filepath.exists():
+        def migrate_note(note, notebook_name=None):
+            # Ensure notebook field
+            note['notebook'] = notebook_name if notebook_name else None
+            # Ensure id field
+            if 'id' not in note or not note['id']:
+                note['id'] = str(uuid.uuid4())
+            # Standardize date fields to ISO 8601
+            def to_iso(dt):
+                if not dt:
+                    return datetime.now().isoformat()
+                try:
+                    # Try ISO first
+                    return datetime.fromisoformat(dt).isoformat()
+                except Exception:
+                    # Try known formats
+                    for fmt in ["%B %d, %Y | %I:%M%p", "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"]:
+                        try:
+                            return datetime.strptime(dt, fmt).isoformat()
+                        except Exception:
+                            continue
+                return datetime.now().isoformat()
+            note['created'] = to_iso(note.get('created'))
+            if 'modified' in note:
+                note['modified'] = to_iso(note.get('modified'))
+            return note
+
+        if hasattr(self, 'filepath') and self.filepath.exists():
             try:
                 with open(self.filepath, 'r') as f:
                     loaded_data = json.load(f)
-                    # Merge loaded data with defaults to handle missing keys (migrations)
-                    courses = loaded_data.get("courses", {})
-                    
-                    # Migrate old data structure (name-keyed) to new (code-keyed)
-                    # Check if any notebook is missing the 'name' field - indicates old format
-                    needs_migration = False
-                    for key, nb_data in courses.items():
-                        if "name" not in nb_data:
-                            needs_migration = True
-                            break
-                    
-                    if needs_migration:
-                        print("Migrating notebook data to new format...")
-                        migrated_courses = {}
-                        for old_key, nb_data in courses.items():
-                            # Old format: key=name, data has no 'name' field, may/may not have 'code'
-                            code = nb_data.get("code", old_key)  # Use old key as fallback
-                            name = old_key
-                            # Add name field
-                            nb_data["name"] = name
-                            nb_data["code"] = code
-                            # Store with code as key
-                            migrated_courses[code] = nb_data
-                        self.data["courses"] = migrated_courses
-                    else:
-                        self.data["courses"] = courses
-                    
-                    # Ensure all notebooks have a 'name' field
-                    for code, nb_data in self.data["courses"].items():
-                        if "name" not in nb_data or not nb_data.get("name"):
-                            nb_data["name"] = code  # Use code as fallback name
-                    
-                    self.data["tasks"] = loaded_data.get("tasks", [])
-                    self.data["completed_tasks"] = loaded_data.get("completed_tasks", [])
-                    self.data["unassigned_notes"] = loaded_data.get("unassigned_notes", [])
-                    
-                    # Merge settings carefully
-                    saved_settings = loaded_data.get("settings", {})
-                    for k, v in DEFAULT_SETTINGS.items():
-                        if k not in saved_settings:
-                            saved_settings[k] = v
-
-                    # --- Template Category Migration ---
-                    # If legacy custom_templates exist and study_templates not yet populated, migrate.
-                    legacy = saved_settings.get("custom_templates", {}) or {}
-                    if legacy and not saved_settings.get("study_templates"):
-                        # Initialize study_templates with legacy content
-                        saved_settings["study_templates"] = dict(legacy)
-                        # Clear legacy key to reduce duplication (still kept as empty for backward compatibility)
-                        saved_settings["custom_templates"] = {}
-
-                    # Ensure keys exist even if empty
-                    if "study_templates" not in saved_settings:
-                        saved_settings["study_templates"] = {}
-                    if "additional_templates" not in saved_settings:
-                        saved_settings["additional_templates"] = {}
-
-                    # Populate default additional templates only once (if user has none)
-                    if not saved_settings["additional_templates"]:
-                        saved_settings["additional_templates"] = DEFAULT_ADDITIONAL_TEMPLATES.copy()
-
-                    # Move any weekly planning template from study to planner (one-time migration)
-                    move_keys = [
-                        k for k in list(saved_settings.get("study_templates", {}).keys())
-                        if k.lower() in ("weekly planning", "weekly planner", "weekly overview")
-                    ]
-                    for k in move_keys:
-                        val = saved_settings["study_templates"].pop(k)
-                        # Don't overwrite if target already has it
-                        if k not in saved_settings["additional_templates"]:
-                            saved_settings["additional_templates"][k] = val
-
-                    self.data["settings"] = saved_settings
-                    
-                    # Save migrated data
-                    if needs_migration:
-                        self.save_data()
-                    
-                    # Clean up any notebooks with empty codes
-                    self._cleanup_invalid_notebooks()
-                    
+                notebooks = loaded_data.get("notebooks", {})
+                for code, nb_data in notebooks.items():
+                    if "name" not in nb_data or not nb_data.get("name"):
+                        nb_data["name"] = code
+                    nb_data.pop("tasks", None)
+                    nb_data.pop("completed_tasks", None)
+                    notes = nb_data.get('notes', [])
+                    for i, note in enumerate(notes):
+                        notes[i] = migrate_note(note, nb_data['name'])
+                self.data["notebooks"] = notebooks
+                self.data["unassigned_notes"] = [migrate_note(n, None) for n in loaded_data.get("unassigned_notes", [])]
+                saved_settings = loaded_data.get("settings", {})
+                for k, v in DEFAULT_SETTINGS.items():
+                    if k not in saved_settings:
+                        saved_settings[k] = v
+                # Remove legacy custom_templates migration (no longer needed)
+                if "study_templates" not in saved_settings:
+                    saved_settings["study_templates"] = {}
+                if "additional_templates" not in saved_settings:
+                    saved_settings["additional_templates"] = {}
+                if not saved_settings["additional_templates"]:
+                    saved_settings["additional_templates"] = DEFAULT_ADDITIONAL_TEMPLATES.copy()
+                move_keys = [
+                    k for k in list(saved_settings.get("study_templates", {}).keys())
+                    if k.lower() in ("weekly planning", "weekly planner", "weekly overview")
+                ]
+                for k in move_keys:
+                    val = saved_settings["study_templates"].pop(k)
+                    if k not in saved_settings["additional_templates"]:
+                        saved_settings["additional_templates"][k] = val
+                self.data["settings"] = saved_settings
+                self._cleanup_invalid_notebooks()
             except Exception as e:
                 print(f"Error loading data: {e}")
-                # Keep default initialized data
         else:
-            self.save_data() # Create file if not exists
+            self.save_data()
     
     def _cleanup_invalid_notebooks(self):
         """Remove notebooks with empty or whitespace-only codes"""
-        invalid_codes = [code for code in self.data["courses"].keys() if not code or not code.strip()]
+        invalid_codes = [code for code in self.data["notebooks"].keys() if not code or not code.strip()]
         if invalid_codes:
             print(f"Cleaning up {len(invalid_codes)} invalid notebook(s)...")
             for code in invalid_codes:
-                del self.data["courses"][code]
+                del self.data["notebooks"][code]
             self.save_data()
 
     def save_data(self):
@@ -621,7 +593,7 @@ class DataManager:
 
     # --- Helper Accessors ---
     def get_notebooks(self):
-        return self.data["courses"]
+        return self.data["notebooks"]
 
     def get_unassigned_notes(self):
         return self.data["unassigned_notes"]
@@ -639,7 +611,7 @@ class DataManager:
 
     def add_note_to_notebook(self, notebook_name, note):
         # Find notebook by name and add note
-        for code, nb_data in self.data["courses"].items():
+        for code, nb_data in self.data["notebooks"].items():
             if nb_data.get("name") == notebook_name:
                 nb_data["notes"].append(note)
                 self.save_data()
@@ -651,14 +623,13 @@ class DataManager:
             return False, "Course code is required."
         
         code = code.strip()
-        existing_codes = [nb.get("code", "").lower() for nb in self.data["courses"].values()]
+        existing_codes = [nb.get("code", "").lower() for nb in self.data["notebooks"].values()]
         if code.lower() in existing_codes:
             return False, "A notebook with this course code already exists."
         
         # Name can be duplicate as long as course code is unique
-        self.data["courses"][name] = {
-            "notes": [], 
-            "tasks": [],
+        self.data["notebooks"][name] = {
+            "notes": [],
             "code": code,
             "instructor": instructor
         }
@@ -667,7 +638,7 @@ class DataManager:
 
     def rename_notebook(self, old_name, new_name):
         # Find notebook by name, update its stored name
-        for code, nb_data in self.data["courses"].items():
+        for code, nb_data in self.data["notebooks"].items():
             if nb_data.get("name") == old_name:
                 nb_data["name"] = new_name
                 self.save_data()
@@ -676,9 +647,9 @@ class DataManager:
 
     def delete_notebook(self, name):
         # Find and delete notebook by name
-        for code, nb_data in list(self.data["courses"].items()):
+        for code, nb_data in list(self.data["notebooks"].items()):
             if nb_data.get("name") == name:
-                del self.data["courses"][code]
+                del self.data["notebooks"][code]
                 self.save_data()
                 return True
         return False
@@ -690,13 +661,13 @@ class DataManager:
         # Check assigned notebooks (find by name)
         else:
             notes = None
-            for code, nb_data in self.data["courses"].items():
+            for code, nb_data in self.data["notebooks"].items():
                 if nb_data.get("name") == notebook_name:
                     notes = nb_data["notes"]
                     break
             if notes is None:
                 return False
-            
+        
         # Case-insensitive title check
         for note in notes:
             if note.get("title", "").lower() == title.lower():
@@ -705,7 +676,7 @@ class DataManager:
 
     def delete_note(self, notebook_name, note_index):
         # Find notebook by name and delete note
-        for code, nb_data in self.data["courses"].items():
+        for code, nb_data in self.data["notebooks"].items():
             if nb_data.get("name") == notebook_name:
                 if 0 <= note_index < len(nb_data["notes"]):
                     nb_data["notes"].pop(note_index)
@@ -1671,6 +1642,7 @@ class HomeView:
         # Try to load a tinted refresh icon from assets; fall back to emoji if unavailable
         try:
             img = load_and_tint_icon('icon_refresh_24.png', self.colors.get('accent', '#4a90e2'), size=(18, 18))
+       
         except Exception:
             img = None
         if img:
@@ -1893,7 +1865,7 @@ class HomeView:
                 self.text_area.insert(delete_start, "• ")
         except Exception:
             pass
-
+    
     def _init_content_placeholder(self):
         """Insert placeholder text if empty; style with secondary color."""
         if self.text_area.get("1.0", "end-1c").strip():
@@ -1937,7 +1909,7 @@ class HomeView:
                 prev_line_end = f"{prev_line_num}.end"
                 prev_line = self.text_area.get(prev_line_start, prev_line_end)
                 
-                # If previous line is just "• " with nothing else, remove it and don't add new bullet
+                # If previous line is just "•" with nothing else, remove it and don't add new bullet
                 if prev_line.strip() == "•":
                     self.text_area.delete(prev_line_start, f"{prev_line_num}.end")
                     # Also remove the newline we just created
@@ -2012,10 +1984,11 @@ class HomeView:
             return
         
         note = {
+            "id": str(uuid.uuid4()),
             "title": title,
             "content": content,
             "tags": tags,
-            "created": datetime.now().strftime("%B %d, %Y | %I:%M%p"),
+            "created": datetime.now().isoformat(),
             "notebook": clean_notebook_name if assigned_notebook != "• Unassigned Notes" else None
         }
         
@@ -2244,7 +2217,7 @@ class NoteWindow(ctk.CTkToplevel):
             self._img_delete = img
             ctk.CTkButton(actions_frame, image=self._img_delete, text="", command=self.delete_note, fg_color=colors['danger'], width=36, height=36).pack(side="right")
         else:
-            ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white", font=get_font(0)).pack(side="right")
+            ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white", width=80, font=get_font(0)).pack(side="right")
         
         # Move to Notebook
         move_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -2370,40 +2343,30 @@ class NoteWindow(ctk.CTkToplevel):
 
     def delete_note(self):
         if messagebox.askyesno("Delete Note", "Are you sure you want to delete this note? This cannot be undone."):
-            notebook_name = self.note.get("_notebook")
+            # Prefer course code for notebook lookup
+            notebook_code = self.note.get("notebook") or self.note.get("_notebook")
             deleted = False
+            # Prefer unique id for note matching
+            note_id = self.note.get("id")
             def note_match(a, b):
-                # Match title, content, created, tags, notebook (if present)
-                def norm(x):
-                    return str(x or '').strip()
-                fields = ['title', 'content', 'created']
-                for f in fields:
-                    if norm(a.get(f)) != norm(b.get(f)):
-                        return False
-                # tags: compare as sets
-                tags_a = set(a.get('tags', []))
-                tags_b = set(b.get('tags', []))
-                if tags_a != tags_b:
-                    return False
-                # notebook: match if present
-                nb_a = norm(a.get('notebook', a.get('_notebook', None)))
-                nb_b = norm(b.get('notebook', b.get('_notebook', None)))
-                if nb_a and nb_b and nb_a != nb_b:
-                    return False
-                return True
+                if a.get("id") and b.get("id"):
+                    return a["id"] == b["id"]
+                # Fallback: match all fields
+                return (
+                    a.get("title") == b.get("title") and
+                    a.get("content") == b.get("content") and
+                    a.get("created") == b.get("created") and
+                    set(a.get("tags", [])) == set(b.get("tags", []))
+                )
 
             # Try unassigned notes
-            if notebook_name is None or notebook_name == "Unassigned Notes":
+            if notebook_code is None or notebook_code == "Unassigned Notes":
                 unassigned = self.data_manager.get_unassigned_notes()
-                if self.note in unassigned:
-                    unassigned.remove(self.note)
-                    deleted = True
-                else:
-                    for n in unassigned:
-                        if note_match(n, self.note):
-                            unassigned.remove(n)
-                            deleted = True
-                            break
+                for idx, n in enumerate(unassigned):
+                    if note_match(n, self.note):
+                        unassigned.pop(idx)
+                        deleted = True
+                        break
                 if deleted:
                     self.data_manager.save_data()
                     self.destroy()
@@ -2413,28 +2376,24 @@ class NoteWindow(ctk.CTkToplevel):
                         self.master.master.sidebar.refresh_stats()
                     return
             else:
-                # Try notebooks
+                # Use course code for notebook lookup
                 notebooks = self.data_manager.get_notebooks()
-                for code, nb_data in notebooks.items():
-                    if nb_data.get("name") == notebook_name:
-                        notes = nb_data.get("notes", [])
-                        if self.note in notes:
-                            notes.remove(self.note)
+                nb_data = notebooks.get(notebook_code)
+                if nb_data:
+                    notes = nb_data.get("notes", [])
+                    for idx, n in enumerate(notes):
+                        if note_match(n, self.note):
+                            notes.pop(idx)
                             deleted = True
-                        else:
-                            for idx, n in enumerate(notes):
-                                if note_match(n, self.note):
-                                    notes.pop(idx)
-                                    deleted = True
-                                    break
-                        if deleted:
-                            self.data_manager.save_data()
-                            self.destroy()
-                            if self.callback:
-                                self.callback()
-                            if isinstance(self.master.master, CourseMate):
-                                self.master.master.sidebar.refresh_stats()
-                            return
+                            break
+                    if deleted:
+                        self.data_manager.save_data()
+                        self.destroy()
+                        if self.callback:
+                            self.callback()
+                        if isinstance(self.master.master, CourseMate):
+                            self.master.master.sidebar.refresh_stats()
+                        return
             messagebox.showerror("Error", "Could not find note to delete.")
 
     def move_note(self):
@@ -2725,7 +2684,7 @@ class NotebooksView:
         # Grid Layout Logic
         notebooks = self.data_manager.get_notebooks()
         if not notebooks:
-            ctk.CTkLabel(self.grid_frame, text="No notebooks yet. Create one to get started!", font=self.get_font(0), text_color=self.colors['secondary_text']).pack(pady=50)
+            ctk.CTkLabel(self.grid_frame, text="No notebooks yet. Create one to get started!", font=self.get_font(0, "italic"), text_color=self.colors['secondary_text']).pack(pady=50)
             return
 
         search_term = self.notebook_search_entry.get().lower().strip() if hasattr(self, 'notebook_search_entry') else ""
@@ -2759,7 +2718,6 @@ class NotebooksView:
     def _create_notebook_card(self, name, data, row, col):
         # Card Frame with border
         border_color = self.colors.get('card_border', self.colors.get('muted', '#68707a'))
-        # Use a consistent corner radius across cards
         corner = 12
         card = ctk.CTkFrame(self.grid_frame, fg_color=self.colors['card_bg'], corner_radius=corner,
                            border_width=2, border_color=border_color)
@@ -2769,8 +2727,8 @@ class NotebooksView:
         header = ctk.CTkFrame(card, fg_color="transparent")
         header.pack(fill="x", padx=15, pady=(15, 10))
         
-        # Title on the left - handle empty names
-        display_name = name.strip() if name else "(Unnamed)"
+        # Title on the left - always show notebook name
+        display_name = data.get("name", name).strip() if data.get("name", name) else "(Unnamed)"
         display_name = self.truncate_text(display_name, 20)
         lbl_title = ctk.CTkLabel(header, text=display_name, font=self.get_font(2, "bold"), 
                                  text_color=self.colors['main_text'])
@@ -2842,8 +2800,10 @@ class NotebooksView:
         
         # Meta (Code | Instructor)
         meta = []
-        if data.get("code"): meta.append(data["code"])
-        if data.get("instructor"): meta.append(data["instructor"])
+        if data.get("code"):
+            meta.append(data["code"])
+        if data.get("instructor"):
+            meta.append(data["instructor"])
         meta_text = " • ".join(meta) if meta else "No details"
         
         lbl_meta = ctk.CTkLabel(card, text=meta_text, font=self.get_font(-2), 
@@ -2855,9 +2815,9 @@ class NotebooksView:
         lbl_count = ctk.CTkLabel(card, text=f"{note_count} Notes", font=self.get_font(-2, "bold"), 
                                 text_color=self.colors['accent'])
         lbl_count.pack(padx=15, pady=(0, 10), anchor="w")
-
+        
         # Open Notebook Button at bottom
-        ctk.CTkButton(card, text="Open Notebook", command=lambda n=name: self.show_notebook(n),
+        ctk.CTkButton(card, text="Open Notebook", command=lambda n=display_name: self.show_notebook(n),
                      fg_color=self.colors.get('button_primary', self.colors['primary']), 
                      text_color=self.colors.get('button_text', 'white'),
                      height=30, font=self.get_font(-2)).pack(fill="x", padx=15, pady=(0, 15))
@@ -3218,62 +3178,7 @@ class SettingsView:
         )
         size_menu.grid(row=0, column=1, sticky="e", padx=(30, 0))
 
-        # # Live Theme Preview
-        # preview_container = ctk.CTkFrame(frame, fg_color="transparent")
-        # preview_container.pack(fill="x", padx=20, pady=(8, 12))
-
-        # self.preview_header = ctk.CTkFrame(preview_container, fg_color=self.colors['primary_dark'], corner_radius=6)
-        # self.preview_header.pack(fill="x")
-        # self.preview_header_label = ctk.CTkLabel(self.preview_header, text="Header Preview", font=self.master.master.get_font(-1, "bold"), text_color=self.colors['header_text'])
-        # self.preview_header_label.pack(expand=True)
-
-        # sample_row = ctk.CTkFrame(preview_container, fg_color="transparent")
-        # sample_row.pack(fill="x", pady=(8,0))
-
-        # self.preview_sidebar = ctk.CTkFrame(sample_row, fg_color=self.colors['primary'], width=120, height=80, corner_radius=6)
-        # self.preview_sidebar.pack(side="left", padx=(0,8))
-        # self.preview_sidebar_label = ctk.CTkLabel(self.preview_sidebar, text="Sidebar", font=self.master.master.get_font(-2), text_color=self.colors['sidebar_text'])
-        # self.preview_sidebar_label.pack(expand=True)
-
-        # self.preview_main = ctk.CTkFrame(sample_row, fg_color=self.colors['background'], corner_radius=6)
-        # self.preview_main.pack(fill="x", expand=True)
-        # self.preview_main_label = ctk.CTkLabel(self.preview_main, text="Main Area", font=self.master.master.get_font(-2), text_color=self.colors['main_text'])
-        # self.preview_main_label.pack(padx=8, pady=8, anchor="w")
-
-        # # Add additional sample controls to the preview so users can see how
-        # # dropdowns, entries and buttons will look in the selected theme.
-        # sample_controls = ctk.CTkFrame(self.preview_main, fg_color="transparent")
-        # sample_controls.pack(fill="x", padx=8, pady=(6, 10))
-
-        # # Sample label
-        # self.preview_sample_label = ctk.CTkLabel(sample_controls, text="Sample Label:", font=self.master.master.get_font(-3), text_color=self.colors['secondary_text'])
-        # self.preview_sample_label.pack(side="left", padx=(0, 8))
-
-        # # Sample dropdown
-        # self.preview_sample_var = ctk.StringVar(value="Option 1")
-        # self.preview_sample_dropdown = ctk.CTkOptionMenu(sample_controls, variable=self.preview_sample_var, values=["Option 1", "Option 2"], width=140,
-        #              fg_color=self.colors.get('dropdown_bg', self.colors['main_text']), button_color=self.colors.get('primary'),
-        #              text_color=self.colors.get('dropdown_text', 'white'))
-        # self.preview_sample_dropdown.pack(side="left", padx=(0, 8))
-
-        # # Sample entry
-        # self.preview_sample_entry = ctk.CTkEntry(sample_controls, placeholder_text="Type...", width=180,
-        #                      fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
-        # self.preview_sample_entry.pack(side="left", padx=(0, 8))
-
-        # # Sample action buttons
-        # btns = ctk.CTkFrame(self.preview_main, fg_color="transparent")
-        # btns.pack(fill="x", padx=8, pady=(0, 8))
-        # self.preview_sample_primary = ctk.CTkButton(btns, text="Primary", width=100, fg_color=self.colors.get('accent'), text_color="white")
-        # self.preview_sample_primary.pack(side="left", padx=(0, 8))
-        # self.preview_sample_secondary = ctk.CTkButton(btns, text="Secondary", width=100, fg_color=self.colors.get('card_bg'), text_color=self.colors.get('main_text'))
-        # self.preview_sample_secondary.pack(side="left")
-
-        # # Initialize preview with current theme selection
-        # try:
-        #     self.preview_theme(self.theme_var.get())
-        # except Exception:
-        #     pass
+ 
 
     def _setup_inspiration_section(self):
         frame = ctk.CTkFrame(self.container, fg_color=self.colors['card_bg'], corner_radius=10)
@@ -3714,20 +3619,53 @@ class AboutView:
         self.master = master
         self.data_manager = data_manager
         self.colors = colors
-        self.container = ctk.CTkFrame(master, fg_color="transparent")
+        # Scrollable container
+        self.container = ctk.CTkScrollableFrame(master, fg_color="transparent")
         self.container.pack(fill="both", expand=True, padx=20, pady=20)
 
-        ctk.CTkLabel(self.container, text="About CourseMate", font=("Open Sans", 20, "bold"), text_color=self.colors['main_text']).pack(anchor="w")
+        # Highlighted header
+        header_frame = ctk.CTkFrame(self.container, fg_color=self.colors['accent'], corner_radius=10)
+        header_frame.pack(fill="x", pady=(0, 16))
+        ctk.CTkLabel(header_frame, text="About CourseMate", font=("Open Sans", 22, "bold"), text_color="#fff").pack(anchor="center", pady=12)
+
         info = (
-            "CourseMate — Template-based note taking for students.\n"
-            "Version: 1.0 (local build)\n\n"
+            "CourseMate — Your study companion for smarter learning.\n"
+            "Version: 1.0\n\n"
+            "What is CourseMate?\n"
+            "CourseMate helps you organize your subjects, notes, and study materials in a clean, "
+            "template-based workspace. Whether you're studying technical subjects or general education, "
+            "CourseMate makes it easier to learn and remember more.\n\n"
+            "Why Use CourseMate?\n"
+            "Because studying shouldn’t feel messy. CourseMate keeps your notes structured and easy to find, "
+            "reducing clutter and helping you focus on what actually matters — understanding your lessons. "
+            "Templates, hashtags, and organized notebooks help you review faster and prepare better for exams.\n\n"
+            "Main Navigation Guide:\n"
+            "• Home — This is where you write your notes. Choose or create a template, type freely, use "
+            "hashtags for topics (e.g. #math), and assign your note to a notebook. You can clear the canvas, "
+            "insert templates, and browse your notes using the Recent, Assigned, and Unassigned tabs.\n\n"
+            "• Notebooks — Your subjects live here. Create notebooks for each course, add notes to them, rename "
+            "subjects, and organize your content by topic. Opening a notebook shows all notes inside it.\n\n"
+            "• Settings — Customize how CourseMate looks and feels. Change your theme, adjust font size, select "
+            "your preferred font family, and manage template categories. Great for making the app comfortable "
+            "for long study sessions.\n\n"
+            "• About — You're reading this page! This section explains what CourseMate is and how to navigate "
+            "the app effectively.\n\n"
+            "How to Use CourseMate (Step-by-Step):\n"
+            "1. Create a notebook for a subject you want to organize.\n"
+            "2. Pick an existing template or create your own study or planner template.\n"
+            "3. Write your note—use #hashtags to group topics and '- ' (dash + space) to create bullet points.\n"
+            "4. Assign the note to a notebook or keep it in Unassigned until you're ready.\n"
+            "5. Use the right-side panel in Home to review notes under Recent, Assigned, or Unassigned.\n"
+            "6. Visit the Notebooks page to browse everything by subject.\n\n"
             "Features:\n"
-            "- Notebook organization\n"
-            "- Tagged notes with hashtags\n"
-            "- Themed UI with runtime-tinted icons\n\n"
-            "Visit the project README for more details."
+            "- Organized notebooks for each subject\n"
+            "- Fast note creation with templates\n"
+            "- Hashtag-based tagging (#math, #lecture, #formula, etc.)\n"
+            "- Clean, theme-based interface\n"
+            "- Planner templates for daily and weekly productivity\n\n"
+            "For more details, check out the project README."
         )
-        ctk.CTkLabel(self.container, text=info, font=self.master.master.get_font(-2), text_color=self.colors['secondary_text'], wraplength=700, justify="left").pack(anchor="w", pady=(8,0))
+        ctk.CTkLabel(self.container, text=info, font=("Open Sans", 14), text_color=self.colors['main_text'], wraplength=700, justify="left").pack(anchor="w", pady=(8,0))
 
         # Small Close/Back button to go Home
         btn_frame = ctk.CTkFrame(self.container, fg_color="transparent")
