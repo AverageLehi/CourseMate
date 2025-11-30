@@ -491,13 +491,80 @@ DEFAULT_QUOTES = [
 # ============================================================================
 
 class DataManager:
-    """Persistent storage layer.
-
-    Responsibilities:
-    - Load / save JSON data file
-    - Migrate legacy structures to current schema
-    - Provide helper methods for notebooks, notes, tasks, and settings.
     """
+    Persistent storage layer. Responsibilities:
+        - Load / save JSON data file
+        - Migrate legacy structures to current schema
+        - Provide helper methods for notebooks, notes, tasks, and settings.
+        """
+    def move_note_by_id(self, note_id, source_notebook, target_notebook):
+        """Move a note by its unique id from source_notebook to target_notebook (or unassigned)."""
+        # If moving to unassigned
+        if target_notebook is None:
+            # Remove from source notebook
+            found = False
+            for code, nb_data in self.data["notebooks"].items():
+                notes = nb_data.get("notes", [])
+                for n in notes:
+                    if n.get("id") == note_id:
+                        notes.remove(n)
+                        n["notebook"] = None
+                        self.data["unassigned_notes"].append(n)
+                        self.save_data()
+                        return True, "Note moved to Unassigned Notes."
+            # Fallback: search all notebooks for note
+            for code, nb_data in self.data["notebooks"].items():
+                notes = nb_data.get("notes", [])
+                for n in notes:
+                    if n.get("id") == note_id:
+                        notes.remove(n)
+                        n["notebook"] = None
+                        self.data["unassigned_notes"].append(n)
+                        self.save_data()
+                        return True, "Note moved to Unassigned Notes (fallback)."
+            return False, "Note not found in any notebook."
+        # Remove from unassigned if present
+        for n in self.data["unassigned_notes"]:
+            if n.get("id") == note_id:
+                self.data["unassigned_notes"].remove(n)
+                n["notebook"] = target_notebook
+                # Add to target notebook
+                for code, nb_data in self.data["notebooks"].items():
+                    if nb_data.get("name") == target_notebook:
+                        nb_data["notes"].append(n)
+                        self.save_data()
+                        return True, "Note moved from Unassigned to notebook."
+                return False, "Target notebook not found."
+        # Otherwise, move from one notebook to another
+        found = False
+        for code, nb_data in self.data["notebooks"].items():
+            notes = nb_data.get("notes", [])
+            for n in notes:
+                if n.get("id") == note_id:
+                    notes.remove(n)
+                    n["notebook"] = target_notebook
+                    # Add to target notebook
+                    for tcode, tnb_data in self.data["notebooks"].items():
+                        if tnb_data.get("name") == target_notebook:
+                            tnb_data["notes"].append(n)
+                            self.save_data()
+                            return True, "Note moved to target notebook."
+                    return False, "Target notebook not found."
+        # Fallback: search all notebooks for note
+        for code, nb_data in self.data["notebooks"].items():
+            notes = nb_data.get("notes", [])
+            for n in notes:
+                if n.get("id") == note_id:
+                    notes.remove(n)
+                    n["notebook"] = target_notebook
+                    for tcode, tnb_data in self.data["notebooks"].items():
+                        if tnb_data.get("name") == target_notebook:
+                            tnb_data["notes"].append(n)
+                            self.save_data()
+                            return True, "Note moved to target notebook (fallback)."
+                    return False, "Target notebook not found."
+        return False, "Note not found in any notebook."
+    
     def __init__(self, filepath="Coursemate_data.json"):
         self.filepath = Path(filepath)
         self.data = {
@@ -1065,9 +1132,79 @@ class Sidebar(ctk.CTkFrame):
         self._create_nav_btn("Settings", self._wrap_callback(self.settings_cb, "Settings"), icon_filename='icon_settings_32_white.png', btn_width=44)
         self._create_nav_btn("About", self._wrap_callback(self.about_cb, "About"), icon_filename='icon_info_32_white.png', btn_width=44)
 
-        # Spacer to push nav icons to the top (no inspiration button)
+        # Spacer to push nav icons to the top
         spacer = ctk.CTkFrame(self, fg_color="transparent")
         spacer.pack(fill="both", expand=True)
+
+        # Inspiration icon button at the bottom, using same logic as other sidebar icons
+        # Inspiration icon button at the bottom, with brief tooltip
+        # Inspiration icon button at the bottom, with brief tooltip
+        self._create_nav_btn(
+            text="Inspiration",
+            command=self.toggle_inspiration_overlay,
+            icon_filename='icon_inspiration_32_white.png',
+            pack_side='bottom',
+            btn_width=44,
+            no_text_fallback=False,
+            tooltip="Show inspiration. Click again to close."
+        )
+    def toggle_inspiration_overlay(self):
+        app = getattr(self, 'master', None)
+        if not app or not hasattr(app, 'main_area'):
+            return
+        # If overlay exists, destroy it
+        if hasattr(app, '_inspiration_overlay') and app._inspiration_overlay is not None:
+            try:
+                app._inspiration_overlay.destroy()
+            except Exception:
+                pass
+            app._inspiration_overlay = None
+            return
+        # Otherwise, create overlay cardframe (draggable via handle)
+        overlay = ctk.CTkFrame(app.main_area, fg_color=app.colors.get('card_bg', '#e1e7ed'), corner_radius=5, width=340, height=120)
+        overlay.place(x=12, y=app.main_area.winfo_height() - 140)
+
+        # Drag handle icon (top of overlay)
+        drag_icon = load_icon('icon_drag_handle_32_white.png', size=(24, 24))
+        handle_frame = ctk.CTkFrame(overlay, fg_color="transparent", height=28)
+        handle_frame.pack(fill="x", side="top", pady=(2,0))
+        drag_label = ctk.CTkLabel(handle_frame, image=drag_icon, text="", width=24, height=24)
+        drag_label.pack(side="top", pady=(2,0))
+        ToolTip(drag_label, "Drag to move")
+
+        # Inspiration quote
+        quote = self._get_inspiration_quote()
+        label = ctk.CTkLabel(overlay, text=quote, font=app.get_font(0, "italic"), text_color=app.colors.get('main_text', '#0b2740'), wraplength=320, justify="left")
+        label.pack(padx=18, pady=(4,18))
+
+        # Make overlay draggable only via handle
+        def start_drag(event):
+            overlay._drag_start_x = event.x_root - overlay.winfo_rootx()
+            overlay._drag_start_y = event.y_root - overlay.winfo_rooty()
+
+        def on_drag(event):
+            x = event.x_root - overlay._drag_start_x - app.main_area.winfo_rootx()
+            y = event.y_root - overlay._drag_start_y - app.main_area.winfo_rooty()
+            # Clamp to main_area bounds
+            max_x = app.main_area.winfo_width() - overlay.winfo_width()
+            max_y = app.main_area.winfo_height() - overlay.winfo_height()
+            x = max(0, min(x, max_x))
+            y = max(0, min(y, max_y))
+            overlay.place(x=x, y=y)
+
+        drag_label.bind('<Button-1>', start_drag)
+        drag_label.bind('<B1-Motion>', on_drag)
+
+        app._inspiration_overlay = overlay
+
+    def _get_inspiration_quote(self):
+        # Get a random quote from settings
+        settings = self.data_manager.get_settings()
+        quotes = settings.get("quotes", [])
+        import random
+        if quotes:
+            return random.choice(quotes)
+        return "Stay motivated!"
 
     def _wrap_callback(self, callback, page_name):
         def _wrapped():
@@ -1081,7 +1218,7 @@ class Sidebar(ctk.CTkFrame):
                 pass
         return _wrapped
 
-    def _create_nav_btn(self, text, command, icon_filename=None, container=None, pack_side='top', set_active=True, btn_width=48, no_text_fallback=False):
+    def _create_nav_btn(self, text, command, icon_filename=None, container=None, pack_side='top', set_active=True, btn_width=48, no_text_fallback=False, tooltip=None):
         """Create a navigation button with icon or text fallback.
         Only uses white icons for all states.
         """
@@ -1132,7 +1269,7 @@ class Sidebar(ctk.CTkFrame):
                 state=btn_state
             )
         btn.pack(side=pack_side, padx=4, pady=4)
-        ToolTip(btn, text)
+        ToolTip(btn, tooltip if tooltip else text)
         self.nav_buttons[text] = {
             'button': btn,
             'icon_filename': icon_filename,
@@ -1581,12 +1718,12 @@ class HomeView:
         # Tab Bar
         tab_frame = ctk.CTkFrame(self.notes_frame, fg_color="transparent")
         tab_frame.pack(fill="x", padx=10, pady=(18, 0))
-        self.tab_var = ctk.StringVar(value="Unassigned")
+        self.tab_var = ctk.StringVar(value="Recent")
         tab_names = ["Recent", "Assigned", "Unassigned"]
         for tab in tab_names:
             btn = ctk.CTkButton(tab_frame, text=tab, width=110,
-                fg_color=self.colors['accent'] if tab == "Unassigned" else self.colors['card_bg'],
-                text_color="white" if tab == "Unassigned" else self.colors['main_text'],
+                fg_color=self.colors['accent'] if tab == "Recent" else self.colors['card_bg'],
+                text_color="white" if tab == "Recent" else self.colors['main_text'],
                 font=self.app.get_font(0, "bold"),
                 command=lambda t=tab: self._switch_tab(t))
             btn.pack(side="left", padx=(0,8))
@@ -1614,7 +1751,7 @@ class HomeView:
         self.notes_list_container = ctk.CTkFrame(self.notes_frame, fg_color="transparent")
         self.notes_list_container.pack(fill="both", expand=True, padx=10, pady=(8,10))
         self.notes_list = None
-        self._switch_tab("Unassigned")
+        self._switch_tab("Recent")
 
     def _switch_tab(self, tab_name):
         self.tab_var.set(tab_name)
@@ -1662,7 +1799,17 @@ class HomeView:
         for nb_name, nb_data in self.data_manager.get_notebooks().items():
             for n in nb_data.get("notes", []):
                 notes.append({**n, "_notebook": nb_data.get("name", nb_name)})
-        notes.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        # Sort by created date (newest first)
+        def get_dt(note):
+            try:
+                # Try ISO format first
+                return datetime.fromisoformat(note.get('created', ''))
+            except Exception:
+                try:
+                    return datetime.strptime(note.get('created', ''), "%B %d, %Y | %I:%M%p")
+                except Exception:
+                    return datetime.min
+        notes.sort(key=get_dt, reverse=True)
         return notes
 
     def _create_note_card(self, note, tab=None):
@@ -1990,7 +2137,16 @@ class HomeView:
         notes = []
         if tab == "Unassigned":
             notes = list(self.data_manager.get_unassigned_notes())
-            notes.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            # Sort by created date (newest first)
+            def get_dt(note):
+                try:
+                    return datetime.fromisoformat(note.get('created', ''))
+                except Exception:
+                    try:
+                        return datetime.strptime(note.get('created', ''), "%B %d, %Y | %I:%M%p")
+                    except Exception:
+                        return datetime.min
+            notes.sort(key=get_dt, reverse=True)
         elif tab == "Recent":
             notes = self._get_recent_notes(15)
         elif tab == "Assigned":
@@ -2392,91 +2548,33 @@ class NoteWindow(ctk.CTkToplevel):
             messagebox.showerror("Error", "Could not find note to delete.")
 
     def move_note(self):
-        # Move note to selected notebook (from the dropdown created in __init__)
+        # Move note to selected notebook using unique note id
         target_display = self.notebook_var.get()
         if not target_display or target_display in ("Select Notebook...", "No Notebooks"):
             messagebox.showwarning("No Target", "Please select a target notebook to move this note.")
             return
 
-        # Resolve the mapping; notebook_map maps display names to actual notebook
-        # names, and maps '• Unassigned Notes' to None.
         target_notebook = self.notebook_map.get(target_display, target_display)
-
-        # Confirm action text for unassigned target
         confirm_target = "Unassigned Notes" if target_notebook is None else target_notebook
-        if messagebox.askyesno("Move Note", f"Move this note to '{confirm_target}'?"):
-            # If target is Unassigned (None), remove from any notebook and add to unassigned
-            if target_notebook is None:
-                # If already unassigned, nothing to do
-                unassigned = self.data_manager.get_unassigned_notes()
-                if self.note in unassigned:
-                    messagebox.showinfo("No-op", "Note is already in Unassigned Notes.")
-                    return
+        if not messagebox.askyesno("Move Note", f"Move this note to '{confirm_target}'?"):
+            return
 
-                # Remove from assigned notebook if present
-                removed = False
-                for code, notebook_data in self.data_manager.get_notebooks().items():
-                    if self.note in notebook_data.get("notes", []):
-                        notebook_data["notes"].remove(self.note)
-                        removed = True
-                        break
-
-                # Add to unassigned and save
-                self.data_manager.add_unassigned_note(self.note)
-                # If we removed from a notebook we already modified data in-memory; save
-                if not removed:
-                    # If it wasn't found in notebooks, ensure data is saved
-                    self.data_manager.save_data()
-
-                self.destroy()
-                if self.callback:
-                    self.callback()
-
-                # Refresh sidebar and main view
-                if isinstance(self.master.master, CourseMate):
-                    try:
-                        self.master.master.sidebar.refresh_stats()
-                        self.master.master.sidebar.refresh_notebooks_list()
-                    except Exception:
-                        pass
-                return
-
-            # Otherwise, move to a named notebook
-            # Remove from unassigned if present
-            unassigned = self.data_manager.get_unassigned_notes()
-            if self.note in unassigned:
-                unassigned.remove(self.note)
-                self.data_manager.add_note_to_notebook(target_notebook, self.note)
-                self.data_manager.save_data()
-                self.destroy()
-                if self.callback:
-                    self.callback()
-                if isinstance(self.master.master, CourseMate):
-                    try:
-                        self.master.master.sidebar.refresh_stats()
-                        self.master.master.sidebar.refresh_notebooks_list()
-                    except Exception:
-                        pass
-                return
-
-            # If not in unassigned, search notebooks to find and move
-            for code, notebook_data in self.data_manager.get_notebooks().items():
-                if self.note in notebook_data.get("notes", []):
-                    notebook_data["notes"].remove(self.note)
-                    self.data_manager.add_note_to_notebook(target_notebook, self.note)
-                    self.data_manager.save_data()
-                    self.destroy()
-                    if self.callback:
-                        self.callback()
-                    if isinstance(self.master.master, CourseMate):
-                        try:
-                            self.master.master.sidebar.refresh_stats()
-                            self.master.master.sidebar.refresh_notebooks_list()
-                        except Exception:
-                            pass
-                    return
-
-            messagebox.showerror("Error", "Could not move note.")
+        note_id = self.note.get("id")
+        current_notebook = self.note.get("notebook")
+        success, msg = self.data_manager.move_note_by_id(note_id, current_notebook, target_notebook)
+        if success:
+            messagebox.showinfo("Move Note", msg)
+            self.destroy()
+            if self.callback:
+                self.callback()
+            if isinstance(self.master.master, CourseMate):
+                try:
+                    self.master.master.sidebar.refresh_stats()
+                    self.master.master.sidebar.refresh_notebooks_list()
+                except Exception:
+                    pass
+        else:
+            messagebox.showerror("Move Note", msg)
 
 class EditNotebookDialog(ctk.CTkToplevel):
     def __init__(self, master, data_manager, colors, callback, notebook_name=None):
