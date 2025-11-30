@@ -11,8 +11,6 @@ from datetime import datetime
 from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox, simpledialog
-import ctypes
-import os
 
 # Simple icon loading system
 try:
@@ -106,135 +104,168 @@ def darken_color(hex_color, percentage=12):
     
     Returns:
         Darkened hex color string with leading #
-    
-    Example:
-        >>> darken_color('#f5f5f5', 12)
-        '#d8d8d8'
     """
     try:
-        # Remove # if present and ensure we have a valid hex
         hex_color = hex_color.lstrip('#')
         if len(hex_color) != 6:
             return f'#{hex_color}' if not hex_color.startswith('#') else hex_color
-        
-        # Convert to RGB
         r = int(hex_color[0:2], 16)
         g = int(hex_color[2:4], 16)
         b = int(hex_color[4:6], 16)
-        
-        # Darken by percentage (use absolute value in case negative)
         factor = 1.0 - (abs(percentage) / 100.0)
-        r = int(r * factor)
-        g = int(g * factor)
-        b = int(b * factor)
-        
-        # Ensure values stay in valid range
-        r = max(0, min(255, r))
-        g = max(0, min(255, g))
-        b = max(0, min(255, b))
-        
-        # Convert back to hex
+        r = max(0, min(255, int(r * factor)))
+        g = max(0, min(255, int(g * factor)))
+        b = max(0, min(255, int(b * factor)))
         return f'#{r:02x}{g:02x}{b:02x}'
     except Exception as e:
-        # On any error, return original color
         print(f"Warning: Could not darken color {hex_color}: {e}")
         return f'#{hex_color}' if not hex_color.startswith('#') else hex_color
-
-
-# ------------------------
-# Simple tooltip class for hover text
-# ------------------------
-class ToolTip:
-    """Create a tooltip for a given widget."""
-    def __init__(self, widget, text):
-        self.widget = widget
-        self.text = text
-        self.tooltip_window = None
-        self.widget.bind("<Enter>", self.show_tooltip, add="+")
-        self.widget.bind("<Leave>", self.hide_tooltip, add="+")
-    
-    def show_tooltip(self, event=None):
-        if self.tooltip_window or not self.text:
-            return
-        x = self.widget.winfo_rootx() + self.widget.winfo_width() + 5
-        y = self.widget.winfo_rooty() + (self.widget.winfo_height() // 2)
         
-        self.tooltip_window = tw = tk.Toplevel(self.widget)
-        tw.wm_overrideredirect(True)
-        tw.wm_geometry(f"+{x}+{y}")
-        
-        label = tk.Label(tw, text=self.text, justify='left',
-                        background="#333333", foreground="#ffffff",
-                        relief='solid', borderwidth=1,
-                        font=("Open Sans", 10, "normal"),
-                        padx=8, pady=4)
-        label.pack()
-    
-    def hide_tooltip(self, event=None):
-        if self.tooltip_window:
-            self.tooltip_window.destroy()
-            self.tooltip_window = None
 
+                # Store references to update icons when active state changes
+                self.nav_buttons[text] = {
+                    'button': btn,
+                    'icon_filename': icon_filename,
+                    'image': img,
+                    'gray_image': gray_img,
+                    'white_image': white_img,
+                    'set_active': set_active
+                }
 
-# ------------------------
-# Tag utilities
-# ------------------------
-def _normalize_token(text: str) -> str:
-    """Return a normalized token for a tag (no '#', lowercase, hyphen-joined).
+            def set_active_page(self, page_name):
+                if self.active_page == page_name:
+                    return
+                self.active_page = page_name
+                for text, info in self.nav_buttons.items():
+                    btn = info['button']
+                    set_active = info.get('set_active', True)
+                    if not set_active:
+                        continue
+                    is_active = (text == page_name)
+                    bg_color = self.colors.get('accent', '#4a90e2') if is_active else self.colors.get('button_primary', '#334a66')
+                    btn.configure(fg_color=bg_color)
+                    icon_filename = info.get('icon_filename')
+                    if icon_filename:
+                        base_name = icon_filename.replace('.png', '')
+                        suffix = 'white' if is_active else 'gray'
+                        filename = f"{base_name}_{suffix}.png"
+                        try:
+                            new_img = load_icon(filename, size=(24, 24))
+                            if new_img:
+                                btn.configure(image=new_img)
+                                info['image'] = new_img
+                        except Exception:
+                            pass
 
-    Examples:
-      'Cornell Notes' -> 'cornell-notes'
-      '#Main Idea & Details' -> 'main-idea-details'
-    """
-    if not text:
-        return ""
-    # Remove any non-alphanumeric characters except spaces, lowercase
-    cleaned = re.sub(r'[^0-9a-zA-Z ]+', '', str(text)).strip().lower()
-    if not cleaned:
-        return ""
-    parts = [p for p in cleaned.split() if p]
-    return '-'.join(parts)
+            def refresh_stats(self):
+                # Keep header quick stats up to date
+                try:
+                    notebooks = self.data_manager.get_notebooks()
+                    total_notes = sum(len(nb.get('notes', [])) for nb in notebooks.values()) + len(self.data_manager.get_unassigned_notes())
+                except Exception:
+                    notebooks = {}
+                    total_notes = 0
+                app = getattr(self, 'master', None)
+                if app and hasattr(app, 'header_lbl_notebooks_count'):
+                    try:
+                        app.header_lbl_notebooks_count.configure(text=f"Notebooks: {len(notebooks)}")
+                    except Exception:
+                        pass
+                if app and hasattr(app, 'header_lbl_notes_count'):
+                    try:
+                        app.header_lbl_notes_count.configure(text=f"Total Notes: {total_notes}")
+                    except Exception:
+                        pass
 
+            def refresh_notebooks_list(self):
+                # No notebooks quick list in this compact sidebar; keep as no-op for compatibility
+                return
 
-def sanitize_tags_from_text(text: str) -> list:
-    """Turn a comma separated tags string into a sanitized list of tags.
+            def open_notebook(self, name):
+                try:
+                    self.notebooks_cb(name)
+                except Exception:
+                    pass
 
-    Returns canonical form including leading '#', no duplicates, order preserved.
-    """
-    if not text:
-        return []
-    pieces = [p.strip() for p in text.split(',')]
-    out = []
-    seen = set()
-    for p in pieces:
-        if not p:
-            continue
-        # Remove leading '#' for normalization
-        bare = p.lstrip('#').strip()
-        token = _normalize_token(bare)
-        if not token:
-            continue
-        if token in seen:
-            continue
-        seen.add(token)
-        out.append('#' + token)
-    return out
+            def start_quote_timer(self):
+                self.update_quote()
+                try:
+                    timer_interval = self.data_manager.get_settings().get('quote_timer', 30) * 1000
+                except Exception:
+                    timer_interval = 30000
+                try:
+                    self.after(timer_interval, self.start_quote_timer)
+                except Exception:
+                    pass
 
+            def update_quote(self):
+                try:
+                    quotes = self.data_manager.get_settings().get('quotes', [])
+                except Exception:
+                    quotes = []
+                if not quotes:
+                    quotes = [
+                        "The only way to do great work is to love what you do.",
+                        "Believe you can and you're halfway there.",
+                        "Success is not final, failure is not fatal."
+                    ]
+                import random
+                self._current_quote = random.choice(quotes)
 
-# ------------------------
-# Hashtag highlighting helpers
-# ------------------------
-def _get_underlying_text_widget(ctk_textbox):
-    """Try to find the underlying tk.Text widget for a CTkTextbox.
-    CTkTextbox implementations vary; try several common attribute names then fall back to the object itself.
-    """
-    if ctk_textbox is None:
-        return None
-    # Common internal attribute names used by CTkTextbox wrappers
-    candidates = ['_text', 'textbox', 'text', 'text_widget', '_textbox', '_text_widget']
-    for a in candidates:
-        if hasattr(ctk_textbox, a):
-            candidate = getattr(ctk_textbox, a)
+            def toggle_inspiration(self):
+                # Show or hide a small overlay with a quote
+                if self._inspiration_overlay and self._inspiration_overlay.winfo_exists():
+                    try:
+                        self._inspiration_overlay.destroy()
+                    except Exception:
+                        pass
+                    self._inspiration_overlay = None
+                    # Set the inspiration button back to normal
+                    info = self.nav_buttons.get('Inspire')
+                    if info:
+                        btn = info['button']
+                        btn.configure(fg_color=self.colors.get('button_primary', '#334a66'))
+                    return
+
+                # Create overlay
+                try:
+                    ov = ctk.CTkToplevel(self.master)
+                    ov.transient(self.master)
+                    ov.overrideredirect(True)
+                    ov.geometry("300x120")
+                    # Center overlay over main window
+                    try:
+                        root_x = self.master.winfo_rootx()
+                        root_y = self.master.winfo_rooty()
+                        w = self.master.winfo_width()
+                        h = self.master.winfo_height()
+                        ov_x = root_x + (w // 2) - (300 // 2)
+                        ov_y = root_y + (h // 2) - (120 // 2)
+                        ov.geometry(f"300x120+{ov_x}+{ov_y}")
+                    except Exception:
+                        pass
+
+                    # Overlay content
+                    ctk.CTkFrame(ov, fg_color=self.colors.get('card_bg', '#f5f5f5'), corner_radius=10).pack(fill="both", expand=True, padx=8, pady=8)
+                    lbl = ctk.CTkLabel(ov, text=self._current_quote or "...", wraplength=260, font=self.master.get_font(-1), text_color=self.colors.get('main_text'))
+                    lbl.pack(fill="both", expand=True, padx=10, pady=10)
+                    # Close overlay on click
+                    ov.bind("<Button-1>", lambda e: self.toggle_inspiration())
+                    self._inspiration_overlay = ov
+                    # Highlight the inspiration button while overlay visible
+                    info = self.nav_buttons.get('Inspire')
+                    if info:
+                        btn = info['button']
+                        try:
+                            btn.configure(fg_color=self.colors.get('accent', '#4a90e2'))
+                        except Exception:
+                            pass
+                except Exception:
+                    # If overlay can't be created, fall back to showing a messagebox
+                    try:
+                        messagebox.showinfo("Inspiration", self._current_quote or "Keep going!")
+                    except Exception:
+                        pass
             # Most likely candidate will be a tk.Text instance
             if isinstance(candidate, tk.Text):
                 return candidate
@@ -291,7 +322,8 @@ def apply_visual_formatting_to_textbox(*_args, **_kwargs):
     """Formatting system removed; legacy no-op placeholder."""
     return
 
-
+import ctypes
+import os
 
 # ============================================================================
 # CONFIGURATION & THEMES
@@ -1068,275 +1100,242 @@ class CourseMate(ctk.CTk):
 # UI COMPONENTS (Placeholders for now)
 # ============================================================================
 
-class Sidebar(ctk.CTkFrame):
-    """Compact left navigation: icon-only navigation with an inspiration toggle at the bottom."""
-    def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb, about_cb=None, initial_page="Home"):
-        super().__init__(master, width=35, corner_radius=0, fg_color=colors['sidebar_bg'])
-        self.colors = colors
-        self.data_manager = data_manager
-        self.home_cb = home_cb
-        self.notebooks_cb = notebooks_cb
-        self.settings_cb = settings_cb
-        self.about_cb = about_cb or (lambda: None)
-        self.active_page = initial_page
-        self.nav_buttons = {}
-        self._inspiration_overlay = None
-        self._current_quote = None
+# class Sidebar(ctk.CTkFrame):
+#         def _create_nav_btn(self, text, command, icon_filename=None):
+#             """Create a navigation button with icon or text fallback."""
+#             is_active = (text == getattr(self, 'active_page', 'Home'))
+#             bg_color = self.colors.get('button_primary', '#334a66')
+#             hover_color = self.colors.get('sidebar_hover', '#405977')
+#             btn_state = "disabled" if is_active else "normal"
+#             img = None
+#             gray_img = None
+#             white_img = None
+#             if icon_filename:
+#                 base_name = icon_filename.replace('.png', '')
+#                 gray_filename = f"{base_name}_gray.png"
+#                 white_filename = f"{base_name}_white.png"
+#                 try:
+#                     gray_img = load_icon(gray_filename, size=(24, 24))
+#                     white_img = load_icon(white_filename, size=(24, 24))
+#                     img = white_img if is_active else gray_img
+#                 except Exception as e:
+#                     print(f"✗ Failed to load icon for {text}: {e}")
+#             def on_click():
+#                 if not is_active:
+#                     self.active_page = text
+#                     command()
+#             if img:
+#                 btn = ctk.CTkButton(
+#                     self.nav_frame,
+#                     text="",
+#                     image=img,
+#                     command=on_click if not is_active else None,
+#                     fg_color=bg_color,
+#                     hover_color=hover_color,
+#                     width=50,
+#                     height=50,
+#                     corner_radius=10,
+#                     state=btn_state
+#                 )
+#                 if not is_active and white_img and gray_img:
+#                     def on_hover_enter(event, btn_text=text):
+#                         if btn_text != getattr(self, 'active_page', 'Home') and white_img:
+#                             btn.configure(image=white_img)
+#                     def on_hover_leave(event, btn_text=text):
+#                         if btn_text != getattr(self, 'active_page', 'Home') and gray_img:
+#                             btn.configure(image=gray_img)
+#                     btn.bind("<Enter>", on_hover_enter, add="+")
+#                     btn.bind("<Leave>", on_hover_leave, add="+")
+#             else:
+#                 btn = ctk.CTkButton(
+#                     self.nav_frame,
+#                     text=text,
+#                     command=on_click if not is_active else None,
+#                     fg_color=bg_color,
+#                     hover_color=hover_color,
+#                     width=50,
+#                     height=50,
+#                     corner_radius=10,
+#                     state=btn_state
+#                 )
+#             btn.pack(padx=10, pady=6)
+#             # Store button references
+#             self.nav_buttons[text] = {
+#                 'button': btn,
+#                 'icon_filename': icon_filename,
+#                 'image': img,
+#                 'gray_image': gray_img,
+#                 'white_image': white_img
+#             }
 
-        # Create top navigation icon stack
-        self.nav_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.nav_frame.pack(side="top", pady=8)
-        self._create_nav_btn("Home", self._wrap_callback(self.home_cb, "Home"), icon_filename='icon_home_32.png')
-        self._create_nav_btn("Notebooks", self._wrap_callback(self.notebooks_cb, "Notebooks"), icon_filename='icon_notebook_32.png')
-        self._create_nav_btn("Settings", self._wrap_callback(self.settings_cb, "Settings"), icon_filename='icon_settings_32.png')
-        self._create_nav_btn("About", self._wrap_callback(self.about_cb, "About"), icon_filename='icon_info_32.png')
+#         def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb, about_cb=None, initial_page="Home"):
+#             super().__init__(master, width=70, corner_radius=0, fg_color=colors['sidebar_bg'])
+#             self.colors = colors
+#             self.data_manager = data_manager
+#             self.home_cb = home_cb
+#             self.notebooks_cb = notebooks_cb
+#             self.settings_cb = settings_cb
+#             self.about_cb = about_cb
+#             # All sidebar quick notebook list code removed
+#             self._create_nav_btn("Home", home_cb, icon_filename='icon_home_32.png')
+#             self._create_nav_btn("Notebooks", notebooks_cb, icon_filename='icon_notebook_32.png')
+#             self._create_nav_btn("Settings", settings_cb, icon_filename='icon_settings_32.png')
+#             self._create_nav_btn("About", about_cb or (lambda: None), icon_filename='icon_info_32.png')
 
-        # Spacer to push the inspiration icon to the bottom
-        spacer = ctk.CTkFrame(self, fg_color="transparent")
-        spacer.pack(fill="both", expand=True)
+#         # Create button with icon or text fallback
+#         if img:
+#             btn = ctk.CTkButton(
+#                 self.nav_frame,
+#                 text="",
+#                 image=img,
+#                 command=on_click if not is_active else None,
+#                 fg_color=bg_color,
+#                 hover_color=hover_color,
+#                 width=50,
+#                 height=50,
+#                 corner_radius=10,
+#                 state=btn_state
+#             )
+#             # Add hover effect: change icon to white for inactive buttons
+#             if not is_active and white_img and gray_img:
+#                 def on_hover_enter(event, btn_text=text):
+#                     if btn_text != self.active_page and white_img:
+#                         btn.configure(image=white_img)
+#                 def on_hover_leave(event, btn_text=text):
+#                     if btn_text != self.active_page and gray_img:
+#                         btn.configure(image=gray_img)
+#                 btn.bind("<Enter>", on_hover_enter, add="+")
+#                 btn.bind("<Leave>", on_hover_leave, add="+")
+#         else:
+#             print(f"  Using text fallback for {text}")
+#             btn = ctk.CTkButton(
+#                 self.nav_frame,
+#                 text=text,
+#                 command=on_click if not is_active else None,
+#                 fg_color=bg_color,
+#                 hover_color=hover_color,
+#                 width=100,
+#                 height=40,
+#                 corner_radius=10,
+#                 font=self.master.get_font(-1, "bold"),
+#                 state=btn_state
+#             ) 
 
-        # Bottom inspiration icon
-        self.bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.bottom_frame.pack(side="bottom", pady=8)
-        self._create_nav_btn("Inspiration", self.toggle_inspiration, icon_filename='icon_inspiration_32_white.png', container=self.bottom_frame, pack_side='bottom', set_active=False)
+#         btn.pack(padx=10, pady=6)
 
-        # Start quote rotation
-        self.start_quote_timer()
-
-    def _wrap_callback(self, callback, page_name):
-        def _wrapped():
-            try:
-                self.set_active_page(page_name)
-            except Exception:
-                pass
-            try:
-                callback()
-            except Exception:
-                pass
-        return _wrapped
-
-    def _create_nav_btn(self, text, command, icon_filename=None, container=None, pack_side='top', set_active=True):
-        """Create a navigation button with icon or text fallback.
+#         ToolTip(btn, text)
         
-        Buttons use gray icons by default, white when active.
-        Background is button_primary by default, accent when active.
-        On hover, inactive buttons show sidebar_hover background and white icons.
-        Expects icon files named like: icon_home_24_gray.png and icon_home_24_white.png
-        """
+#         # Store button references with both icon versions
+#         self.nav_buttons[text] = {
+#             'button': btn,
+#             'icon_filename': icon_filename,
+#             'image': img,
+#             'gray_image': gray_img,
+#             'white_image': white_img
+#         }
+
+#     def refresh_stats(self):
+#         notebooks = self.data_manager.get_notebooks()
+#         total_notes = sum(len(nb.get('notes', [])) for nb in notebooks.values()) + len(self.data_manager.get_unassigned_notes())
+
+#         # Update header overlay labels if present (overlay lives on the App instance)
+#         app = getattr(self, 'master', None)
+#         if app and hasattr(app, 'header_lbl_notebooks_count'):
+#             try:
+#                 app.header_lbl_notebooks_count.configure(text=f"Notebooks: {len(notebooks)}")
+#             except Exception:
+#                 pass
+#         if app and hasattr(app, 'header_lbl_notes_count'):
+#             try:
+#                 app.header_lbl_notes_count.configure(text=f"Total Notes: {total_notes}")
+#             except Exception:
+#                 pass
+
+#     def refresh_notebooks_list(self):
+#         # No notebook list in sidebar anymore
+#         pass
+
+#         text_color=self.colors.get('sidebar_text', 'white'),
+
+#     def open_notebook(self, name):
+#         # Switch to Notebooks view and select the notebook
+#         self.notebooks_cb(name)
+#         # Ideally, we'd pass the notebook name to the view, but we'll implement that later
+#         # by storing 'selected_notebook' in the app state or similar.
+
+#     def start_quote_timer(self):
+#         self.update_quote()
+#         # Timer logic would go here, using self.after
+#         # For now, simple rotation
+#         timer_interval = self.data_manager.get_settings().get("quote_timer", 30) * 1000
+#         self.after(timer_interval, self.start_quote_timer)
+
+#     def update_quote(self):
+#         quotes = self.data_manager.get_settings().get("quotes", [])
+#         if not quotes:
+#             quotes = ["The only way to do great work is to love what you do.", 
+#                       "Believe you can and you're halfway there.", 
+#                       "Success is not final, failure is not fatal."]
         
-        # Determine if this button is currently active
-        is_active = (text == self.active_page) if set_active else False
+#         import random
+#         quote = random.choice(quotes)
+#         self.lbl_quote.configure(text=f'"{quote}"')
 
-        # Set background color and state based on active state
-        if is_active:
-            bg_color = self.colors.get('button_primary', '#334a66')
-            hover_color = self.colors.get('button_primary', '#334a66')
-            btn_state = "disabled"
-        else:
-            bg_color = self.colors.get('button_primary', '#334a66')
-            hover_color = self.colors.get('sidebar_hover', '#405977')
-            btn_state = "normal"
-
-        # Try to load icon - pre-load both gray and white versions
-        img = None
-        gray_img = None
-        white_img = None
-
-        if icon_filename:
-            base_name = icon_filename.replace('.png', '')
-            gray_filename = f"{base_name}_gray.png"
-            white_filename = f"{base_name}_white.png"
-            try:
-                gray_img = load_icon(gray_filename, size=(24, 24))
-                white_img = load_icon(white_filename, size=(24, 24))
-                img = white_img if is_active else gray_img
-            except Exception as e:
-                print(f"✗ Failed to load icon for {text}: {e}")
-                import traceback
-                traceback.print_exc()
-
-        def on_click():
-            if set_active and not is_active:
-                self.set_active_page(text)
-            try:
-                command()
-            except Exception:
-                pass
-
-        # Create button with icon or text fallback
-        if img:
-            btn = ctk.CTkButton(
-                container or self.nav_frame,
-                text="",
-                image=img,
-                command=on_click if not is_active else None,
-                fg_color=bg_color,
-                hover_color=hover_color,
-                width=50,
-                height=50,
-                corner_radius=10,
-                state=btn_state
-            )
-            # Add hover effect: change icon to white for inactive buttons
-            if not is_active and white_img and gray_img:
-                def on_hover_enter(event, btn_text=text):
-                    if btn_text != self.active_page and white_img:
-                        btn.configure(image=white_img)
-                def on_hover_leave(event, btn_text=text):
-                    if btn_text != self.active_page and gray_img:
-                        btn.configure(image=gray_img)
-                btn.bind("<Enter>", on_hover_enter, add="+")
-                btn.bind("<Leave>", on_hover_leave, add="+")
-        else:
-            print(f"  Using text fallback for {text}")
-            btn = ctk.CTkButton(
-                container or self.nav_frame,
-                text=text,
-                command=on_click if not is_active else None,
-                fg_color=bg_color,
-                hover_color=hover_color,
-                width=100,
-                height=40,
-                corner_radius=10,
-                font=self.master.get_font(-1, "bold"),
-                state=btn_state
-            ) 
-
-        btn.pack(side=pack_side, padx=8, pady=6)
-
-        ToolTip(btn, text)
-        
-        # Store button references with both icon versions
-        self.nav_buttons[text] = {
-            'button': btn,
-            'icon_filename': icon_filename,
-            'image': img,
-            'gray_image': gray_img,
-            'white_image': white_img,
-            'set_active': set_active
-        }
-
-    def refresh_stats(self):
-        notebooks = self.data_manager.get_notebooks()
-        total_notes = sum(len(nb.get('notes', [])) for nb in notebooks.values()) + len(self.data_manager.get_unassigned_notes())
-
-        # Update header overlay labels if present (overlay lives on the App instance)
-        app = getattr(self, 'master', None)
-        if app and hasattr(app, 'header_lbl_notebooks_count'):
-            try:
-                app.header_lbl_notebooks_count.configure(text=f"Notebooks: {len(notebooks)}")
-            except Exception:
-                pass
-        if app and hasattr(app, 'header_lbl_notes_count'):
-            try:
-                app.header_lbl_notes_count.configure(text=f"Total Notes: {total_notes}")
-            except Exception:
-                pass
-
-    def refresh_notebooks_list(self):
-        # Quick access list removed in compact sidebar; keep method for compatibility
-        return
-
-    def open_notebook(self, name):
-        # Switch to Notebooks view and select the notebook
-        self.notebooks_cb(name)
-        # Ideally, we'd pass the notebook name to the view, but we'll implement that later
-        # by storing 'selected_notebook' in the app state or similar.
-
-    def start_quote_timer(self):
-        self.update_quote()
-        # Timer logic would go here, using self.after
-        # For now, simple rotation
-        timer_interval = self.data_manager.get_settings().get("quote_timer", 30) * 1000
-        self.after(timer_interval, self.start_quote_timer)
-
-    def update_quote(self):
-        quotes = self.data_manager.get_settings().get("quotes", [])
-        if not quotes:
-            quotes = ["The only way to do great work is to love what you do.", "Believe you can and you're halfway there.", "Success is not final, failure is not fatal."]
-        
-        import random
-        quote = random.choice(quotes)
-        self._current_quote = quote
-        # If overlay is visible, update the label text
-        try:
-            if self._inspiration_overlay and hasattr(self._inspiration_overlay, '_quote_label'):
-                self._inspiration_overlay._quote_label.configure(text=f'"{quote}"')
-        except Exception:
-            pass
-
-    def toggle_inspiration(self):
-        """Show/hide the inspiration card. Useful on short screens."""
-        if getattr(self, 'inspiration_visible', True):
-            try:
-                self.inspiration_frame.pack_forget()
-            except Exception:
-                pass
-            self.inspiration_visible = False
-        else:
-            try:
-                self.inspiration_frame.pack(side="bottom", fill="x", padx=8, pady=3)
-            except Exception:
-                pass
-            self.inspiration_visible = True
-        # Update toggle button icon
-        icon = self._insp_icon_open if self.inspiration_visible else self._insp_icon_closed
-        self.inspire_toggle_btn.configure(text=icon)
+#     def toggle_inspiration(self):
+#         """Show/hide the inspiration card. Useful on short screens."""
+#         if getattr(self, 'inspiration_visible', True):
+#             try:
+#                 self.inspiration_frame.pack_forget()
+#             except Exception:
+#                 pass
+#             self.inspiration_visible = False
+#         else:
+#             try:
+#                 self.inspiration_frame.pack(side="bottom", fill="x", padx=8, pady=3)
+#             except Exception:
+#                 pass
+#             self.inspiration_visible = True
+#         # Update toggle button icon
+#         icon = self._insp_icon_open if self.inspiration_visible else self._insp_icon_closed
+#         self.inspire_toggle_btn.configure(text=icon)
     
-    def toggle_notebooks(self):
-        """Show/hide the notebooks list."""
-        if getattr(self, 'notebooks_visible', True):
-            try:
-                self.notebooks_frame.pack_forget()
-            except Exception:
-                pass
-            self.notebooks_visible = False
-        else:
-            try:
-                self.notebooks_frame.pack(fill="both", expand=True)
-            except Exception:
-                pass
-            self.notebooks_visible = True
-        # Update toggle button icon
-        icon = self._nb_icon_open if self.notebooks_visible else self._nb_icon_closed
-        self.notebooks_toggle_btn.configure(text=icon)
 
-    def set_active_page(self, page_name):
-        """Update the active page and refresh button styles."""
-        if self.active_page == page_name:
-            return  # Already active
+#     def set_active_page(self, page_name):
+#         """Update the active page and refresh button styles."""
+#         if self.active_page == page_name:
+#             return  # Already active
         
-        self.active_page = page_name
+#         self.active_page = page_name
         
-        # Refresh all navigation buttons
-        for btn_text, btn_info in self.nav_buttons.items():
-            is_active = (btn_text == page_name)
-            btn = btn_info['button']
-            icon_filename = btn_info['icon_filename']
+#         # Refresh all navigation buttons
+#         for btn_text, btn_info in self.nav_buttons.items():
+#             is_active = (btn_text == page_name)
+#             btn = btn_info['button']
+#             icon_filename = btn_info['icon_filename']
             
-            # Set background color based on active state
-            if is_active:
-                bg_color = self.colors.get('accent', '#4a90e2')
-            else:
-                bg_color = self.colors.get('button_primary', '#334a66')
+#             # Set background color based on active state
+#             if is_active:
+#                 bg_color = self.colors.get('accent', '#4a90e2')
+#             else:
+#                 bg_color = self.colors.get('button_primary', '#334a66')
             
-            # Update button background
-            btn.configure(fg_color=bg_color)
+#             # Update button background
+#             btn.configure(fg_color=bg_color)
             
-            # Reload and update icon if present
-            if icon_filename:
-                # Determine which icon file to load based on active state
-                base_name = icon_filename.replace('.png', '')
-                suffix = 'white' if is_active else 'gray'
-                actual_filename = f"{base_name}_{suffix}.png"
+#             # Reload and update icon if present
+#             if icon_filename:
+#                 # Determine which icon file to load based on active state
+#                 base_name = icon_filename.replace('.png', '')
+#                 suffix = 'white' if is_active else 'gray'
+#                 actual_filename = f"{base_name}_{suffix}.png"
                 
-                try:
-                    new_img = load_icon(actual_filename, size=(24, 24))
-                    if new_img:
-                        btn.configure(image=new_img)
-                        btn_info['image'] = new_img  # Update stored reference
-                except Exception as e:
-                    print(f"Failed to update icon for {btn_text}: {e}")
+#                 try:
+#                     new_img = load_icon(actual_filename, size=(24, 24))
+#                     if new_img:
+#                         btn.configure(image=new_img)
+#                         btn_info['image'] = new_img  # Update stored reference
+#                 except Exception as e:
+#                     print(f"Failed to update icon for {btn_text}: {e}")
 
 
 
