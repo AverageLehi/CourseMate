@@ -154,24 +154,25 @@ class ToolTip:
         self.tooltip_window = None
         self.widget.bind("<Enter>", self.show_tooltip, add="+")
         self.widget.bind("<Leave>", self.hide_tooltip, add="+")
-    
+
     def show_tooltip(self, event=None):
         if self.tooltip_window or not self.text:
             return
         x = self.widget.winfo_rootx() + self.widget.winfo_width() + 5
         y = self.widget.winfo_rooty() + (self.widget.winfo_height() // 2)
+
         
         self.tooltip_window = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(True)
         tw.wm_geometry(f"+{x}+{y}")
         
         label = tk.Label(tw, text=self.text, justify='left',
-                        background="#333333", foreground="#ffffff",
+                        background="#393E46", foreground="#ffffff",
                         relief='solid', borderwidth=1,
-                        font=("Open Sans", 10, "normal"),
+                        font=("Open Sans", 12, "normal"),
                         padx=8, pady=4)
         label.pack()
-    
+     
     def hide_tooltip(self, event=None):
         if self.tooltip_window:
             self.tooltip_window.destroy()
@@ -1257,6 +1258,9 @@ class TemplateDialog(ctk.CTkToplevel):
         self.insert_mode = insert_mode  # New flag for AI result insertion
         self.title("Template Editor" if not insert_mode else "AI Result")
         self.geometry("480x400")
+        # Safely get colors from the app instance before any widget creation
+        app = self._get_app_instance(master)
+        self.colors = getattr(app, 'colors', THEMES['CourseMate Theme'])
         self.resizable(False, False)
         try:
             self.transient(master)
@@ -1271,8 +1275,8 @@ class TemplateDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(self, text="Template title:", font=font_bold).pack(anchor="w", padx=16, pady=(12, 4))
         self.title_entry = ctk.CTkEntry(self, placeholder_text="Enter template title", font=font_normal,
-                                         fg_color=master.colors.get('card_bg', master.colors['background']),
-                                         text_color=master.colors['main_text'])
+                         fg_color=self.colors.get('card_bg', self.colors['background']),
+                         text_color=self.colors['main_text'])
         self.title_entry.pack(fill="x", padx=16, pady=(0, 8))
         # Validation bindings for template title (single line + length)
         try:
@@ -1285,8 +1289,8 @@ class TemplateDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(self, text="Template structure:", font=font_bold).pack(anchor="w", padx=16, pady=(0, 4))
         self.structure_text = ctk.CTkTextbox(self, font=font_normal, height=200,
-                                              fg_color=master.colors.get('background', '#ffffff'),
-                                              text_color=master.colors['main_text'])
+                              fg_color=self.colors.get('background', '#ffffff'),
+                              text_color=self.colors['main_text'])
         self.structure_text.pack(fill="both", expand=True, padx=16, pady=(0, 8))
         self.structure_text.insert("1.0", structure_init)
 
@@ -1343,7 +1347,7 @@ class InputDialog(ctk.CTkToplevel):
     def __init__(self, master, title, prompt, initialvalue=""):
         super().__init__(master)
         self.title(title)
-        self.geometry("400x150")
+        self.geometry("550x150")
         self.resizable(False, False)
         try:
             self.transient(master)
@@ -1359,9 +1363,11 @@ class InputDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(self, text=prompt, font=font_normal).pack(pady=(20, 10), padx=20, anchor="w")
 
-        self.entry = ctk.CTkEntry(self, width=360,
-                                   fg_color=master.colors.get('card_bg', master.colors['background']),
-                                   text_color=master.colors['main_text'])
+        app = self._get_app_instance(master)
+        colors = getattr(app, 'colors', THEMES['CourseMate Theme'])
+        self.entry = ctk.CTkEntry(self, width=500,
+                       fg_color=colors.get('card_bg', colors['background']),
+                       text_color=colors['main_text'])
         self.entry.pack(padx=20, pady=(0, 20))
         self.entry.insert(0, initialvalue)
         self.entry.focus()
@@ -1430,7 +1436,7 @@ class HomeView:
         self.container.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Page Title
-        ctk.CTkLabel(self.container, text="HOME", font=app.get_font(3, "bold"), text_color=colors['main_text']).pack(anchor="w", pady=(0, 2))
+        ctk.CTkLabel(self.container, text="HOME", font=app.get_font(6, "bold"), text_color=colors['main_text']).pack(anchor="w", pady=(0, 10))
         
         # Content container with two columns
         content_container = ctk.CTkFrame(self.container, fg_color="transparent")
@@ -1479,7 +1485,7 @@ class HomeView:
         )
         self.study_template_dropdown.pack(side="left")
         # Planner (additional) templates dropdown
-        ctk.CTkLabel(templates_frame, text="Planner:", font=self.app.get_font(0), text_color=self.colors['main_text']).pack(side="left", padx=(8,5))
+        ctk.CTkLabel(templates_frame, text="Additional:", font=self.app.get_font(0), text_color=self.colors['main_text']).pack(side="left", padx=(8,5))
         self.planner_template_var = ctk.StringVar(value="Select...")
         self.planner_template_dropdown = ctk.CTkOptionMenu(
             templates_frame,
@@ -1592,30 +1598,20 @@ class HomeView:
         # Search Bar
         search_frame = ctk.CTkFrame(self.notes_frame, fg_color="transparent")
         search_frame.pack(fill="x", padx=10, pady=(8, 0))
-        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Find by name, tags or keyword", 
-                                         fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30, font=self.app.get_font(0))
-        self.search_entry.pack(side="left", fill="x", expand=True)
+        self.search_entry = ctk.CTkEntry(
+            search_frame,
+            placeholder_text="Find by name, tags or keyword",
+            fg_color=self.colors['background'],
+            text_color=self.colors['main_text'],
+            border_color=self.colors.get('card_border'),
+            border_width=2,
+            height=40,
+            width=250,
+            font=self.app.get_font(0),
+        )
+        self.search_entry.pack(side="top", pady=4)
         self.search_entry.bind("<KeyRelease>", self.filter_notes)
 
-        # Refresh Button
-        # Try to load a tinted refresh icon from assets; fall back to emoji if unavailable
-        try:
-            img = load_and_tint_icon('icon_refresh_24.png', self.colors.get('accent', '#4a90e2'), size=(18, 18))
-       
-        except Exception:
-            img = None
-        if img:
-            # Keep a reference to avoid GC
-            self._img_refresh = img
-            refresh_btn = ctk.CTkButton(search_frame, image=self._img_refresh, text="", width=30, height=30,
-                fg_color=self.colors['accent'], command=self.refresh_notes_list)
-        else:
-            refresh_btn = ctk.CTkButton(search_frame, text="🔄", width=30, height=30,
-                fg_color=self.colors['accent'], text_color="white",
-                font=self.app.get_font(0, "bold"),
-                command=self.refresh_notes_list)
-        refresh_btn.pack(side="right", padx=(8, 0))
 
         # Notes List Area (will be swapped per tab)
         self.notes_list_container = ctk.CTkFrame(self.notes_frame, fg_color="transparent")
@@ -1709,7 +1705,7 @@ class HomeView:
         ctk.CTkButton(card, text="Open Note", command=lambda n=note: self.open_note_window(n),
             fg_color=self.colors.get('button_primary', self.colors['primary']),
             text_color=self.colors.get('button_text', 'white'),
-            height=25, font=self.app.get_font(-3)).pack(fill="x", padx=10, pady=(0, 8))
+            height=30, font=self.app.get_font(-1)).pack(fill="x", padx=10, pady=(0, 8))
         
     def filter_notes(self, event=None):
         self.refresh_notes_list()
@@ -2119,17 +2115,34 @@ class NoteWindow(ctk.CTkToplevel):
         actions_frame = ctk.CTkFrame(self, fg_color="transparent")
         actions_frame.pack(fill="x", padx=20, pady=(0, 20))
         
-        # Save Button
-        # create a stored reference to allow enabling/disabling based on validation
-        self.save_btn = ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white", font=get_font(0))
-        self.save_btn.pack(side="left", padx=(0, 10))
-        
-        # Export Button (use tinted icon when available)
+        # Save Button (icon, tooltip)
         try:
             img = None
-            for fn in ('icon_export_24.png',):
+            for fn in ('icon_save_changes_32_white.png',):
                 try:
-                    img = load_and_tint_icon(fn, colors.get('accent', '#4a90e2'), size=(16,16))
+                    img = load_icon(fn, size=(24,24))
+                    if img:
+                        break
+                except Exception:
+                    img = None
+        except Exception:
+            img = None
+
+        if img:
+            self._img_save = img
+            self.save_btn = ctk.CTkButton(actions_frame, image=self._img_save, text="", command=self.save_changes, fg_color=colors['success'], width=36, height=36)
+            self.save_btn.pack(side="left", padx=(0, 10))
+            ToolTip(self.save_btn, "Save changes")
+        else:
+            self.save_btn = ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white", font=get_font(0))
+            self.save_btn.pack(side="left", padx=(0, 10))
+        
+        # Export Button (icon, tooltip)
+        try:
+            img = None
+            for fn in ('icon_export_notes_32_white.png',):
+                try:
+                    img = load_icon(fn, size=(24,24))
                     if img:
                         break
                 except Exception:
@@ -2139,16 +2152,19 @@ class NoteWindow(ctk.CTkToplevel):
 
         if img:
             self._img_export = img
-            ctk.CTkButton(actions_frame, image=self._img_export, text="", command=self.export_note, fg_color=colors['info'], width=36, height=36).pack(side="left", padx=(0, 10))
+            self.export_btn = ctk.CTkButton(actions_frame, image=self._img_export, text="", command=self.export_note, fg_color=colors['info'], width=36, height=36)
+            self.export_btn.pack(side="left", padx=(0, 10))
+            ToolTip(self.export_btn, "Export note")
         else:
-            ctk.CTkButton(actions_frame, text="Export", command=self.export_note, fg_color=colors['info'], text_color="white", width=80, font=get_font(0)).pack(side="left", padx=(0, 10))
+            self.export_btn = ctk.CTkButton(actions_frame, text="Export", command=self.export_note, fg_color=colors['info'], text_color="white", width=80, font=get_font(0))
+            self.export_btn.pack(side="left", padx=(0, 10))
 
-        # Copy Button (use tinted icon when available)
+        # Copy Button (icon, tooltip)
         try:
             img = None
-            for fn in ('icon_copy_24.png',):
+            for fn in ('icon_content_copy_32_white.png',):
                 try:
-                    img = load_and_tint_icon(fn, colors.get('accent', '#4a90e2'), size=(16,16))
+                    img = load_icon(fn, size=(24,24))
                     if img:
                         break
                 except Exception:
@@ -2158,16 +2174,19 @@ class NoteWindow(ctk.CTkToplevel):
 
         if img:
             self._img_copy = img
-            ctk.CTkButton(actions_frame, image=self._img_copy, text="", command=self.copy_content, fg_color=colors['accent'], width=36, height=36).pack(side="left", padx=(0, 10))
+            self.copy_btn = ctk.CTkButton(actions_frame, image=self._img_copy, text="", command=self.copy_content, fg_color=colors['accent'], width=36, height=36)
+            self.copy_btn.pack(side="left", padx=(0, 10))
+            ToolTip(self.copy_btn, "Copy note content")
         else:
-            ctk.CTkButton(actions_frame, text="Copy", command=self.copy_content, fg_color=colors['accent'], text_color="white", width=80, font=get_font(0)).pack(side="left", padx=(0, 10))
+            self.copy_btn = ctk.CTkButton(actions_frame, text="Copy", command=self.copy_content, fg_color=colors['accent'], text_color="white", width=80, font=get_font(0))
+            self.copy_btn.pack(side="left", padx=(0, 10))
 
-        # Delete Button (use tinted icon when available)
+        # Delete Button (icon, tooltip)
         try:
             img = None
-            for fn in ('icon_delete_24.png','icon_delete_48.png'):
+            for fn in ('icon_delete_32_white.png',):
                 try:
-                    img = load_and_tint_icon(fn, colors.get('danger', '#e74c3c'), size=(16,16))
+                    img = load_icon(fn, size=(24,24))
                     if img:
                         break
                 except Exception:
@@ -2177,9 +2196,12 @@ class NoteWindow(ctk.CTkToplevel):
 
         if img:
             self._img_delete = img
-            ctk.CTkButton(actions_frame, image=self._img_delete, text="", command=self.delete_note, fg_color=colors['danger'], width=36, height=36).pack(side="right")
+            self.delete_btn = ctk.CTkButton(actions_frame, image=self._img_delete, text="", command=self.delete_note, fg_color=colors['danger'], width=36, height=36)
+            self.delete_btn.pack(side="right")
+            ToolTip(self.delete_btn, "Delete note")
         else:
-            ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white", width=80, font=get_font(0)).pack(side="right")
+            self.delete_btn = ctk.CTkButton(actions_frame, text="Delete Note", command=self.delete_note, fg_color=colors['danger'], text_color="white", width=80, font=get_font(0))
+            self.delete_btn.pack(side="right")
         
         # Move to Notebook
         move_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -2210,12 +2232,12 @@ class NoteWindow(ctk.CTkToplevel):
                        text_color=colors.get('dropdown_text', 'white'), font=get_font(0))
         self.notebook_dropdown.pack(side="left", padx=(0, 10))
 
-        # Move Button (use tinted icon when available)
+        # Move Button (icon, tooltip)
         try:
             img = None
-            for fn in ('icon_move_24.png',):
+            for fn in ('icon_move_item_32_white.png',):
                 try:
-                    img = load_and_tint_icon(fn, colors.get('info', '#3498db'), size=(14,14))
+                    img = load_icon(fn, size=(24,24))
                     if img:
                         break
                 except Exception:
@@ -2225,10 +2247,13 @@ class NoteWindow(ctk.CTkToplevel):
 
         if img:
             self._img_move = img
-            ctk.CTkButton(move_frame, image=self._img_move, text="", command=self.move_note, fg_color=colors['info'], width=36, height=36).pack(side="left")
+            self.move_btn = ctk.CTkButton(move_frame, image=self._img_move, text="", command=self.move_note, fg_color=colors['info'], width=36, height=36)
+            self.move_btn.pack(side="left")
+            ToolTip(self.move_btn, "Move note to notebook")
         else:
-            ctk.CTkButton(move_frame, text="Move", command=self.move_note, width=60,
-                          fg_color=colors['info'], text_color="white", font=get_font(0)).pack(side="left")
+            self.move_btn = ctk.CTkButton(move_frame, text="Move", command=self.move_note, width=60,
+                          fg_color=colors['info'], text_color="white", font=get_font(0))
+            self.move_btn.pack(side="left")
 
     def update_word_count(self, event=None):
         text = self.text_area.get("1.0", "end-1c")
@@ -2631,10 +2656,18 @@ class NotebooksView:
         search_frame = ctk.CTkFrame(self.container, fg_color="transparent")
         search_frame.pack(fill="x", padx=0, pady=(0, 10))
         
-        self.notebook_search_entry = ctk.CTkEntry(search_frame, placeholder_text="Find by name and course code", 
-                                         fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30, font=self.master.master.get_font(0))
-        self.notebook_search_entry.pack(side="left", fill="x", expand=True)
+        self.notebook_search_entry = ctk.CTkEntry(
+            search_frame,
+            placeholder_text="Find by name and course code",
+            fg_color=self.colors['background'],
+            text_color=self.colors['main_text'],
+            border_color=self.colors.get('card_border'),
+            border_width=2,
+            height=40,
+            width=250,
+            font=self.master.master.get_font(0)
+        )
+        self.notebook_search_entry.pack(side="left", expand=True)
         self.notebook_search_entry.bind("<KeyRelease>", self.filter_notebooks)
         
         # Grid Container
@@ -2692,6 +2725,7 @@ class NotebooksView:
         card = ctk.CTkFrame(self.grid_frame, fg_color=self.colors['card_bg'], corner_radius=corner,
                            border_width=2, border_color=border_color)
         card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
+        # Remove hover effect from card
         
         # Header with icon buttons
         header = ctk.CTkFrame(card, fg_color="transparent")
@@ -2715,16 +2749,25 @@ class NotebooksView:
         except Exception:
             img_del = None
 
-        # Delete button
-        ctk.CTkButton(header, image=img_del, text="", width=36, height=32,
+        # Delete button with tooltip
+        btn_del = ctk.CTkButton(header, image=img_del, text="", width=36, height=32,
             command=lambda n=name: self.delete_notebook(n),
             fg_color=self.colors.get('danger', '#e74c3c'), hover_color="#c0392b",
-            border_width=0).pack(side="right", padx=(5, 0))
-        # Edit button
-        ctk.CTkButton(header, image=img_edit, text="", width=36, height=32,
+            border_width=0)
+        btn_del.pack(side="right", padx=(5, 0))
+        ToolTip(btn_del, "Delete this notebook")
+        # Edit button with hover and tooltip
+        btn_edit = ctk.CTkButton(header, image=img_edit, text="", width=36, height=32,
             command=lambda n=name: self.rename_notebook(n),
-            fg_color=self.colors.get('info', '#3498db'), hover_color=self.colors.get('accent', '#4a90e2'),
-            border_width=0).pack(side="right", padx=(5, 0))
+            fg_color=self.colors.get('info', '#3498db'), border_width=0)
+        btn_edit.pack(side="right", padx=(5, 0))
+        def on_edit_enter(event):
+            btn_edit.configure(fg_color=self.colors.get('accent', '#4a90e2'))
+        def on_edit_leave(event):
+            btn_edit.configure(fg_color=self.colors.get('info', '#3498db'))
+        btn_edit.bind("<Enter>", on_edit_enter)
+        btn_edit.bind("<Leave>", on_edit_leave)
+        ToolTip(btn_edit, "Rename this notebook")
         # Hover effect for the card (subtle change using theme hover color)
         # Hover color change removed as requested
         
@@ -2747,10 +2790,11 @@ class NotebooksView:
         lbl_count.pack(padx=15, pady=(0, 10), anchor="w")
         
         # Open Notebook Button at bottom
-        ctk.CTkButton(card, text="Open Notebook", command=lambda n=display_name: self.show_notebook(n),
-                     fg_color=self.colors.get('button_primary', self.colors['primary']), 
-                     text_color=self.colors.get('button_text', 'white'),
-                     height=30, font=self.get_font(-2)).pack(fill="x", padx=15, pady=(0, 15))
+        btn_open = ctk.CTkButton(card, text="Open Notebook", command=lambda n=display_name: self.show_notebook(n),
+                 fg_color=self.colors.get('button_primary', self.colors['primary']), 
+                 text_color=self.colors.get('button_text', 'white'),
+                 height=30, font=self.get_font(-1))
+        btn_open.pack(fill="x", padx=15, pady=(0, 15))
 
     def show_notebook(self, name):
         self.selected_notebook = name
@@ -2800,19 +2844,30 @@ class NotebooksView:
             edit_img = load_icon('icon_edit_32_white.png', size=(24,24))
         except Exception:
             edit_img = None
-        ctk.CTkButton(header, image=del_img, text="", width=36, height=32, command=self.delete_notebook,
-            fg_color=self.colors.get('danger', '#e74c3c'), hover_color="#c0392b", border_width=0).pack(side="right", padx=5)
-        ctk.CTkButton(header, image=edit_img, text="", width=36, height=32, command=self.rename_notebook,
-            fg_color=self.colors.get('info', '#3498db'), hover_color=self.colors.get('accent', '#4a90e2'), border_width=0).pack(side="right", padx=5)
+        btn_delete = ctk.CTkButton(header, image=del_img, text="", width=36, height=32, command=self.delete_notebook,
+            fg_color=self.colors.get('danger', '#e74c3c'), hover_color="#c0392b", border_width=0)
+        btn_delete.pack(side="right", padx=5)
+        self.master.after(100, lambda: ToolTip(btn_delete, "Delete this notebook"))
+        btn_rename = ctk.CTkButton(header, image=edit_img, text="", width=36, height=32, command=self.rename_notebook,
+            fg_color=self.colors.get('info', '#3498db'), hover_color=self.colors.get('accent', '#4a90e2'), border_width=0)
+        btn_rename.pack(side="right", padx=5)
+        self.master.after(100, lambda: ToolTip(btn_rename, "Rename this notebook"))
         
         # Search Bar
         search_frame = ctk.CTkFrame(self.container, fg_color="transparent")
         search_frame.pack(fill="x", padx=0, pady=(0, 10))
         
-        self.search_entry = ctk.CTkEntry(search_frame, placeholder_text="Find by name, tag, or keyword", 
-                                         fg_color=self.colors['background'], text_color=self.colors['main_text'],
-                                         height=30, font=self.master.master.get_font(0))
-        self.search_entry.pack(side="left", fill="x", expand=True)
+        self.search_entry = ctk.CTkEntry(
+            search_frame, 
+            placeholder_text="Find by name, tag, or keyword", 
+            fg_color=self.colors['background'],
+            text_color=self.colors['main_text'],
+            border_color=self.colors.get('card_border'),
+            border_width=2,
+            height=40,
+            width=250,
+            font=self.master.master.get_font(0))
+        self.search_entry.pack(side="left", expand=True)
         self.search_entry.bind("<KeyRelease>", self.filter_notes)
                
         # Notes List
@@ -2915,9 +2970,10 @@ class NotebooksView:
         
         # Open Button
         ctk.CTkButton(card, text="Open Note", command=lambda: self.open_note(note),
-                  fg_color=self.colors.get('button_primary', self.colors['primary']), 
-                  text_color=self.colors.get('button_text', 'white'),
-                  height=25, font=self.get_font(-3)).pack(fill="x", padx=15, pady=(0, 10))
+                    fg_color=self.colors.get('button_primary', 
+                    self.colors['primary']), 
+                    text_color=self.colors.get('button_text', 'white'),
+                    height=30, font=self.get_font(-1)).pack(fill="x", padx=15, pady=(0, 10))
         # Hover color change removed as requested
 
     def add_notebook(self):
@@ -3196,7 +3252,7 @@ class SettingsView:
         self.new_template_category_menu = ctk.CTkOptionMenu(
             form,
             variable=self.new_template_category,
-            values=["Study", "Planner"],
+            values=["Study", "Additional"],
             fg_color=self.colors.get('dropdown_bg', self.colors['main_text']),
             button_color=self.colors.get('accent'),
             text_color=self.colors.get('dropdown_text', 'white'),
@@ -3211,7 +3267,7 @@ class SettingsView:
         self.new_template_text.pack(fill="x", padx=20, pady=(0, 8))
         
         # Placeholder support for template content
-        self._template_placeholder_text = "Enter template structure here...\n\nFor Study Templates (e.g., Cornell Notes, Concept Maps):\nTopic: \n\nKey Points:\n- \n- \n\nSummary:\n- \n\nFor Planner Templates (e.g., Daily/Weekly Plans):\nDate: \n\nTasks:\n- [ ] \n- [ ] \n\nNotes:\n- "
+        self._template_placeholder_text = "Enter template structure here...\n\nFor Study Templates (e.g., Cornell Notes, Concept Maps):\nTopic: \n\nKey Points:\n- \n- \n\nSummary:\n- \n\nFor Additional Templates (e.g., Daily/Weekly Plans):\nDate: \n\nTasks:\n- [ ] \n- [ ] \n\nNotes:\n- "
         self._template_placeholder_active = False
         self._init_template_placeholder()
 
@@ -3256,17 +3312,17 @@ class SettingsView:
                           command=lambda t=title: self.edit_template_dialog(t, "Study"),
                           font=self.master.master.get_font(-1)).pack(side="left")
 
-        # Right Column: Planner Templates
-        planner_column = ctk.CTkFrame(columns_container, fg_color="transparent")
-        planner_column.pack(side="right", fill="both", expand=True, padx=(10, 0))
+        # Right Column: Additional Templates
+        additional_column = ctk.CTkFrame(columns_container, fg_color="transparent")
+        additional_column.pack(side="right", fill="both", expand=True, padx=(10, 0))
         
-        ctk.CTkLabel(planner_column, text="Planner Templates", font=self.master.master.get_font(1, "bold"), text_color=self.colors['main_text']).pack(anchor="w", pady=(0, 6))
+        ctk.CTkLabel(additional_column, text="Additional Templates", font=self.master.master.get_font(1, "bold"), text_color=self.colors['main_text']).pack(anchor="w", pady=(0, 6))
         
-        planner_list = ctk.CTkScrollableFrame(planner_column, fg_color="transparent", height=240)
-        planner_list.pack(fill="both", expand=True)
+        additional_list = ctk.CTkScrollableFrame(additional_column, fg_color="transparent", height=240)
+        additional_list.pack(fill="both", expand=True)
         
         for title in self.planner_templates.keys():
-            row = ctk.CTkFrame(planner_list, fg_color=self.colors['card_bg'], corner_radius=6, height=36)
+            row = ctk.CTkFrame(additional_list, fg_color=self.colors['card_bg'], corner_radius=6, height=36)
             row.pack(fill="x", pady=4)
             try:
                 row.pack_propagate(False)
@@ -3276,10 +3332,10 @@ class SettingsView:
             actions = ctk.CTkFrame(row, fg_color="transparent")
             actions.pack(side="right", padx=12, pady=4)
             ctk.CTkButton(actions, text="Edit", width=72, height=26, fg_color=self.colors['info'],
-                          command=lambda t=title: self.edit_template_dialog(t, "Planner"),
+                          command=lambda t=title: self.edit_template_dialog(t, "Additional"),
                           font=self.master.master.get_font(-1)).pack(side="left", padx=(0,8))
             ctk.CTkButton(actions, text="Delete", width=72, height=26, fg_color=self.colors['danger'],
-                          command=lambda t=title: self.delete_template(t, "Planner"),
+                          command=lambda t=title: self.delete_template(t, "Additional"),
                           font=self.master.master.get_font(-1)).pack(side="left")
 
     def update_setting(self, key, value):
@@ -3564,9 +3620,9 @@ class AboutView:
         self.container.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Highlighted header
-        header_frame = ctk.CTkFrame(self.container, fg_color=self.colors['accent'], corner_radius=10)
+        header_frame = ctk.CTkFrame(self.container, fg_color=self.colors['primary'], corner_radius=10)
         header_frame.pack(fill="x", pady=(0, 16))
-        ctk.CTkLabel(header_frame, text="About CourseMate", font=("Open Sans", 22, "bold"), text_color="#fff").pack(anchor="center", pady=12)
+        ctk.CTkLabel(header_frame, text="About CourseMate", font=("Open Sans", 22, "bold"), text_color="#fff").pack(anchor="center", pady=5)
 
         info = (
             "CourseMate — Your study companion for smarter learning.\n"
