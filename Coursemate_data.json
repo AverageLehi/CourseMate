@@ -50,7 +50,8 @@
           "title": "Self-Concept Development",
           "content": "Definition:\n- Self-concept is how we perceive ourselves\n\nCharacteristics:\n- Shaped by experiences\n- Influences behavior\n- Can be positive or negative\n\nExamples:\n- Academic self-concept\n- Social self-concept\n\nNon-Examples:\n- Physical appearance only\n- Temporary moods",
           "created": "2025-11-24 12:00",
-          "modified": "November 26, 2025 | 02:21AM"
+          "modified": "November 26, 2025 | 02:21AM",
+          "tags": []
         },
         {
           "title": "Main Idea & Details - Identity",
@@ -285,6 +286,18 @@
       "code": "PLN 001",
       "instructor": "Planner Bot",
       "name": "Planner Examples"
+    },
+    "Pyhsical Education": {
+      "notes": [],
+      "tasks": [],
+      "code": "PED 031",
+      "instructor": ""
+    },
+    "Subject": {
+      "notes": [],
+      "tasks": [],
+      "code": "Course 123",
+      "instructor": ""
     }
   },
   "tasks": [],
@@ -299,9 +312,9 @@
     }
   ],
   "settings": {
-    "theme": "Dark Theme",
-    "font_family": "Courier New",
-    "font_size": "Normal",
+    "theme": "Light Theme",
+    "font_family": "Open Sans",
+    "font_size": "Large",
     "quotes": [
       "Everyday is a new day for a wise man.",
       "The only way to do great work is to love what you do. \u2014 Steve Jobs",
@@ -314,7 +327,8 @@
     "quote_timer": 120,
     "custom_templates": {},
     "study_templates": {
-      "Modified Frayer Model": "Definition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-"
+      "Modified Frayer Model": "Definition:\n-\n\n\n\n\nCharacteristics:\n-\n\nExamples:\n-\n\nNon-Examples:\n-",
+      "James Version": "Time: \n\nSubjects:\n\nRest between subjects:"
     },
     "additional_templates": {
       "Daily Planner": "Date: \n\nTop 3 Priorities:\n1. \n2. \n3. \n\nSchedule (Hour | Task):\n08:00 - \n09:00 - \n10:00 - \n11:00 - \n12:00 - \n13:00 - \n14:00 - \n15:00 - \n16:00 - \n17:00 - \n\nTasks:\n- [ ] \n- [ ] \n- [ ] \n\nNotes:\n- ",

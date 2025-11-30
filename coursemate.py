@@ -291,8 +291,6 @@ def apply_visual_formatting_to_textbox(*_args, **_kwargs):
     """Formatting system removed; legacy no-op placeholder."""
     return
 
-
-
 # ============================================================================
 # CONFIGURATION & THEMES
 # ============================================================================
@@ -398,15 +396,15 @@ THEMES = {
         'header_subtext':   '#7b1e5f',
         # Sidebar colors
         'sidebar_bg':       '#f8bbd0',
-        'sidebar_button':   '#334a66',
-        'sidebar_hover':    '#405977',
+        'sidebar_button':   '#d81b60',
+        'sidebar_hover':    "#bd1855",
         'sidebar_text':     '#F4F4F4',
         'sidebar_label':    '#7b1e5f',
         # Main content colors
         'primary':          '#fce4ec',
         'accent':           '#ec407a',
         'background':       '#fff0f5',
-        'card_bg':          '#ffebee',
+        'card_bg':          "#fbe0e4",
         'card_border':      '#f8bbd0',
         'card_hover':       '#ffcdd2',
         'main_text':        '#0b2740',
@@ -429,16 +427,16 @@ THEMES = {
         'header_subtext':   '#2563a8',
         # Sidebar colors
         'sidebar_bg':       '#b3e5fc',
-        'sidebar_button':   '#334a66',
-        'sidebar_hover':    '#405977',
+        'sidebar_button':   "#26a7e3",
+        'sidebar_hover':    "#0b91cf",
         'sidebar_text':     '#F4F4F4',
         'sidebar_label':    '#2563a8',
         # Main content colors
         'primary':          '#e1f5fe',
         'accent':           '#29b6f6',
         'background':       '#f0f8ff',
-        'card_bg':          '#e3f2fd',
-        'card_border':      '#b3e5fc',
+        'card_bg':          "#c5e3f9",
+        'card_border':      "#4babef",
         'card_hover':       '#bbdefb',
         'main_text':        '#0b2740',
         'secondary_text':   '#2563a8',
@@ -819,6 +817,7 @@ class CourseMate(ctk.CTk):
         self.bind('<Escape>', lambda e: (self.attributes('-fullscreen', False), setattr(self, '_is_fullscreen', False)))
         
         # Layout Setup
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         # Reserve row 0 for a header and make the main content row (1) expandable
         self.grid_rowconfigure(1, weight=1)
@@ -1071,7 +1070,10 @@ class CourseMate(ctk.CTk):
 class Sidebar(ctk.CTkFrame):
     """Compact left navigation: icon-only navigation with an inspiration toggle at the bottom."""
     def __init__(self, master, data_manager, colors, home_cb, notebooks_cb, settings_cb, about_cb=None, initial_page="Home"):
-        super().__init__(master, width=35, corner_radius=0, fg_color=colors['sidebar_bg'])
+        super().__init__(master, width=60, corner_radius=0, fg_color=colors['sidebar_bg'])
+        self.pack_propagate(False)
+        self.grid_propagate(False)
+
         self.colors = colors
         self.data_manager = data_manager
         self.home_cb = home_cb
@@ -1084,24 +1086,16 @@ class Sidebar(ctk.CTkFrame):
         self._current_quote = None
 
         # Create top navigation icon stack
-        self.nav_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.nav_frame.pack(side="top", pady=8)
-        self._create_nav_btn("Home", self._wrap_callback(self.home_cb, "Home"), icon_filename='icon_home_32.png')
-        self._create_nav_btn("Notebooks", self._wrap_callback(self.notebooks_cb, "Notebooks"), icon_filename='icon_notebook_32.png')
-        self._create_nav_btn("Settings", self._wrap_callback(self.settings_cb, "Settings"), icon_filename='icon_settings_32.png')
-        self._create_nav_btn("About", self._wrap_callback(self.about_cb, "About"), icon_filename='icon_info_32.png')
+        self.nav_frame = ctk.CTkFrame(self, fg_color="transparent", width=56)
+        self.nav_frame.pack(side="top", pady=(8), padx=2)
+        self._create_nav_btn("Home", self._wrap_callback(self.home_cb, "Home"), icon_filename='icon_home_32.png', btn_width=44)
+        self._create_nav_btn("Notebooks", self._wrap_callback(self.notebooks_cb, "Notebooks"), icon_filename='icon_notebook_32.png', btn_width=44)
+        self._create_nav_btn("Settings", self._wrap_callback(self.settings_cb, "Settings"), icon_filename='icon_settings_32.png', btn_width=44)
+        self._create_nav_btn("About", self._wrap_callback(self.about_cb, "About"), icon_filename='icon_info_32.png', btn_width=44)
 
-        # Spacer to push the inspiration icon to the bottom
+        # Spacer to push nav icons to the top (no inspiration button)
         spacer = ctk.CTkFrame(self, fg_color="transparent")
         spacer.pack(fill="both", expand=True)
-
-        # Bottom inspiration icon
-        self.bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.bottom_frame.pack(side="bottom", pady=8)
-        self._create_nav_btn("Inspiration", self.toggle_inspiration, icon_filename='icon_inspiration_32_white.png', container=self.bottom_frame, pack_side='bottom', set_active=False)
-
-        # Start quote rotation
-        self.start_quote_timer()
 
     def _wrap_callback(self, callback, page_name):
         def _wrapped():
@@ -1115,7 +1109,7 @@ class Sidebar(ctk.CTkFrame):
                 pass
         return _wrapped
 
-    def _create_nav_btn(self, text, command, icon_filename=None, container=None, pack_side='top', set_active=True):
+    def _create_nav_btn(self, text, command, icon_filename=None, container=None, pack_side='top', set_active=True, btn_width=48, no_text_fallback=False):
         """Create a navigation button with icon or text fallback.
         
         Buttons use gray icons by default, white when active.
@@ -1127,15 +1121,10 @@ class Sidebar(ctk.CTkFrame):
         # Determine if this button is currently active
         is_active = (text == self.active_page) if set_active else False
 
-        # Set background color and state based on active state
-        if is_active:
-            bg_color = self.colors.get('button_primary', '#334a66')
-            hover_color = self.colors.get('button_primary', '#334a66')
-            btn_state = "disabled"
-        else:
-            bg_color = self.colors.get('button_primary', '#334a66')
-            hover_color = self.colors.get('sidebar_hover', '#405977')
-            btn_state = "normal"
+        # Always allow button to be clickable
+        bg_color = self.colors.get('sidebar_button', '#334a66')
+        hover_color = self.colors.get('sidebar_hover', '#405977')
+        btn_state = "normal"
 
         # Try to load icon - pre-load both gray and white versions
         img = None
@@ -1156,7 +1145,7 @@ class Sidebar(ctk.CTkFrame):
                 traceback.print_exc()
 
         def on_click():
-            if set_active and not is_active:
+            if set_active:
                 self.set_active_page(text)
             try:
                 command()
@@ -1169,43 +1158,46 @@ class Sidebar(ctk.CTkFrame):
                 container or self.nav_frame,
                 text="",
                 image=img,
-                command=on_click if not is_active else None,
+                command=on_click,
                 fg_color=bg_color,
                 hover_color=hover_color,
-                width=50,
-                height=50,
+                width=btn_width,
+                height=btn_width,
                 corner_radius=10,
                 state=btn_state
             )
             # Add hover effect: change icon to white for inactive buttons
-            if not is_active and white_img and gray_img:
+            if white_img and gray_img:
                 def on_hover_enter(event, btn_text=text):
-                    if btn_text != self.active_page and white_img:
+                    if white_img:
                         btn.configure(image=white_img)
                 def on_hover_leave(event, btn_text=text):
-                    if btn_text != self.active_page and gray_img:
+                    if gray_img:
                         btn.configure(image=gray_img)
                 btn.bind("<Enter>", on_hover_enter, add="+")
                 btn.bind("<Leave>", on_hover_leave, add="+")
         else:
+            if no_text_fallback:
+                # Do not create a text fallback for inspiration
+                return
             print(f"  Using text fallback for {text}")
             btn = ctk.CTkButton(
                 container or self.nav_frame,
                 text=text,
-                command=on_click if not is_active else None,
+                command=on_click,
                 fg_color=bg_color,
                 hover_color=hover_color,
-                width=100,
-                height=40,
+                width=btn_width,
+                height=btn_width,
                 corner_radius=10,
                 font=self.master.get_font(-1, "bold"),
                 state=btn_state
             ) 
 
-        btn.pack(side=pack_side, padx=8, pady=6)
+        btn.pack(side=pack_side, padx=4, pady=4)
 
         ToolTip(btn, text)
-        
+
         # Store button references with both icon versions
         self.nav_buttons[text] = {
             'button': btn,
@@ -1243,45 +1235,6 @@ class Sidebar(ctk.CTkFrame):
         # Ideally, we'd pass the notebook name to the view, but we'll implement that later
         # by storing 'selected_notebook' in the app state or similar.
 
-    def start_quote_timer(self):
-        self.update_quote()
-        # Timer logic would go here, using self.after
-        # For now, simple rotation
-        timer_interval = self.data_manager.get_settings().get("quote_timer", 30) * 1000
-        self.after(timer_interval, self.start_quote_timer)
-
-    def update_quote(self):
-        quotes = self.data_manager.get_settings().get("quotes", [])
-        if not quotes:
-            quotes = ["The only way to do great work is to love what you do.", "Believe you can and you're halfway there.", "Success is not final, failure is not fatal."]
-        
-        import random
-        quote = random.choice(quotes)
-        self._current_quote = quote
-        # If overlay is visible, update the label text
-        try:
-            if self._inspiration_overlay and hasattr(self._inspiration_overlay, '_quote_label'):
-                self._inspiration_overlay._quote_label.configure(text=f'"{quote}"')
-        except Exception:
-            pass
-
-    def toggle_inspiration(self):
-        """Show/hide the inspiration card. Useful on short screens."""
-        if getattr(self, 'inspiration_visible', True):
-            try:
-                self.inspiration_frame.pack_forget()
-            except Exception:
-                pass
-            self.inspiration_visible = False
-        else:
-            try:
-                self.inspiration_frame.pack(side="bottom", fill="x", padx=8, pady=3)
-            except Exception:
-                pass
-            self.inspiration_visible = True
-        # Update toggle button icon
-        icon = self._insp_icon_open if self.inspiration_visible else self._insp_icon_closed
-        self.inspire_toggle_btn.configure(text=icon)
     
     def toggle_notebooks(self):
         """Show/hide the notebooks list."""
@@ -1390,6 +1343,13 @@ class TemplateDialog(ctk.CTkToplevel):
                                          fg_color=master.colors.get('card_bg', master.colors['background']),
                                          text_color=master.colors['main_text'])
         self.title_entry.pack(fill="x", padx=16, pady=(0, 8))
+        # Validation bindings for template title (single line + length)
+        try:
+            self.title_entry.bind("<KeyRelease>", self._validate_title_live)
+            self.title_entry.bind("<Return>", self._on_title_return)
+            self.title_entry.bind("<FocusOut>", self._validate_title_on_blur)
+        except Exception:
+            pass
         self.title_entry.insert(0, title_init)
 
         ctk.CTkLabel(self, text="Template structure:", font=font_bold).pack(anchor="w", padx=16, pady=(0, 4))
@@ -1424,6 +1384,7 @@ class TemplateDialog(ctk.CTkToplevel):
             if not title or not structure:
                 messagebox.showwarning("Invalid", "Both title and structure are required.")
                 return
+            
             if self.on_save:
                 try:
                     self.on_save(title, structure)
@@ -1538,7 +1499,7 @@ class HomeView:
         self.container.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Page Title
-        ctk.CTkLabel(self.container, text="HOME", font=app.get_font(6, "bold"), text_color=colors['main_text']).pack(anchor="w", pady=(0, 10))
+        ctk.CTkLabel(self.container, text="HOME", font=app.get_font(3, "bold"), text_color=colors['main_text']).pack(anchor="w", pady=(0, 2))
         
         # Content container with two columns
         content_container = ctk.CTkFrame(self.container, fg_color="transparent")
@@ -1605,14 +1566,17 @@ class HomeView:
         # Actions row (Save only). Clear content relocated above textbox.
         self.actions_frame = ctk.CTkFrame(self.write_frame, fg_color="transparent")
         self.actions_frame.pack(fill="x", padx=20, pady=(0, 10))
-        ctk.CTkButton(self.actions_frame, text="Save Note", command=self.save_note,
-                  fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=110,
-                  font=self.app.get_font(0, "bold")).pack(side="right", pady=(2,0))
+        # store reference so we can enable/disable based on validation
+        self.save_btn = ctk.CTkButton(self.actions_frame, text="Save Note", command=self.save_note,
+              fg_color=self.colors['success'], hover_color='#219150', text_color="white", width=110,
+              font=self.app.get_font(0, "bold"))
+        self.save_btn.pack(side="right", pady=(2,0))
         # Title Entry
         self.title_entry = ctk.CTkEntry(self.write_frame, placeholder_text="Note Title (Required)", 
                 font=self.app.get_font(0, "bold"), height=40,
                 fg_color=self.colors['background'], text_color=self.colors['main_text'], border_width=0)
         self.title_entry.pack(fill="x", padx=20, pady=(0, 10))
+       
         
         # Formatting toolbar removed.
         
@@ -1626,13 +1590,13 @@ class HomeView:
               fg_color=self.colors['danger'], hover_color='#c0392b', text_color="white", width=120,
               font=self.app.get_font(-1, "bold")).pack(side="right")
         # Text Area with placeholder support
-        self.text_area = ctk.CTkTextbox(self.write_frame, font=self.app.get_font(0),
+        self.text_area = ctk.CTkTextbox(self.write_frame, font=self.app.get_font(1),
             fg_color=self.colors['background'], text_color=self.colors['main_text'],
             wrap="word", corner_radius=10)
         self.text_area.pack(fill="both", expand=True, padx=20, pady=(0, 20))
         self._content_placeholder_text = (
             "Start writing your note here... Use #hashtags (e.g. #math). "
-            "Type '- ' (dash-space) for bullets; ontinue the list."
+            "Type '- ' (dash-space) for bullets; continue the list."
         )
         self._placeholder_active = False
         self._init_content_placeholder()
@@ -2221,7 +2185,9 @@ class NoteWindow(ctk.CTkToplevel):
         actions_frame.pack(fill="x", padx=20, pady=(0, 20))
         
         # Save Button
-        ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white", font=get_font(0)).pack(side="left", padx=(0, 10))
+        # create a stored reference to allow enabling/disabling based on validation
+        self.save_btn = ctk.CTkButton(actions_frame, text="Save Changes", command=self.save_changes, fg_color=colors['success'], text_color="white", font=get_font(0))
+        self.save_btn.pack(side="left", padx=(0, 10))
         
         # Export Button (use tinted icon when available)
         try:
@@ -2377,6 +2343,7 @@ class NoteWindow(ctk.CTkToplevel):
             self.note['tags'] = []
 
         new_title = self.title_var.get().strip() if hasattr(self, 'title_var') else self.note.get('title', '')
+       
         if not new_title:
             new_title = 'Untitled'
         self.note['title'] = new_title
