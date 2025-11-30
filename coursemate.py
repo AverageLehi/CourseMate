@@ -1059,10 +1059,10 @@ class Sidebar(ctk.CTkFrame):
         # Create top navigation icon stack
         self.nav_frame = ctk.CTkFrame(self, fg_color="transparent", width=56)
         self.nav_frame.pack(side="top", pady=(8), padx=2)
-        self._create_nav_btn("Home", self._wrap_callback(self.home_cb, "Home"), icon_filename='icon_home_32.png', btn_width=44)
-        self._create_nav_btn("Notebooks", self._wrap_callback(self.notebooks_cb, "Notebooks"), icon_filename='icon_notebook_32.png', btn_width=44)
-        self._create_nav_btn("Settings", self._wrap_callback(self.settings_cb, "Settings"), icon_filename='icon_settings_32.png', btn_width=44)
-        self._create_nav_btn("About", self._wrap_callback(self.about_cb, "About"), icon_filename='icon_info_32.png', btn_width=44)
+        self._create_nav_btn("Home", self._wrap_callback(self.home_cb, "Home"), icon_filename='icon_home_32_white.png', btn_width=44)
+        self._create_nav_btn("Notebooks", self._wrap_callback(self.notebooks_cb, "Notebooks"), icon_filename='icon_notebook_32_white.png', btn_width=44)
+        self._create_nav_btn("Settings", self._wrap_callback(self.settings_cb, "Settings"), icon_filename='icon_settings_32_white.png', btn_width=44)
+        self._create_nav_btn("About", self._wrap_callback(self.about_cb, "About"), icon_filename='icon_info_32_white.png', btn_width=44)
 
         # Spacer to push nav icons to the top (no inspiration button)
         spacer = ctk.CTkFrame(self, fg_color="transparent")
@@ -1082,39 +1082,18 @@ class Sidebar(ctk.CTkFrame):
 
     def _create_nav_btn(self, text, command, icon_filename=None, container=None, pack_side='top', set_active=True, btn_width=48, no_text_fallback=False):
         """Create a navigation button with icon or text fallback.
-        
-        Buttons use gray icons by default, white when active.
-        Background is button_primary by default, accent when active.
-        On hover, inactive buttons show sidebar_hover background and white icons.
-        Expects icon files named like: icon_home_24_gray.png and icon_home_24_white.png
+        Only uses white icons for all states.
         """
-        
-        # Determine if this button is currently active
         is_active = (text == self.active_page) if set_active else False
-
-        # Always allow button to be clickable
         bg_color = self.colors.get('sidebar_button', '#334a66')
         hover_color = self.colors.get('sidebar_hover', '#405977')
         btn_state = "normal"
-
-        # Try to load icon - pre-load both gray and white versions
         img = None
-        gray_img = None
-        white_img = None
-
         if icon_filename:
-            base_name = icon_filename.replace('.png', '')
-            gray_filename = f"{base_name}_gray.png"
-            white_filename = f"{base_name}_white.png"
             try:
-                gray_img = load_icon(gray_filename, size=(24, 24))
-                white_img = load_icon(white_filename, size=(24, 24))
-                img = white_img if is_active else gray_img
+                img = load_icon(icon_filename, size=(32, 32))
             except Exception as e:
                 print(f"✗ Failed to load icon for {text}: {e}")
-                import traceback
-                traceback.print_exc()
-
         def on_click():
             if set_active:
                 self.set_active_page(text)
@@ -1122,8 +1101,6 @@ class Sidebar(ctk.CTkFrame):
                 command()
             except Exception:
                 pass
-
-        # Create button with icon or text fallback
         if img:
             btn = ctk.CTkButton(
                 container or self.nav_frame,
@@ -1137,19 +1114,8 @@ class Sidebar(ctk.CTkFrame):
                 corner_radius=10,
                 state=btn_state
             )
-            # Add hover effect: change icon to white for inactive buttons
-            if white_img and gray_img:
-                def on_hover_enter(event, btn_text=text):
-                    if white_img:
-                        btn.configure(image=white_img)
-                def on_hover_leave(event, btn_text=text):
-                    if gray_img:
-                        btn.configure(image=gray_img)
-                btn.bind("<Enter>", on_hover_enter, add="+")
-                btn.bind("<Leave>", on_hover_leave, add="+")
         else:
             if no_text_fallback:
-                # Do not create a text fallback for inspiration
                 return
             print(f"  Using text fallback for {text}")
             btn = ctk.CTkButton(
@@ -1163,19 +1129,13 @@ class Sidebar(ctk.CTkFrame):
                 corner_radius=10,
                 font=self.master.get_font(-1, "bold"),
                 state=btn_state
-            ) 
-
+            )
         btn.pack(side=pack_side, padx=4, pady=4)
-
         ToolTip(btn, text)
-
-        # Store button references with both icon versions
         self.nav_buttons[text] = {
             'button': btn,
             'icon_filename': icon_filename,
             'image': img,
-            'gray_image': gray_img,
-            'white_image': white_img,
             'set_active': set_active
         }
 
@@ -1251,7 +1211,7 @@ class Sidebar(ctk.CTkFrame):
             if icon_filename:
                 # Determine which icon file to load based on active state
                 base_name = icon_filename.replace('.png', '')
-                suffix = 'white' if is_active else 'gray'
+                suffix = 'white'
                 actual_filename = f"{base_name}_{suffix}.png"
                 
                 try:
@@ -1718,11 +1678,7 @@ class HomeView:
         card = ctk.CTkFrame(self.notes_list, fg_color=self.colors['card_bg'], corner_radius=corner, border_width=2, border_color=border_color)
         card.pack(fill="x", pady=5)
         card.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
-        try:
-            card.bind("<Enter>", lambda e: card.configure(fg_color=self.colors.get('card_hover', card.cget('fg_color'))))
-            card.bind("<Leave>", lambda e: card.configure(fg_color=self.colors.get('card_bg', card.cget('fg_color'))))
-        except Exception:
-            pass
+        # Hover color change removed
         title = note.get('title', 'Untitled')
         created_str = note.get('created', '')
         try:
@@ -1745,9 +1701,15 @@ class HomeView:
         lbl_meta.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
         tags = note.get('tags', [])
         if tags:
-            tag_lbl = ctk.CTkLabel(card, text=" ".join(tags), font=self.app.get_font(-3, "italic"), text_color=self.colors['accent'], anchor="w")
+            tags_text = " ".join([f"#{t}" if not t.startswith('#') else t for t in tags])
+            tag_lbl = ctk.CTkLabel(card, text=tags_text, font=self.app.get_font(-3, "italic"), text_color=self.colors['accent'], anchor="w")
             tag_lbl.pack(fill="x", padx=10, pady=(0, 5))
             tag_lbl.bind("<Button-1>", lambda e, n=note: self.open_note_window(n))
+        # Add Open Note button
+        ctk.CTkButton(card, text="Open Note", command=lambda n=note: self.open_note_window(n),
+            fg_color=self.colors.get('button_primary', self.colors['primary']),
+            text_color=self.colors.get('button_text', 'white'),
+            height=25, font=self.app.get_font(-3)).pack(fill="x", padx=10, pady=(0, 8))
         
     def filter_notes(self, event=None):
         self.refresh_notes_list()
@@ -2223,7 +2185,7 @@ class NoteWindow(ctk.CTkToplevel):
         move_frame = ctk.CTkFrame(self, fg_color="transparent")
         move_frame.pack(fill="x", padx=20, pady=(0, 20))
         
-        ctk.CTkLabel(move_frame, text="Move to:", font=get_font(-2), text_color=colors['main_text']).pack(side="left", padx=(0, 5))
+        ctk.CTkLabel(move_frame, text="Move to:", font=get_font(0), text_color=colors['accent']).pack(side="left", padx=(0, 5))
         
         self.notebook_var = ctk.StringVar(value="Select Notebook...")
         
@@ -2292,6 +2254,18 @@ class NoteWindow(ctk.CTkToplevel):
         if file_path:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
+                    # Export notebook title if available
+                    notebook_title = ''
+                    nb_code = self.note.get('notebook') or self.note.get('_notebook') or ''
+                    if nb_code:
+                        notebooks = self.data_manager.get_notebooks()
+                        nb_data = notebooks.get(nb_code)
+                        if nb_data:
+                            notebook_title = nb_data.get('name', nb_code)
+                        else:
+                            notebook_title = nb_code
+                    if notebook_title:
+                        f.write(f"Notebook: {notebook_title}\n")
                     f.write(f"Title: {self.title_var.get()}\n")
                     # Export tags derived from content (keep consistent with save behavior)
                     exported_tags = extract_hashtags_from_text(self.text_area.get("1.0", "end-1c"))
@@ -2329,13 +2303,12 @@ class NoteWindow(ctk.CTkToplevel):
         
         # Save content with markers
         self.note['content'] = new_content
-        self.content_model.set_text(new_content)
         
         # Update modified timestamp
         self.note['modified'] = datetime.now().strftime("%B %d, %Y | %I:%M%p")
         
         self.data_manager.save_data()
-        messagebox.showinfo("Saved", "Title and content saved.")
+        messagebox.showinfo("Saved", "Title and content saved.", parent=self)
         if self.callback:
             self.callback()
 
@@ -2525,9 +2498,13 @@ class EditNotebookDialog(ctk.CTkToplevel):
         # If editing, populate with current values
         if self.is_edit_mode:
             for code, nb_data in self.data_manager.get_notebooks().items():
-                if nb_data.get("name") == notebook_name:
+                # Match by code or name for robustness
+                if nb_data.get("name") == notebook_name or code == notebook_name:
+                    self.name_entry.delete(0, "end")
                     self.name_entry.insert(0, nb_data.get("name", ""))
-                    self.code_entry.insert(0, nb_data.get("code", ""))
+                    self.code_entry.delete(0, "end")
+                    self.code_entry.insert(0, nb_data.get("code", code))
+                    self.instructor_entry.delete(0, "end")
                     self.instructor_entry.insert(0, nb_data.get("instructor", ""))
                     self.original_code = code
                     break
@@ -2545,65 +2522,58 @@ class EditNotebookDialog(ctk.CTkToplevel):
         name = self.name_entry.get().strip()
         code = self.code_entry.get().strip()
         instructor = self.instructor_entry.get().strip()
-        
         if not name:
             messagebox.showwarning("Required", "Notebook name is required.")
             return
-        
         if not code:
             messagebox.showwarning("Required", "Course code is required.")
             return
-            
         if len(name) > 25:
             messagebox.showwarning("Name Too Long", "Notebook name must be 25 characters or less.")
             return
-        
         if len(code) > 15:
             messagebox.showwarning("Code Too Long", "Course code must be 15 characters or less.")
             return
-        
         if self.is_edit_mode:
-            # Update existing notebook
             notebooks = self.data_manager.get_notebooks()
-            
             # Check if code changed and if new code already exists
             if code != self.original_code and code in notebooks:
                 messagebox.showerror("Error", "A notebook with this course code already exists.")
                 return
-            
             # Get the notebook data
-            if self.original_code in notebooks:
-                nb_data = notebooks[self.original_code]
-                
-                # Update fields
+            nb_data = notebooks.get(self.original_code)
+            if nb_data:
                 nb_data["name"] = name
                 nb_data["code"] = code
                 nb_data["instructor"] = instructor
-                
                 # If code changed, move to new key
                 if code != self.original_code:
                     notebooks[code] = nb_data
                     del notebooks[self.original_code]
-                
+                    self.original_code = code
                 self.data_manager.save_data()
-                self.callback(name)
+                messagebox.showinfo("Saved", "Notebook changes saved.", parent=self)
+                if self.callback:
+                    self.callback(name)
                 self.destroy()
             else:
                 messagebox.showerror("Error", "Notebook not found!")
         else:
-            # Create new notebook
             result = self.data_manager.add_notebook(name, code, instructor)
             if isinstance(result, tuple):
                 success, message = result
                 if success:
-                    self.callback(name)
+                    messagebox.showinfo("Saved", "Notebook created.", parent=self)
+                    if self.callback:
+                        self.callback(name)
                     self.destroy()
                 else:
                     messagebox.showerror("Error", message)
             else:
-                # Legacy compatibility
                 if result:
-                    self.callback(name)
+                    messagebox.showinfo("Saved", "Notebook created.", parent=self)
+                    if self.callback:
+                        self.callback(name)
                     self.destroy()
                 else:
                     messagebox.showerror("Error", "Could not create notebook!")
@@ -2735,68 +2705,28 @@ class NotebooksView:
         lbl_title.pack(side="left")
         
         # Icon buttons on the right
-        # Delete and Edit buttons (use tinted icons when available)
+        # Edit and Delete buttons with white icons and correct bg colors
         try:
-            img_del = None
-            for fn in ('icon_delete_24.png', 'icon_delete_48.png'):
-                try:
-                    img_del = load_and_tint_icon(fn, self.colors.get('danger', '#e74c3c'), size=(14,14))
-                    if img_del:
-                        break
-                except Exception:
-                    img_del = None
+            img_edit = load_icon('icon_edit_32_white.png', size=(24,24))
+        except Exception:
+            img_edit = None
+        try:
+            img_del = load_icon('icon_delete_32_white.png', size=(24,24))
         except Exception:
             img_del = None
 
-        try:
-            img_edit = None
-            for fn in ('icon_edit_24.png',):
-                try:
-                    img_edit = load_and_tint_icon(fn, self.colors.get('info', '#3498db'), size=(14,14))
-                    if img_edit:
-                        break
-                except Exception:
-                    img_edit = None
-        except Exception:
-            img_edit = None
-
-        if img_del:
-            if not hasattr(self, '_nb_images'):
-                self._nb_images = []
-            self._nb_images.append(img_del)
-            ctk.CTkButton(header, image=img_del, text="", width=30, height=25,
-                         command=lambda n=name: self.delete_notebook(n),
-                         fg_color="transparent", hover_color=self.colors['danger'],
-                         border_width=1, border_color=self.colors.get('muted', '#9e9e9e')).pack(side="right", padx=(5, 0))
-        else:
-            ctk.CTkButton(header, text="🗑️", width=30, height=25, 
-                         command=lambda n=name: self.delete_notebook(n),
-                         fg_color="transparent", hover_color=self.colors['danger'], 
-                         text_color=self.colors['danger'],
-                         border_width=1, border_color=self.colors.get('muted', '#9e9e9e'),
-                         font=self.get_font(-2)).pack(side="right", padx=(5, 0))
-
-        if img_edit:
-            if not hasattr(self, '_nb_images'):
-                self._nb_images = []
-            self._nb_images.append(img_edit)
-            ctk.CTkButton(header, image=img_edit, text="", width=30, height=25,
-                         command=lambda n=name: self.rename_notebook(n),
-                         fg_color="transparent", hover_color=self.colors['info'],
-                         border_width=1, border_color=self.colors.get('muted', '#9e9e9e')).pack(side="right", padx=(5, 0))
-        else:
-            ctk.CTkButton(header, text="✏️", width=30, height=25, 
-                         command=lambda n=name: self.rename_notebook(n),
-                         fg_color="transparent", hover_color=self.colors['info'], 
-                         text_color=self.colors['info'],
-                         border_width=1, border_color=self.colors.get('muted', '#9e9e9e'),
-                         font=self.get_font(-2)).pack(side="right", padx=(5, 0))
+        # Delete button
+        ctk.CTkButton(header, image=img_del, text="", width=36, height=32,
+            command=lambda n=name: self.delete_notebook(n),
+            fg_color=self.colors.get('danger', '#e74c3c'), hover_color="#c0392b",
+            border_width=0).pack(side="right", padx=(5, 0))
+        # Edit button
+        ctk.CTkButton(header, image=img_edit, text="", width=36, height=32,
+            command=lambda n=name: self.rename_notebook(n),
+            fg_color=self.colors.get('info', '#3498db'), hover_color=self.colors.get('accent', '#4a90e2'),
+            border_width=0).pack(side="right", padx=(5, 0))
         # Hover effect for the card (subtle change using theme hover color)
-        try:
-            card.bind("<Enter>", lambda e: card.configure(fg_color=self.colors.get('card_hover', card.cget('fg_color'))))
-            card.bind("<Leave>", lambda e: card.configure(fg_color=self.colors.get('card_bg', card.cget('fg_color'))))
-        except Exception:
-            pass
+        # Hover color change removed as requested
         
         # Meta (Code | Instructor)
         meta = []
@@ -2840,28 +2770,40 @@ class NotebooksView:
         header = ctk.CTkFrame(self.container, fg_color="transparent")
         header.pack(fill="x", pady=(0, 20))
         
-        # Back Button
-        ctk.CTkButton(header, text="← Back", width=60, command=self.show_all_notebooks, 
-                      fg_color="transparent", text_color=self.colors['main_text'], hover_color=self.colors['sidebar_hover']).pack(side="left", padx=(0, 10))
-        
+
+        # Back Button with icon
+        try:
+            back_img = load_icon('icon_arrow_back_32_white.png', size=(24,24))
+        except Exception:
+            back_img = None
+        ctk.CTkButton(header, image=back_img, text="", width=36, height=32, command=self.show_all_notebooks,
+            fg_color=self.colors.get('sidebar_bg', 'transparent'), hover_color=self.colors.get('sidebar_hover', '#405977'), border_width=0).pack(side="left", padx=(0, 10))
+
         # Title
         ctk.CTkLabel(header, text=name, font=self.get_font(6, "bold"), text_color=self.colors['main_text']).pack(side="left")
-        
+
         # Meta Info (Code | Instructor)
         if notebook_data:
             meta_parts = []
             if notebook_data.get("code"): meta_parts.append(notebook_data["code"])
             if notebook_data.get("instructor"): meta_parts.append(notebook_data["instructor"])
-            
             if meta_parts:
                 meta_text = " | ".join(meta_parts)
                 ctk.CTkLabel(header, text=meta_text, font=self.get_font(-2), text_color=self.colors['secondary_text']).pack(side="left", padx=(15, 0), pady=(5, 0))
 
-        # Actions
-        ctk.CTkButton(header, text="Delete", width=80, command=self.delete_notebook,
-                      fg_color=self.colors['danger'], text_color="white").pack(side="right", padx=5)
-        ctk.CTkButton(header, text="Rename", width=80, command=self.rename_notebook,
-                      fg_color=self.colors['info'], text_color="white").pack(side="right", padx=5)
+        # Actions: Delete and Rename as icons
+        try:
+            del_img = load_icon('icon_delete_32_white.png', size=(24,24))
+        except Exception:
+            del_img = None
+        try:
+            edit_img = load_icon('icon_edit_32_white.png', size=(24,24))
+        except Exception:
+            edit_img = None
+        ctk.CTkButton(header, image=del_img, text="", width=36, height=32, command=self.delete_notebook,
+            fg_color=self.colors.get('danger', '#e74c3c'), hover_color="#c0392b", border_width=0).pack(side="right", padx=5)
+        ctk.CTkButton(header, image=edit_img, text="", width=36, height=32, command=self.rename_notebook,
+            fg_color=self.colors.get('info', '#3498db'), hover_color=self.colors.get('accent', '#4a90e2'), border_width=0).pack(side="right", padx=5)
         
         # Search Bar
         search_frame = ctk.CTkFrame(self.container, fg_color="transparent")
@@ -2954,10 +2896,12 @@ class NotebooksView:
         ctk.CTkLabel(header, text=date_display, font=self.get_font(-3), text_color=self.colors['secondary_text']).pack(side="left", padx=10)
         
         # Delete Note Button
-        ctk.CTkButton(header, text="🗑️", width=30, height=25, command=lambda: self.delete_note(index),
-                      fg_color="transparent", hover_color=self.colors['danger'], text_color=self.colors['danger'],
-                      border_width=1, border_color=self.colors.get('muted', '#9e9e9e'),
-                      font=self.get_font(-2)).pack(side="right")
+        try:
+            img_del = load_icon('icon_delete_32_white.png', size=(24,24))
+        except Exception:
+            img_del = None
+        ctk.CTkButton(header, image=img_del, text="", width=36, height=32, command=lambda: self.delete_note(index),
+            fg_color=self.colors.get('danger', '#e74c3c'), hover_color="#c0392b", border_width=0).pack(side="right")
         
         # Preview
         preview = note.get('content', '')[:100].replace('\n', ' ') + "..."
@@ -2974,11 +2918,7 @@ class NotebooksView:
                   fg_color=self.colors.get('button_primary', self.colors['primary']), 
                   text_color=self.colors.get('button_text', 'white'),
                   height=25, font=self.get_font(-3)).pack(fill="x", padx=15, pady=(0, 10))
-        try:
-            card.bind("<Enter>", lambda e: card.configure(fg_color=self.colors.get('card_hover', card.cget('fg_color'))))
-            card.bind("<Leave>", lambda e: card.configure(fg_color=self.colors.get('card_bg', card.cget('fg_color'))))
-        except Exception:
-            pass
+        # Hover color change removed as requested
 
     def add_notebook(self):
         # Open dialog

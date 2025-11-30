@@ -1,8 +1,33 @@
 {
-  "notebooks": {},
+  "notebooks": {
+    "James Files": {
+      "notes": [],
+      "code": "Jame 112",
+      "instructor": "Jamess",
+      "name": "James Files"
+    },
+    "JAN 0011": {
+      "notes": [
+        {
+          "id": "6e7e87f5-4105-43fb-807d-2821b8686b1d",
+          "title": "asdfsadf",
+          "content": "asdfsadf\n\nWho:\n-\n\nWhat:\n-\n\nWhen:\n-\n\nWhere:\n-\nasdf\nWhy:\n-\n\nHow:\n- \n#5w1h",
+          "tags": [
+            "#5w1h"
+          ],
+          "created": "2025-12-01T01:16:21.871259",
+          "notebook": "Janry Filessss",
+          "modified": "2025-12-01T01:45:00"
+        }
+      ],
+      "code": "JAN 0011",
+      "instructor": "Janrye",
+      "name": "Janry Filessss"
+    }
+  },
   "unassigned_notes": [],
   "settings": {
-    "theme": "CourseMate Theme",
+    "theme": "Baby Blue",
     "font_family": "Open Sans",
     "font_size": "Normal",
     "quotes": [
@@ -14,6 +39,12 @@
     ],
     "quote_timer": 30,
     "study_templates": {},
-    "additional_templates": {}
+    "additional_templates": {
+      "Daily Planner": "Date: \n\nTop 3 Priorities:\n1. \n2. \n3. \n\nSchedule (Hour | Task):\n08:00 - \n09:00 - \n10:00 - \n11:00 - \n12:00 - \n13:00 - \n14:00 - \n15:00 - \n16:00 - \n17:00 - \n\nTasks:\n- [ ] \n- [ ] \n- [ ] \n\nNotes:\n- ",
+      "Weekly Overview": "Week Of: \n\nGoals:\n- \n- \n- \n\nMon:\nFocus: \nTasks: - [ ] \n\nTue:\nFocus: \nTasks: - [ ] \n\nWed:\nFocus: \nTasks: - [ ] \n\nThu:\nFocus: \nTasks: - [ ] \n\nFri:\nFocus: \nTasks: - [ ] \n\nWeekend Notes:\n- ",
+      "Time Block Grid": "Date: \n\n| Time | Block |\n|------|-------|\n| 08:00 | \n| 09:00 | \n| 10:00 | \n| 11:00 | \n| 12:00 | Lunch |\n| 13:00 | \n| 14:00 | \n| 15:00 | \n| 16:00 | \n| 17:00 | Wrap Up |\n\nAdjustments / Reflections:\n- ",
+      "Assignment Tracker": "Course: \n\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n|            |          |        |       |\n|            |          |        |       |\n|            |          |        |       |\n\nUpcoming Deadlines:\n- ",
+      "Habit Tracker": "Month: \nHabit: \n\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |       |       |\n| 2   |       |       |\n| 3   |       |       |\n| 4   |       |       |\n| 5   |       |       |\n| 6   |       |       |\n| 7   |       |       |\n| 8   |       |       |\n| 9   |       |       |\n| 10  |       |       |\n| 11  |       |       |\n| 12  |       |       |\n| 13  |       |       |\n| 14  |       |       |\n| 15  |       |       |\n| 16  |       |       |\n| 17  |       |       |\n| 18  |       |       |\n| 19  |       |       |\n| 20  |       |       |\n| 21  |       |       |\n| 22  |       |       |\n| 23  |       |       |\n| 24  |       |       |\n| 25  |       |       |\n| 26  |       |       |\n| 27  |       |       |\n| 28  |       |       |\n| 29  |       |       |\n| 30  |       |       |\n| 31  |       |       |\n\nReflection:\n- "
+    }
   }
 }
