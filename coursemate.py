@@ -1,3 +1,18 @@
+import re
+
+def format_human_date(iso_str):
+    """Convert ISO date string to human-readable format: 'Dec 1, 2025, 2:30 PM'"""
+    if not iso_str:
+        return ""
+    try:
+        dt = datetime.fromisoformat(iso_str)
+        # Use %-d and %-I for Linux/Mac, fallback for Windows
+        try:
+            return dt.strftime("%b %-d, %Y, %-I:%M %p")
+        except:
+            return dt.strftime("%b %d, %Y, %I:%M %p").replace(" 0", " ")
+    except Exception:
+        return iso_str
 """CourseMate Application Module
 
 Core definitions for data persistence, themed UI components, note/dialog views,
@@ -1821,11 +1836,7 @@ class HomeView:
         # Hover color change removed
         title = note.get('title', 'Untitled')
         created_str = note.get('created', '')
-        try:
-            created_dt = datetime.strptime(created_str, "%B %d, %Y | %I:%M%p")
-            date_str = created_dt.strftime("%b %d")
-        except Exception:
-            date_str = created_str.split('|')[0].strip() if '|' in created_str else created_str.split(' ')[0]
+        date_str = format_human_date(created_str)
         content_words = note.get('content', '').split()
         preview_text = " ".join(content_words[:3]) if content_words else ""
         lbl_title = ctk.CTkLabel(card, text=title, font=self.app.get_font(-1, "bold"), text_color=self.colors['main_text'], anchor="w")
@@ -2249,20 +2260,15 @@ class NoteWindow(ctk.CTkToplevel):
         date_frame = ctk.CTkFrame(self, fg_color="transparent")
         date_frame.pack(fill="x", padx=20, pady=(0, 10))
         
-        # Created On
-        created_text = note.get('created', '')
-        try:
-             dt = datetime.strptime(created_text, "%Y-%m-%d %H:%M")
-             created_text = dt.strftime("%B %d, %Y | %I:%M%p")
-        except ValueError:
-             pass
-        
-        ctk.CTkLabel(date_frame, text=f"Created on: {created_text}", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w")
-        
-        # Modified On
-        modified_text = note.get('modified', '')
-        if modified_text:
-            ctk.CTkLabel(date_frame, text=f"Last edited on: {modified_text}", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w")
+           # Created On
+           created_text = note.get('created', '')
+           human_created = format_human_date(created_text)
+           ctk.CTkLabel(date_frame, text=f"Created on: {human_created}", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w")
+           # Modified On
+           modified_text = note.get('modified', '')
+           if modified_text:
+              human_modified = format_human_date(modified_text)
+              ctk.CTkLabel(date_frame, text=f"Last edited on: {human_modified}", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w")
         
         # Actions Frame
         actions_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -2448,7 +2454,10 @@ class NoteWindow(ctk.CTkToplevel):
                     # Export tags derived from content (keep consistent with save behavior)
                     exported_tags = extract_hashtags_from_text(self.text_area.get("1.0", "end-1c"))
                     f.write(f"Tags: {', '.join(exported_tags)}\n")
-                    f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+                    # Use note's created date in human-readable format
+                    created_str = self.note.get('created', '')
+                    human_date = format_human_date(created_str)
+                    f.write(f"Date: {human_date}\n")
                     f.write("-" * 40 + "\n\n")
                     f.write(self.text_area.get("1.0", "end-1c"))
                 messagebox.showinfo("Exported", "Note exported successfully.")
@@ -3027,21 +3036,16 @@ class NotebooksView:
         
         ctk.CTkLabel(header, text=note.get('title', 'Untitled'), font=self.get_font(0, "bold"), text_color=self.colors['main_text']).pack(side="left")
         
-        # Format date for display
+        # Format date for display (use human-readable)
         created_text = note.get('created', '')
-        try:
-             # Try to reformat if it matches the old format
-             dt = datetime.strptime(created_text, "%Y-%m-%d %H:%M")
-             created_text = dt.strftime("%B %d, %Y | %I:%M%p")
-        except ValueError:
-             pass # Already in new format or unknown
-             
-        date_display = f"Created on: {created_text}"
+        human_date = format_human_date(created_text)
+        date_display = f"Created on: {human_date}"
         
         # Check for modified date
         modified_text = note.get('modified', '')
         if modified_text:
-            date_display += f"  •  Last edited on: {modified_text}"
+            human_modified = format_human_date(modified_text)
+            date_display += f"  •  Last edited on: {human_modified}"
              
         ctk.CTkLabel(header, text=date_display, font=self.get_font(-3), text_color=self.colors['secondary_text']).pack(side="left", padx=10)
         
