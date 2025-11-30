@@ -1,73 +1,290 @@
 {
   "notebooks": {
-    "James Files": {
+    "Purposive Communication - GEN 001": {
       "notes": [
         {
-          "id": "737faf52-ec96-494a-96e1-58397fc2efcd",
-          "title": "from janry tp james",
-          "content": "",
-          "tags": [],
-          "created": "2025-12-01T03:53:40.048610",
-          "notebook": "James Files"
+          "id": "note-001",
+          "title": "Cornell Notes Example",
+          "content": "Title: Purposive Communication\n\nQuestion/Keyword\n- What is communication?\n- Types of communication\n\nNotes\n- Communication is the process of sharing information.\n- Verbal and non-verbal forms.\n\nSummary\n- Communication is essential in daily life.",
+          "tags": ["#communication", "#cornell-notes"],
+          "created": "2025-12-01T08:00:01",
+          "notebook": "Purposive Communication - GEN 001"
         },
         {
-          "id": "a25f7eb4-86ed-4ae0-9f69-b19a6b733260",
-          "title": "From james to janry",
-          "content": "",
-          "tags": [],
-          "created": "2025-12-01T03:53:34.336882",
-          "notebook": "James Files"
+          "id": "note-012",
+          "title": "Main Idea & Details",
+          "content": "Main Idea: Effective Communication\n\nDetail 1:\n- Listening skills\n\nDetail 2:\n- Clarity in speech\n\nDetail 3:\n- Feedback\n\nSummary:\n- Communication improves with practice.",
+          "tags": ["#main-idea-details", "#practice"],
+          "created": "2025-12-01T08:00:12",
+          "notebook": "Purposive Communication - GEN 001"
+        },
+        {
+          "id": "note-021",
+          "title": "Time Block Grid: Speech Day",
+          "content": "Date: 2025-12-01\n| Time | Block |\n|------|-------|\n| 08:00 | Prepare speech |\n| 09:00 | Practice |\n| 10:00 | Deliver speech |\n| 11:00 | Feedback |\n\nAdjustments / Reflections:\n- Felt confident after feedback.",
+          "tags": ["#time-block", "#speech"],
+          "created": "2025-12-01T08:00:21",
+          "notebook": "Purposive Communication - GEN 001"
         }
       ],
-      "code": "Jame 112",
-      "instructor": "Jamess",
-      "name": "James Files"
+      "code": "GEN 001",
+      "instructor": "Prof. Santos",
+      "name": "Purposive Communication - GEN 001"
     },
-    "JAN 0011": {
+    "Understanding the Self - GEN 002": {
       "notes": [
         {
-          "id": "1a662247-df05-4a6f-b78b-b823f9c68081",
-          "title": "from lehi to dekstop",
-          "content": "fasdfasdf",
-          "tags": [],
-          "created": "2025-12-01T04:01:31.286760",
-          "notebook": "Janry Filessss",
-          "modified": "December 01, 2025 | 04:30AM"
+          "id": "note-002",
+          "title": "Main Idea & Details Example",
+          "content": "Main Idea: Self-awareness\n\nDetail 1:\n- Recognizing emotions\n\nDetail 2:\n- Understanding strengths and weaknesses\n\nDetail 3:\n- Setting personal goals\n\nSummary:\n- Self-awareness is the foundation for personal growth.",
+          "tags": ["#self-awareness", "#main-idea-details"],
+          "created": "2025-12-01T08:00:02",
+          "notebook": "Understanding the Self - GEN 002"
+        },
+        {
+          "id": "note-013",
+          "title": "Cornell Notes on Self",
+          "content": "Title: Understanding the Self\n\nQuestion/Keyword\n- What shapes identity?\n\nNotes\n- Family, culture, and experiences influence self.\n\nSummary\n- Identity is dynamic.",
+          "tags": ["#identity", "#cornell-notes"],
+          "created": "2025-12-01T08:00:13",
+          "notebook": "Understanding the Self - GEN 002"
+        },
+        {
+          "id": "note-022",
+          "title": "Habit Tracker: Self Goals",
+          "content": "Month: December\nHabit: Meditation\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |   X   | 10 min |\n| 2   |       |       |\n| 3   |       |       |\nReflection:\n- Meditation helps focus.",
+          "tags": ["#habit-tracker", "#meditation"],
+          "created": "2025-12-01T08:00:22",
+          "notebook": "Understanding the Self - GEN 002"
         }
       ],
-      "code": "JAN 0011",
-      "instructor": "Janrye",
-      "name": "Janry Filessss"
+      "code": "GEN 002",
+      "instructor": "Dr. Reyes",
+      "name": "Understanding the Self - GEN 002"
+    },
+    "Ethics - GEN 006": {
+      "notes": [
+        {
+          "id": "note-003",
+          "title": "Polya's 4 Steps Example",
+          "content": "1. Understand the Problem:\n- What is ethical behavior?\n\n2. Devise a Plan:\n- Study ethical theories\n\n3. Carry Out the Plan:\n- Apply theories to real-life cases\n\n4. Look Back:\n- Reflect on decisions made.",
+          "tags": ["#ethics", "#polya-steps"],
+          "created": "2025-12-01T08:00:03",
+          "notebook": "Ethics - GEN 006"
+        },
+        {
+          "id": "note-014",
+          "title": "Concept Map: Ethics",
+          "content": "Central Concept: Ethics\n\nRelated Concept 1:\n- Morality\n\nRelated Concept 2:\n- Law\n\nConnections:\n- Ethics guides behavior.",
+          "tags": ["#concept-map", "#morality"],
+          "created": "2025-12-01T08:00:14",
+          "notebook": "Ethics - GEN 006"
+        },
+        {
+          "id": "note-023",
+          "title": "Assignment Tracker: Ethics Paper",
+          "content": "Course: GEN 006\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n| Paper      | 2025-12-05 | Done   | Submitted |\n| Case Study | 2025-12-10 | Pending| Research |\nUpcoming Deadlines:\n- Case study due soon.",
+          "tags": ["#assignment-tracker", "#ethics"],
+          "created": "2025-12-01T08:00:23",
+          "notebook": "Ethics - GEN 006"
+        }
+      ],
+      "code": "GEN 006",
+      "instructor": "Ms. Cruz",
+      "name": "Ethics - GEN 006"
+    },
+    "Mathematics In The Modern World - MAT 152": {
+      "notes": [
+        {
+          "id": "note-004",
+          "title": "Concept Map Example",
+          "content": "Central Concept: Mathematics in daily life\n\nRelated Concept 1:\n- Budgeting\n\nRelated Concept 2:\n- Statistics in news\n\nConnections:\n- Math helps in making informed decisions.",
+          "tags": ["#mathematics", "#concept-map"],
+          "created": "2025-12-01T08:00:04",
+          "notebook": "Mathematics In The Modern World - MAT 152"
+        },
+        {
+          "id": "note-015",
+          "title": "Cornell Notes: Math",
+          "content": "Title: Math in Modern World\n\nQuestion/Keyword\n- How is math used daily?\n\nNotes\n- Math is used in shopping, planning, and analysis.\n\nSummary\n- Math is practical.",
+          "tags": ["#cornell-notes", "#math"],
+          "created": "2025-12-01T08:00:15",
+          "notebook": "Mathematics In The Modern World - MAT 152"
+        },
+        {
+          "id": "note-024",
+          "title": "Weekly Overview: Math Goals",
+          "content": "Week Of: 2025-12-01\nGoals:\n- Master statistics\n- Practice algebra\n- Review geometry\nMon:\nFocus: Algebra\nTasks: - [ ] Practice\nTue:\nFocus: Statistics\nTasks: - [ ] Read\nWed:\nFocus: Geometry\nTasks: - [ ] Review\nWeekend Notes:\n- Prepare for exam.",
+          "tags": ["#weekly", "#math-goals"],
+          "created": "2025-12-01T08:00:24",
+          "notebook": "Mathematics In The Modern World - MAT 152"
+        }
+      ],
+      "code": "MAT 152",
+      "instructor": "Mr. Lim",
+      "name": "Mathematics In The Modern World - MAT 152"
+    },
+    "Computer Programming (Python) - ITE 260": {
+      "notes": [
+        {
+          "id": "note-005",
+          "title": "5W1H Example",
+          "content": "Who:\n- Programmers\n\nWhat:\n- Write code\n\nWhen:\n- During development\n\nWhere:\n- On computers\n\nWhy:\n- To solve problems\n\nHow:\n- Using Python language.",
+          "tags": ["#python", "#5w1h"],
+          "created": "2025-12-01T08:00:05",
+          "notebook": "Computer Programming (Python) - ITE 260"
+        },
+        {
+          "id": "note-016",
+          "title": "Polya's 4 Steps: Debugging",
+          "content": "1. Understand the Problem:\n- Code not working\n\n2. Devise a Plan:\n- Check error messages\n\n3. Carry Out the Plan:\n- Fix bugs\n\n4. Look Back:\n- Test again.",
+          "tags": ["#debugging", "#polya-steps"],
+          "created": "2025-12-01T08:00:16",
+          "notebook": "Computer Programming (Python) - ITE 260"
+        },
+        {
+          "id": "note-025",
+          "title": "Assignment Tracker: Python Project",
+          "content": "Course: ITE 260\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n| Project    | 2025-12-12 | Pending| Write code |\n| Quiz       | 2025-12-15 | Pending| Study |\nUpcoming Deadlines:\n- Project due soon.",
+          "tags": ["#assignment-tracker", "#python"],
+          "created": "2025-12-01T08:00:25",
+          "notebook": "Computer Programming (Python) - ITE 260"
+        }
+      ],
+      "code": "ITE 260",
+      "instructor": "Engr. Dela Cruz",
+      "name": "Computer Programming (Python) - ITE 260"
+    },
+    "Introduction to Fundamentals (ITE 366)": {
+      "notes": [
+        {
+          "id": "note-006",
+          "title": "Frayer Model Example",
+          "content": "Definition:\n- Fundamentals are basic principles.\n\nCharacteristics:\n- Foundational\n- Essential\n\nExamples:\n- Variables\n- Functions\n\nNon-Examples:\n- Advanced algorithms.",
+          "tags": ["#fundamentals", "#frayer-model"],
+          "created": "2025-12-01T08:00:06",
+          "notebook": "Introduction to Fundamentals (ITE 366)"
+        },
+        {
+          "id": "note-017",
+          "title": "Main Idea & Details: Fundamentals",
+          "content": "Main Idea: Basics of Programming\n\nDetail 1:\n- Variables\n\nDetail 2:\n- Data types\n\nDetail 3:\n- Control structures\n\nSummary:\n- Programming starts with fundamentals.",
+          "tags": ["#main-idea-details", "#programming"],
+          "created": "2025-12-01T08:00:17",
+          "notebook": "Introduction to Fundamentals (ITE 366)"
+        },
+        {
+          "id": "note-026",
+          "title": "Time Block Grid: Study Day",
+          "content": "Date: 2025-12-01\n| Time | Block |\n|------|-------|\n| 08:00 | Read notes |\n| 09:00 | Practice coding |\n| 10:00 | Review concepts |\nAdjustments / Reflections:\n- Productive study session.",
+          "tags": ["#time-block", "#study"],
+          "created": "2025-12-01T08:00:26",
+          "notebook": "Introduction to Fundamentals (ITE 366)"
+        }
+      ],
+      "code": "ITE 366",
+      "instructor": "Ms. Tan",
+      "name": "Introduction to Fundamentals (ITE 366)"
+    },
+    "Personal Daily Diary": {
+      "notes": [
+        {
+          "id": "note-007",
+          "title": "Daily Planner Example",
+          "content": "Date: 2025-12-01\nTop 3 Priorities:\n1. Finish assignment\n2. Review notes\n3. Exercise\nSchedule (Hour | Task):\n08:00 - Breakfast\n09:00 - Study\n10:00 - Meeting\nTasks:\n- [ ] Submit homework\n- [ ] Read chapter\n- [ ] Jog\nNotes:\n- Felt productive today.",
+          "tags": ["#planner", "#daily"],
+          "created": "2025-12-01T08:00:07",
+          "notebook": "Personal Daily Diary"
+        },
+        {
+          "id": "note-018",
+          "title": "Habit Tracker Example",
+          "content": "Month: December\nHabit: Reading\n| Day | Done? | Notes |\n|-----|-------|-------|\n| 1   |   X   | Read 10 pages |\n| 2   |       |       |\n| 3   |       |       |\nReflection:\n- Building a reading habit.",
+          "tags": ["#habit-tracker", "#reading"],
+          "created": "2025-12-01T08:00:18",
+          "notebook": "Personal Daily Diary"
+        },
+        {
+          "id": "note-027",
+          "title": "Cornell Notes: Diary Reflection",
+          "content": "Title: Daily Reflection\nQuestion/Keyword\n- What went well today?\nNotes\n- Completed all tasks.\n- Felt motivated.\nSummary\n- Good progress.",
+          "tags": ["#cornell-notes", "#reflection"],
+          "created": "2025-12-01T08:00:27",
+          "notebook": "Personal Daily Diary"
+        }
+      ],
+      "code": "DIARY",
+      "instructor": "Self",
+      "name": "Personal Daily Diary"
+    },
+    "Weekly Planning": {
+      "notes": [
+        {
+          "id": "note-008",
+          "title": "Weekly Overview Example",
+          "content": "Week Of: 2025-12-01\nGoals:\n- Complete project\n- Attend seminar\n- Practice coding\nMon:\nFocus: Study\nTasks: - [ ] Review\nTue:\nFocus: Meeting\nTasks: - [ ] Attend\nWed:\nFocus: Practice\nTasks: - [ ] Code\nThu:\nFocus: Read\nTasks: - [ ] Book\nFri:\nFocus: Exercise\nTasks: - [ ] Jog\nWeekend Notes:\n- Rest and recharge.",
+          "tags": ["#weekly", "#planning"],
+          "created": "2025-12-01T08:00:08",
+          "notebook": "Weekly Planning"
+        },
+        {
+          "id": "note-019",
+          "title": "Assignment Tracker Example",
+          "content": "Course: GEN 001\n| Assignment | Due Date | Status | Notes |\n|------------|----------|--------|-------|\n| Essay      | 2025-12-05 | Done   | Good work |\n| Project    | 2025-12-10 | Pending| Start soon |\nUpcoming Deadlines:\n- Project due next week.",
+          "tags": ["#assignment-tracker", "#deadlines"],
+          "created": "2025-12-01T08:00:19",
+          "notebook": "Weekly Planning"
+        },
+        {
+          "id": "note-028",
+          "title": "Time Block Grid: Planning",
+          "content": "Date: 2025-12-01\n| Time | Block |\n|------|-------|\n| 08:00 | Plan week |\n| 09:00 | Set goals |\n| 10:00 | Review progress |\nAdjustments / Reflections:\n- Ready for a productive week.",
+          "tags": ["#time-block", "#planning"],
+          "created": "2025-12-01T08:00:28",
+          "notebook": "Weekly Planning"
+        }
+      ],
+      "code": "WEEKLY",
+      "instructor": "Self",
+      "name": "Weekly Planning"
     }
   },
   "unassigned_notes": [
     {
-      "id": "5ceb0856-1761-4f3b-b9e5-be481b19b734",
-      "title": "from unassigned to james",
-      "content": "",
-      "tags": [],
-      "created": "2025-12-01T03:53:46.966840",
+      "id": "note-010",
+      "title": "Unassigned Study Note",
+      "content": "Title: Unassigned\n\nQuestion/Keyword\n- What is an unassigned note?\n\nNotes\n- This note is not linked to any notebook.\n\nSummary\n- Unassigned notes are flexible.",
+      "tags": ["#unassigned", "#cornell-notes"],
+      "created": "2025-12-01T08:00:10",
       "notebook": null
     },
     {
-      "id": "cfa77ac8-07dd-4bcf-88a7-0424cb892e79",
-      "title": "from desktop to janry",
-      "content": "",
-      "tags": [],
-      "created": "2025-12-01T04:01:41.989583",
+      "id": "note-011",
+      "title": "Unassigned Planner Note",
+      "content": "Date: 2025-12-01\n\nTop 3 Priorities:\n1. Try CourseMate\n2. Explore templates\n3. Take notes\n\nSchedule (Hour | Task):\n08:00 - Try\n09:00 - Explore\n10:00 - Take notes\n\nTasks:\n- [ ] Try\n- [ ] Explore\n- [ ] Take notes\n\nNotes:\n- CourseMate is easy to use!",
+      "tags": ["#unassigned", "#planner"],
+      "created": "2025-12-01T08:00:11",
       "notebook": null
     },
     {
-      "id": "673b08a0-7cdd-40c4-86a5-a84b747a988e",
-      "title": "from pop to lolli",
-      "content": "",
-      "tags": [],
-      "created": "2025-12-01T04:02:41.960430",
+      "id": "note-029",
+      "title": "Unassigned Weekly Overview",
+      "content": "Week Of: 2025-12-01\nGoals:\n- Try new features\n- Organize notes\n- Plan week\nMon:\nFocus: Explore\nTasks: - [ ] Try\nTue:\nFocus: Organize\nTasks: - [ ] Sort\nWed:\nFocus: Plan\nTasks: - [ ] Write\nWeekend Notes:\n- Review progress.",
+      "tags": ["#weekly", "#unassigned"],
+      "created": "2025-12-01T08:00:29",
+      "notebook": null
+    },
+    {
+      "id": "note-030",
+      "title": "Unassigned Concept Map",
+      "content": "Central Concept: Unassigned\nRelated Concept 1:\n- Flexibility\nRelated Concept 2:\n- Organization\nConnections:\n- Unassigned notes can be moved anywhere.",
+      "tags": ["#concept-map", "#unassigned"],
+      "created": "2025-12-01T08:00:30",
       "notebook": null
     }
   ],
   "settings": {
-    "theme": "Dark Theme",
+    "theme": "CourseMate Theme",
     "font_family": "Open Sans",
     "font_size": "Normal",
     "quotes": [

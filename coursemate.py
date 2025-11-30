@@ -2259,16 +2259,15 @@ class NoteWindow(ctk.CTkToplevel):
         # Date Info Frame
         date_frame = ctk.CTkFrame(self, fg_color="transparent")
         date_frame.pack(fill="x", padx=20, pady=(0, 10))
-        
-           # Created On
-           created_text = note.get('created', '')
-           human_created = format_human_date(created_text)
-           ctk.CTkLabel(date_frame, text=f"Created on: {human_created}", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w")
-           # Modified On
-           modified_text = note.get('modified', '')
-           if modified_text:
-              human_modified = format_human_date(modified_text)
-              ctk.CTkLabel(date_frame, text=f"Last edited on: {human_modified}", font=get_font(-3), text_color=colors['secondary_text']).pack(anchor="w")
+        # Created On
+        created_text = self.note.get('created', '')
+        human_created = format_human_date(created_text)
+        ctk.CTkLabel(date_frame, text=f"Created on: {human_created}", font=get_font(-3), text_color=self.colors['secondary_text']).pack(anchor="w")
+        # Modified On
+        modified_text = self.note.get('modified', '')
+        if modified_text:
+            human_modified = format_human_date(modified_text)
+            ctk.CTkLabel(date_frame, text=f"Last edited on: {human_modified}", font=get_font(-3), text_color=self.colors['secondary_text']).pack(anchor="w")
         
         # Actions Frame
         actions_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -2837,7 +2836,7 @@ class NotebooksView:
         
         # Title on the left - always show notebook name
         display_name = data.get("name", name).strip() if data.get("name", name) else "(Unnamed)"
-        display_name = self.truncate_text(display_name, 20)
+        display_name = self.truncate_text(display_name, 40)
         lbl_title = ctk.CTkLabel(header, text=display_name, font=self.get_font(2, "bold"), 
                                  text_color=self.colors['main_text'])
         lbl_title.pack(side="left")
